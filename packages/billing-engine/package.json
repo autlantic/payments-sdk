@@ -1,0 +1,47 @@
+{
+  "name": "@autlantic/billing-engine",
+  "version": "0.2.0",
+  "description": "Subscription and invoice engine for Autlantic recurring billing",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/autlantic/payments-sdk.git",
+    "directory": "packages/billing-engine"
+  },
+  "homepage": "https://docs.autlantic.com",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "tsx --test src/**/*.test.ts",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@autlantic/chain-evm": "workspace:*",
+    "@autlantic/payments-recurring-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

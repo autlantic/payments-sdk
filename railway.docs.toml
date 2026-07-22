@@ -1,0 +1,15 @@
+# Autlantic Payments docs (docs.autlantic.com)
+# Railway: Settings → Config file path → railway.docs.toml
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @autlantic/docs build"
+watchPatterns = [
+  "apps/docs/**",
+  "railway.docs.toml",
+  "pnpm-lock.yaml",
+]
+
+[deploy]
+startCommand = "pnpm --filter @autlantic/docs start"
+restartPolicyType = "ON_FAILURE"

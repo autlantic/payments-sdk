@@ -1,0 +1,49 @@
+{
+  "name": "@autlantic/chain-evm",
+  "version": "0.2.0",
+  "description": "EVM chain adapter (Base + USDC) for Autlantic recurring billing",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/autlantic/payments-sdk.git",
+    "directory": "packages/chain-evm"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "relayer",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "tsx --test src/**/*.test.ts",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@autlantic/payments-recurring-core": "workspace:*",
+    "@noble/hashes": "^1.8.0",
+    "viem": "^2.31.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "homepage": "https://docs.autlantic.com"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@autlantic/docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Autlantic Billing SDK documentation (docs.autlantic.com). USDC on Base",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "serve .vitepress/dist -l tcp://0.0.0.0:${PORT:-4173}",
+    "start": "serve .vitepress/dist -l tcp://0.0.0.0:${PORT:-4173}"
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3",
+    "vue": "^3.5.17"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

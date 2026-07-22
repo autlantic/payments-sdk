@@ -1,0 +1,42 @@
+{
+  "name": "@autlantic/payments-recurring-core",
+  "version": "0.2.0",
+  "description": "Types and billing rules for Autlantic recurring USDC payments",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/autlantic/payments-sdk.git",
+    "directory": "packages/payments-recurring-core"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "tsx --test src/**/*.test.ts",
+    "prepublishOnly": "pnpm run build"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "homepage": "https://docs.autlantic.com"
+}

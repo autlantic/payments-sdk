@@ -1,0 +1,67 @@
+import type {
+  RecurringCustomer,
+  RecurringInvoice,
+  RecurringMandate,
+  RecurringSubscription,
+} from "@autlantic/payments-recurring-core";
+
+export type BillingStoreSnapshot = {
+  subscriptions: RecurringSubscription[];
+  customers: RecurringCustomer[];
+  mandates: RecurringMandate[];
+  invoices: RecurringInvoice[];
+};
+
+const DATE_FIELDS_SUB = new Set([
+  "currentPeriodStart",
+  "currentPeriodEnd",
+  "canceledAt",
+  "createdAt",
+  "updatedAt",
+]);
+
+const DATE_FIELDS_INV = new Set([
+  "dueAt",
+  "nextAttemptAt",
+  "paidAt",
+  "createdAt",
+  "updatedAt",
+]);
+
+const DATE_FIELDS_MANDATE = new Set(["createdAt", "activatedAt"]);
+
+function reviveDates<T extends Record<string, unknown>>(
+  row: T,
+  fields: Set<string>,
+): T {
+  const out = { ...row };
+  for (const key of fields) {
+    const value = out[key];
+    if (typeof value === "string") {
+      (out as Record<string, unknown>)[key] = new Date(value);
+    }
+  }
+  return out;
+}
+
+export function serializeBillingSnapshot(
+  snapshot: BillingStoreSnapshot,
+): BillingStoreSnapshot {
+  return JSON.parse(JSON.stringify(snapshot)) as BillingStoreSnapshot;
+}
+
+export function parseBillingSnapshot(raw: string): BillingStoreSnapshot {
+  const parsed = JSON.parse(raw) as BillingStoreSnapshot;
+  return {
+    subscriptions: parsed.subscriptions.map((s) =>
+      reviveDates(s as unknown as Record<string, unknown>, DATE_FIELDS_SUB),
+    ) as RecurringSubscription[],
+    customers: parsed.customers,
+    mandates: parsed.mandates.map((m) =>
+      reviveDates(m as unknown as Record<string, unknown>, DATE_FIELDS_MANDATE),
+    ) as RecurringMandate[],
+    invoices: parsed.invoices.map((i) =>
+      reviveDates(i as unknown as Record<string, unknown>, DATE_FIELDS_INV),
+    ) as RecurringInvoice[],
+  };
+}

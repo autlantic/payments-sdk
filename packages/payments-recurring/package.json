@@ -1,0 +1,59 @@
+{
+  "name": "@autlantic/payments-recurring",
+  "version": "0.2.1",
+  "description": "Autlantic Recurring Billing SDK. USDC subscriptions on Base",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/autlantic/payments-sdk.git",
+    "directory": "packages/payments-recurring"
+  },
+  "homepage": "https://docs.autlantic.com",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "base",
+    "usdc",
+    "subscriptions",
+    "recurring",
+    "billing",
+    "crypto",
+    "autlantic"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "API.md"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "tsx --test src/**/*.test.ts",
+    "example": "tsx examples/sandbox-demo.mts",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@autlantic/billing-engine": "workspace:*",
+    "@autlantic/chain-evm": "workspace:*",
+    "@autlantic/payments-recurring-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

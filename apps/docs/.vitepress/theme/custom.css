@@ -1,0 +1,118 @@
+@import "../../../../packages/autlantic-brand/tokens.css";
+
+/**
+ * VitePress brand = indigo (purple-blue). Same tokens as autlantic.com app.
+ */
+:root {
+  --vp-c-brand-1: var(--color-accent-strong);
+  --vp-c-brand-2: var(--color-accent-hover);
+  --vp-c-brand-3: var(--color-accent);
+  --vp-c-brand-soft: var(--color-accent-muted);
+
+  --vp-c-green-1: var(--color-crypto);
+  --vp-c-green-2: var(--color-crypto-hover);
+  --vp-c-green-3: var(--color-crypto-strong);
+  --vp-c-green-soft: var(--color-crypto-muted);
+
+  --vp-c-bg: var(--color-surface);
+  --vp-c-bg-alt: var(--color-surface-muted);
+  --vp-c-bg-soft: var(--color-surface-subtle);
+  --vp-c-bg-elv: var(--color-surface-elevated);
+
+  --vp-c-text-1: var(--color-ink);
+  --vp-c-text-2: var(--color-ink-secondary);
+  --vp-c-text-3: var(--color-ink-muted);
+
+  --vp-c-border: var(--color-border);
+  --vp-c-divider: var(--color-border);
+  --vp-c-gutter: var(--color-border-strong);
+}
+
+.dark {
+  --vp-c-brand-1: var(--color-accent-hover);
+  --vp-c-brand-2: var(--color-accent);
+  --vp-c-brand-3: var(--color-accent-strong);
+  --vp-c-brand-soft: var(--color-accent-muted);
+
+  --vp-c-bg: var(--color-surface);
+  --vp-c-bg-alt: var(--color-surface-muted);
+  --vp-c-bg-soft: var(--color-surface-subtle);
+  --vp-c-bg-elv: var(--color-surface-elevated);
+
+  --vp-c-text-1: var(--color-ink);
+  --vp-c-text-2: var(--color-ink-secondary);
+  --vp-c-text-3: var(--color-ink-muted);
+
+  --vp-c-border: var(--color-border);
+  --vp-c-divider: var(--color-border);
+}
+
+/* Nav wordmark — same cross-gradient SVG lockup as apps/web NavLogo. */
+.autlantic-nav-title {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.autlantic-nav-lockup {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  line-height: 0;
+  transform: translateZ(0);
+}
+
+.autlantic-nav-wordmark {
+  display: block;
+  height: 2.25rem;
+  width: 105px;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.autlantic-nav-wordmark-dark {
+  display: none;
+}
+
+.dark .autlantic-nav-wordmark-light {
+  display: none;
+}
+
+.dark .autlantic-nav-wordmark-dark {
+  display: block;
+}
+
+@media (min-width: 640px) {
+  .autlantic-nav-wordmark {
+    height: 2.25rem;
+    width: 105px;
+  }
+}
+
+.autlantic-nav-beta {
+  position: absolute;
+  top: 0;
+  right: -0.75rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.dark .autlantic-nav-beta {
+  color: var(--color-accent-chart-muted);
+}
+
+.autlantic-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
