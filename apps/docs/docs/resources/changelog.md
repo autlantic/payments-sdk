@@ -1,10 +1,25 @@
 # Changelog
 
+Version history for the Autlantic Payments SDK and docs. Also see GitHub [Releases](https://github.com/autlantic/payments-sdk/releases).
+
+## Docs - reference maturity (site)
+
+Public docs now include:
+
+- [Lifecycle](/guide/lifecycle) with sequence and state diagrams
+- [Error codes](/guide/errors) (`InvoiceFailureCode`)
+- [Retries](/guide/retries) (`DEFAULT_RETRY_POLICY`)
+- [TypeScript types](/api/types)
+- Expanded [Node.js SDK](/api/nodejs) and [Webhooks](/guide/webhooks) references
+
+Package versions below are unchanged unless noted.
+
 ## 0.2.5 - README branding
 
 - Drop wordmark from package README; keep Autlantic icon only
 - Public docs cleanup: SDK-only testing, hosted API described as Autlantic-operated
 - Docs site points at the public [payments-sdk](https://github.com/autlantic/payments-sdk) repo
+- GitHub Release [v0.2.5](https://github.com/autlantic/payments-sdk/releases/tag/v0.2.5)
 
 ## 0.2.4 - Public brand assets on npm
 

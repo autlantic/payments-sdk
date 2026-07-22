@@ -64,7 +64,11 @@ If you prefer HTTP + API key over embedding Node, see [Hosted HTTP API](/api/htt
 
 ## Next steps
 
+- [Lifecycle](/guide/lifecycle) (diagrams + activate vs renew)
+- [Error codes](/guide/errors) and [Retries](/guide/retries)
+- [TypeScript types](/api/types)
 - [Sandbox & testing](/guide/sandbox)
 - [Webhooks](/guide/webhooks)
 - [Node.js API reference](/api/nodejs)
+- [Changelog](/resources/changelog)
 - [Security](/guide/security)

@@ -2,13 +2,33 @@
 
 `@autlantic/payments-recurring` **0.2.5** (related packages: `payments-recurring-core`, `chain-evm`, and `billing-engine` at **0.2.4**).
 
+Typed domain models: [TypeScript types](/api/types).  
+HTTP twin: [Hosted HTTP API](/api/http).
+
+## Install
+
+```bash
+npm install @autlantic/payments-recurring@^0.2.5
+```
+
+```ts
+import {
+  AutlanticBilling,
+  AUTLANTIC_BILLING_SDK_VERSION,
+  type CreateSubscriptionRequest,
+  type RecurringSubscription,
+} from "@autlantic/payments-recurring";
+```
+
+`AUTLANTIC_BILLING_SDK_VERSION` is the string `"0.2.5"`.
+
 ## `AutlanticBilling`
 
 ### Factories
 
 ```ts
 new AutlanticBilling({
-  apiBaseUrl?: string;
+  apiBaseUrl?: string;   // omit for in-process sandbox
   apiKey?: string;
   merchantId: string;
   sandbox?: boolean;
@@ -19,34 +39,100 @@ AutlanticBilling.sandbox({ merchantId, webhookSecret? });
 AutlanticBilling.fromEnv();
 ```
 
+| Factory | Behavior |
+|---------|----------|
+| `sandbox(...)` | In-memory store. No remote API. |
+| `fromEnv()` | Uses env vars below. Remote if `AUTLANTIC_BILLING_API_URL` is set. |
+| `new AutlanticBilling({...})` | Explicit config. |
+
 Env vars: `AUTLANTIC_BILLING_API_URL`, `AUTLANTIC_BILLING_API_KEY`, `AUTLANTIC_BILLING_MERCHANT_ID`, `AUTLANTIC_BILLING_SANDBOX`, `AUTLANTIC_BILLING_WEBHOOK_SECRET`
+
+### `createSubscription` input
+
+```ts
+type CreateSubscriptionRequest = {
+  merchantRef: string;
+  customerWallet: string;
+  payoutAddressEvm: string;
+  amountUsdc: number;
+  interval: "month" | "year";
+  planId?: string;
+  metadata?: Record<string, string>;
+};
+```
+
+Returns subscription + first open invoice (and `checkoutUrl` in sandbox).
 
 ### Methods
 
-| Method | Description |
-|--------|-------------|
-| `createSubscription(input)` | Create incomplete subscription + open invoice |
-| `listSubscriptions({ status? })` | List merchant subscriptions |
-| `getSubscription(id)` | Fetch subscription |
-| `updateSubscription(id, input)` | Update amount, interval, plan, metadata |
-| `getCheckoutSession(id)` | Fetch hosted checkout session JSON |
-| `completeSubscription(id)` | Mark wallet mandate active (no charge) |
-| `activateSubscription(id, { onChainSubscriptionId? })` | Complete mandate + first charge |
-| `cancelSubscription(id, immediate?)` | Cancel at period end or now |
-| `listInvoices({ subscriptionId? })` | List invoices |
-| `getInvoice(id)` | Fetch invoice |
-| `chargeInvoice(id, sandboxMode?)` | Attempt invoice payment |
-| `refundInvoice(id, { amountUsdc? })` | Refund a paid invoice |
-| `voidInvoice(id)` | Void an open invoice |
+| Method | Returns (conceptually) | Description |
+|--------|------------------------|-------------|
+| `createSubscription(input)` | `{ subscription, invoice, checkoutUrl? }` | Create incomplete subscription + open invoice |
+| `listSubscriptions({ status? })` | `{ subscriptions }` | List merchant subscriptions |
+| `getSubscription(id)` | `{ subscription }` | Fetch subscription |
+| `updateSubscription(id, input)` | `{ subscription }` | Update amount, interval, plan, metadata |
+| `getCheckoutSession(id)` | `{ session }` | Hosted checkout session JSON (remote) |
+| `completeSubscription(id)` | `{ subscription }` | Mark wallet mandate active (**no** charge) |
+| `activateSubscription(id, { onChainSubscriptionId? })` | `{ subscription, charge, txHash? }` | Complete mandate **+ first charge** |
+| `cancelSubscription(id, immediate?)` | `{ subscription }` | Cancel at period end or now |
+| `listInvoices({ subscriptionId? })` | `{ invoices }` | List invoices |
+| `getInvoice(id)` | `{ invoice }` | Fetch invoice |
+| `chargeInvoice(id, sandboxMode?)` | charge result | Attempt invoice payment / renewal |
+| `refundInvoice(id, { amountUsdc? })` | refund result | Refund a paid invoice |
+| `voidInvoice(id)` | void result | Void an open invoice |
 
-### Webhooks
+`sandboxMode` for `chargeInvoice`: `"success" | "insufficient_balance" | "allowance_revoked"` (in-process sandbox only).
+
+### Activate vs charge
+
+```ts
+const { subscription } = await billing.createSubscription({ /* ... */ });
+const { charge } = await billing.activateSubscription(subscription.id);
+// charge pays the first invoice. Do not chargeInvoice that same invoice again.
+
+// Later renewals:
+await billing.chargeInvoice(renewalInvoiceId);
+```
+
+See [Lifecycle](/guide/lifecycle).
+
+### Errors
+
+- Transport / API failures: thrown `Error` with message.
+- Soft charge declines: invoice `failureCode` ([Error codes](/guide/errors)) and `invoice.payment_failed` webhooks.
+- Exhausted retries: [Retries](/guide/retries) → `past_due`.
+
+### Webhooks helpers
 
 ```ts
 import {
   signBillingWebhook,
   verifyBillingWebhook,
   parseBillingWebhookEvent,
+  BILLING_WEBHOOK_SIGNATURE_HEADER,
 } from "@autlantic/payments-recurring";
 ```
 
-Header: `x-autlantic-signature`
+Header name: `x-autlantic-signature` (`BILLING_WEBHOOK_SIGNATURE_HEADER`).
+
+### Idempotency
+
+Pass `Idempotency-Key` on POST requests to the hosted billing API. Replays return the cached response for 24 hours.
+
+### Re-exported chain helpers
+
+```ts
+import {
+  defaultSandboxChainId,
+  chainConfigFor,
+  usdcToMicro,
+  encodeApproveCalldata,
+} from "@autlantic/payments-recurring";
+```
+
+## Next
+
+- [TypeScript types](/api/types)
+- [Hosted HTTP API](/api/http)
+- [Lifecycle](/guide/lifecycle)
+- [Changelog](/resources/changelog)

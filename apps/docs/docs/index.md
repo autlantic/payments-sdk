@@ -21,13 +21,13 @@ hero:
 
 features:
   - title: npm SDK
-    details: "@autlantic/payments-recurring: create subscriptions, charge invoices, refunds, and verify webhooks. TypeScript, Node 20+."
+    details: "@autlantic/payments-recurring 0.2.5: create subscriptions, charge invoices, refunds, and verify webhooks. TypeScript, Node 20+."
+  - title: Typed reference
+    details: "Exported TypeScript interfaces, InvoiceFailureCode, retry policy, and lifecycle diagrams in the docs."
   - title: Hosted API
     details: "REST with API key when you do not want Node in your stack. Same billing engine as the SDK."
   - title: Sandbox mode
-    details: "Base Sepolia / in-process sandbox. Test activate and renewals before mainnet."
-  - title: Four packages
-    details: "payments-recurring-core, chain-evm, billing-engine, payments-recurring. Use the umbrella client or split layers."
+    details: "Base Sepolia / in-process sandbox. Test activate, failures, and renewals before mainnet."
 ---
 
 ## Two ways to integrate
