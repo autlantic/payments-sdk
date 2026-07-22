@@ -1,8 +1,12 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/autlantic/payments-sdk/main/brand/autlantic-icon-192-dark.png" alt="Autlantic" width="72" height="72" />
+  <img src="https://autlantic.com/brand/autlantic-icon-1024-master.png" alt="Autlantic" width="96" height="96" />
 </p>
 
 <h1 align="center">@autlantic/payments-recurring</h1>
+
+<p align="center">
+  <img src="https://autlantic.com/brand/autlantic-wordmark-800-light.png" alt="Autlantic" width="200" />
+</p>
 
 <p align="center">
   <strong>Autlantic Billing</strong>. TypeScript SDK for USDC recurring subscriptions on Base.
@@ -105,6 +109,10 @@ Header: `x-autlantic-signature`. Always verify against the **raw** request body.
 | Node.js API | [API reference](https://docs.autlantic.com/api/nodejs) |
 | Security | [SECURITY.md](https://github.com/autlantic/payments-sdk/blob/main/SECURITY.md) |
 | Source | [github.com/autlantic/payments-sdk](https://github.com/autlantic/payments-sdk) |
+
+## Brand
+
+Autlantic marks: [autlantic.com/brand](https://autlantic.com/brand/autlantic-icon-1024-master.png). See [SECURITY.md](https://github.com/autlantic/payments-sdk/blob/main/SECURITY.md#brand-and-trademarks).
 
 ## License
 

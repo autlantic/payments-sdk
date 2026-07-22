@@ -1,8 +1,12 @@
 <p align="center">
-  <img src="brand/autlantic-icon-192-dark.png" alt="Autlantic" width="72" height="72" />
+  <img src="https://autlantic.com/brand/autlantic-icon-1024-master.png" alt="Autlantic" width="96" height="96" />
 </p>
 
 <h1 align="center">Autlantic Payments SDK</h1>
+
+<p align="center">
+  <img src="https://autlantic.com/brand/autlantic-wordmark-800-light.png" alt="Autlantic" width="220" />
+</p>
 
 <p align="center">
   <strong>USDC recurring billing on Base</strong><br />
@@ -14,10 +18,6 @@
   <a href="https://www.npmjs.com/package/@autlantic/payments-recurring"><img src="https://img.shields.io/npm/v/@autlantic/payments-recurring?style=flat-square&color=5672cd" alt="npm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT License" /></a>
   <a href="https://autlantic.com"><img src="https://img.shields.io/badge/product-autlantic.com-111827?style=flat-square" alt="Autlantic" /></a>
-</p>
-
-<p align="center">
-  <img src="brand/autlantic-wordmark-light.svg" alt="Autlantic wordmark" width="220" />
 </p>
 
 ---
@@ -106,7 +106,12 @@ Please report vulnerabilities privately. See [SECURITY.md](./SECURITY.md).
 
 ## Brand
 
-Autlantic marks in [`brand/`](./brand) are for Autlantic documentation and approved partners. Do not use the Autlantic name or logo in a way that implies endorsement without permission. See [SECURITY.md](./SECURITY.md#brand-and-trademarks).
+Official marks live on the product CDN:
+
+- Icon: https://autlantic.com/brand/autlantic-icon-1024-master.png
+- Wordmark: https://autlantic.com/brand/autlantic-wordmark-800-light.png
+
+Do not use Autlantic branding to imply endorsement. See [SECURITY.md](./SECURITY.md#brand-and-trademarks).
 
 ## License
 

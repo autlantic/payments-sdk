@@ -1,15 +1,9 @@
 # Brand assets
 
-Official Autlantic marks for this repository’s documentation and GitHub presence.
+Prefer the public CDN copies (required for npm READMEs while this repo is private):
 
-| File | Use |
-|------|-----|
-| `autlantic-icon-192-dark.png` | App icon / avatar |
-| `autlantic-wordmark-light.svg` | Wordmark on light backgrounds (README) |
-| `autlantic-wordmark-dark.svg` | Wordmark on dark backgrounds |
-| `autlantic-icon-master-mark.svg` | Master mark (dark) |
-| `autlantic-icon-master-mark-light.svg` | Master mark (light) |
+- Icon: https://autlantic.com/brand/autlantic-icon-1024-master.png
+- Wordmark (light): https://autlantic.com/brand/autlantic-wordmark-800-light.png
+- Wordmark SVG: https://autlantic.com/brand/autlantic-wordmark-light.svg
 
-Primary brand accent used in docs and badges: `#5672cd`.
-
-These files are trademarks of Autlantic. See [SECURITY.md](../SECURITY.md#brand-and-trademarks) and [LICENSE](../LICENSE).
+Local files in this folder are mirrors for offline docs. See [SECURITY.md](../SECURITY.md#brand-and-trademarks).

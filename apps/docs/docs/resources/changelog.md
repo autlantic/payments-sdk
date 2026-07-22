@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.4 - Public brand assets on npm
+
+- README logos use https://autlantic.com/brand/... (works while the GitHub repo is private)
+- Consistent Autlantic branding across all four packages
+
 ## 0.2.3 - Professional npm READMEs
 
 - Branded package READMEs for npm (badges, quick start, docs links)
