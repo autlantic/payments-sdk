@@ -5,10 +5,6 @@
 <h1 align="center">@autlantic/payments-recurring</h1>
 
 <p align="center">
-  <img src="https://autlantic.com/brand/autlantic-wordmark-800-light.png" alt="Autlantic" width="200" />
-</p>
-
-<p align="center">
   <strong>Autlantic Billing</strong>. TypeScript SDK for USDC recurring subscriptions on Base.
 </p>
 

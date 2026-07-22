@@ -5,10 +5,6 @@
 <h1 align="center">Autlantic Payments SDK</h1>
 
 <p align="center">
-  <img src="https://autlantic.com/brand/autlantic-wordmark-800-light.png" alt="Autlantic" width="220" />
-</p>
-
-<p align="center">
   <strong>USDC recurring billing on Base</strong><br />
   TypeScript SDK for subscriptions, invoices, webhooks, and sandbox testing.
 </p>

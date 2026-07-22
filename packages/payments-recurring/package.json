@@ -1,6 +1,6 @@
 {
   "name": "@autlantic/payments-recurring",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Autlantic Billing SDK. USDC recurring subscriptions on Base",
   "license": "MIT",
   "repository": {

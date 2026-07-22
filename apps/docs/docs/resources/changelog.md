@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.5 - README branding
+
+- Drop wordmark from package README; keep Autlantic icon only
+
 ## 0.2.4 - Public brand assets on npm
 
 - README logos use https://autlantic.com/brand/... (works while the GitHub repo is private)

@@ -16,7 +16,7 @@ import { defaultSandboxChainId, VAULT_PLACEHOLDER_BASE_SEPOLIA } from "@autlanti
 import type { BillingInterval, RecurringInvoice, RecurringSubscription } from "@autlantic/payments-recurring-core";
 import type { AutlanticBillingConfig, CreateSubscriptionRequest } from "./config";
 
-export const AUTLANTIC_BILLING_SDK_VERSION = "0.2.4";
+export const AUTLANTIC_BILLING_SDK_VERSION = "0.2.5";
 
 type ApiEnvelope<T> = T & { error?: string };
 
