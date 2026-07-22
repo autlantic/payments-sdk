@@ -38,5 +38,6 @@
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   },
-  "homepage": "https://docs.autlantic.com"
+  "homepage": "https://docs.autlantic.com",
+  "author": "Autlantic <support@autlantic.com>"
 }
