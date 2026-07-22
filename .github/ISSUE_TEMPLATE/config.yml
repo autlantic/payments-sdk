@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/autlantic/payments-sdk/blob/main/SECURITY.md
+    about: Report security issues privately. Do not open a public issue.
+  - name: Product and billing support
+    url: mailto:support@autlantic.com
+    about: Account, merchant portal, or production billing help.
+  - name: Documentation
+    url: https://docs.autlantic.com
+    about: Guides for Node, HTTP API, webhooks, and sandbox.

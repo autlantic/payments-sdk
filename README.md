@@ -100,6 +100,10 @@ pnpm dev:docs   # local VitePress docs
 
 Please report vulnerabilities privately. See [SECURITY.md](./SECURITY.md).
 
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) and our [Code of Conduct](./CODE_OF_CONDUCT.md).
+
 ## Brand
 
 Official marks live on the product CDN:

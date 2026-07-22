@@ -1,0 +1,48 @@
+name: Feature request
+description: Suggest an improvement to the SDK, API surface, or docs
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the merchant or integrator problem first. Solutions come second.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that is hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: API shape, docs change, or workflow you have in mind.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds or other approaches you tried.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - payments-recurring client
+        - Webhooks
+        - Sandbox
+        - Hosted HTTP API
+        - Docs / examples
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and did not find a duplicate
+          required: true
