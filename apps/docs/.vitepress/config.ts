@@ -54,7 +54,7 @@ export default defineConfig({
         ],
       },
     ],
-    // Source repo is private; do not expose GitHub edit/social links publicly.
+    // GitHub source links are on package READMEs and docs.autlantic.com.
     socialLinks: [],
     footer: {
       message: "Autlantic Recurring Billing SDK",

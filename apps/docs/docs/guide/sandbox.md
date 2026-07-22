@@ -10,7 +10,7 @@ import { AutlanticBilling } from "@autlantic/payments-recurring";
 const billing = AutlanticBilling.sandbox({ merchantId: "mer_demo" });
 ```
 
-Or via env:
+Or via env when talking to a remote Autlantic billing API:
 
 ```bash
 export AUTLANTIC_BILLING_SANDBOX=1
@@ -24,24 +24,24 @@ const billing = AutlanticBilling.fromEnv();
 
 1. Create a subscription with a test wallet and payout address.
 2. `activateSubscription` (sandbox completes mandate + first charge).
-3. `chargeInvoice` for renewals.
+3. `chargeInvoice` for later renewals (not the same first invoice after activate).
 4. Cancel, refund, and void flows.
 5. Webhook signature verification with your secret.
 
-## Monorepo commands
+## Repo commands
+
+From the root of this repository:
 
 ```bash
-pnpm check:recurring-sdk
-pnpm --filter @autlantic/payments-recurring example
-pnpm dev:billing-api
-pnpm dev:billing-worker
+pnpm check      # build + unit tests
+pnpm example    # sandbox demo
 ```
 
-More detail: package `TESTING.md` under `packages/payments-recurring`.
+More detail: [`packages/payments-recurring/TESTING.md`](https://github.com/autlantic/payments-sdk/blob/main/packages/payments-recurring/TESTING.md).
 
 ## Going live
 
 1. Set `AUTLANTIC_BILLING_SANDBOX` off (or remove it).
 2. Point at Base mainnet chain config and live USDC.
-3. Run `billing-worker` for due renewals.
+3. Use Autlantic’s hosted billing API / worker for renewals, or your own deployment of a compatible API.
 4. Verify webhooks with `x-autlantic-signature`.

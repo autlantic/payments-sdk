@@ -1,6 +1,6 @@
 # Brand assets
 
-Prefer the public CDN copies (required for npm READMEs while this repo is private):
+Prefer the public CDN copies (required for npm READMEs):
 
 - Icon: https://autlantic.com/brand/autlantic-icon-1024-master.png
 - Wordmark (light): https://autlantic.com/brand/autlantic-wordmark-800-light.png

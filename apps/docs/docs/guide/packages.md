@@ -11,4 +11,4 @@ Most integrators only install `@autlantic/payments-recurring`. The other package
 
 ## Spec
 
-Product/architecture notes: [recurring-payments-spec.md](https://github.com/autlantic/payments-sdk/blob/main/docs/recurring-payments-spec.md).
+Product overview: [recurring-payments-spec.md](https://github.com/autlantic/payments-sdk/blob/main/docs/recurring-payments-spec.md).

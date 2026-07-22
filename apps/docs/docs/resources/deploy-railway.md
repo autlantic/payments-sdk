@@ -1,17 +1,15 @@
 # Deploy docs on Railway
 
-This site is a static VitePress build served with `serve`. Deploy it as a **separate Railway service** from the Autlantic web app.
+This site is a static VitePress build served with `serve`. Deploy it as its own Railway service for `docs.autlantic.com`.
 
 ## 1. Railway service settings
 
-1. Service name: `@autlantic/docs`
-2. **Settings → Config file path:** `/railway.docs.toml` (must exist in the deployed branch)
+1. Service name: `@autlantic/docs` (or any name you prefer)
+2. **Settings → Config file path:** `/railway.docs.toml`
 3. Root directory: leave empty (repo root)
 4. Custom domain: `docs.autlantic.com`
 
 ## 2. Build & start
-
-The repo config runs:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -33,19 +31,12 @@ Railway probes HTTP on `$PORT`. The `serve` process responds with 200 for static
 
 ## Local dev
 
-From repo root:
-
 ```bash
 pnpm --filter @autlantic/docs dev
-```
-
-Build preview:
-
-```bash
 pnpm --filter @autlantic/docs build
 pnpm --filter @autlantic/docs preview
 ```
 
 ## Updating content
 
-Edit markdown under `apps/docs/docs/`. Push to `production`; Railway redeploys when watch patterns include `apps/docs/**`.
+Edit markdown under `apps/docs/docs/`, then push to the branch Railway watches (typically `main`).

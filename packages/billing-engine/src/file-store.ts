@@ -21,7 +21,7 @@ function loadSnapshot(filePath: string): ReturnType<typeof parseBillingSnapshot>
   }
 }
 
-/** JSON file store so billing-api and billing-worker share state in dev. */
+/** JSON file store so API and worker processes can share state in local multi-process setups. */
 export function createFileBillingStore(filePath: string): BillingStore {
   const initial = loadSnapshot(filePath);
   const inner = createMemoryBillingStore(initial ?? undefined);

@@ -3,6 +3,7 @@
 ## 0.2.5 - README branding
 
 - Drop wordmark from package README; keep Autlantic icon only
+- Public docs cleanup: SDK-only testing, hosted API described as Autlantic-operated
 
 ## 0.2.4 - Public brand assets on npm
 

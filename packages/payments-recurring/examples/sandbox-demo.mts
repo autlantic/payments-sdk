@@ -32,4 +32,4 @@ if (activated.charge?.events[0]) {
   console.log("Webhook signature:", signed.signature.slice(0, 16) + "…");
 }
 
-console.log("\nDone. Start billing API: pnpm dev:billing-api");
+console.log("\nDone. Sandbox flow completed in-process.");

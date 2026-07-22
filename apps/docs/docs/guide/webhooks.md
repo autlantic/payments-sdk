@@ -31,4 +31,4 @@ Always verify against the **raw** request body. Do not re-serialize JSON before 
 | Variable | Purpose |
 |----------|---------|
 | `AUTLANTIC_BILLING_WEBHOOK_SECRET` | Shared HMAC secret |
-| `AUTLANTIC_BILLING_WEBHOOK_URL` | Destination URL (billing-worker / engine) |
+| `AUTLANTIC_BILLING_WEBHOOK_URL` | Destination URL for delivered events (hosted API / worker) |

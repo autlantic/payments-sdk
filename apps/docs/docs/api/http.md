@@ -1,6 +1,21 @@
 # Hosted HTTP API
 
-Run `pnpm dev:billing-api` (default `:8788`) or deploy `apps/billing-api`.
+The hosted billing HTTP API is operated by **Autlantic**. This open-source repo ships the TypeScript client and engine packages; it does not run the production API process.
+
+Point the SDK at your Autlantic billing base URL:
+
+```ts
+import { AutlanticBilling } from "@autlantic/payments-recurring";
+
+const billing = AutlanticBilling.fromEnv();
+// AUTLANTIC_BILLING_API_URL
+// AUTLANTIC_BILLING_API_KEY
+// AUTLANTIC_BILLING_MERCHANT_ID
+// AUTLANTIC_BILLING_SANDBOX
+// AUTLANTIC_BILLING_WEBHOOK_SECRET
+```
+
+For local demos without a remote API, use `AutlanticBilling.sandbox()` instead. See [Sandbox & testing](/guide/sandbox).
 
 ## Public checkout (no API key)
 
@@ -33,4 +48,4 @@ Pass `Idempotency-Key` on POST requests. Replays return the cached response for 
 
 ## Renewals
 
-Due invoices are processed by `apps/billing-worker` with the same `AUTLANTIC_BILLING_*` env vars.
+Due invoices are processed by Autlantic’s billing worker using the same `AUTLANTIC_BILLING_*` configuration as the API.

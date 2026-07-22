@@ -1,4 +1,4 @@
-# API reference - @autlantic/payments-recurring v0.2.1
+# API reference - @autlantic/payments-recurring v0.2
 
 ## `AutlanticBilling`
 
@@ -29,8 +29,8 @@ Env vars: `AUTLANTIC_BILLING_API_URL`, `AUTLANTIC_BILLING_API_KEY`, `AUTLANTIC_B
 | `updateSubscription(id, input)` | Update amount, interval, plan, metadata |
 | `getCheckoutSession(id)` | Fetch hosted checkout session JSON |
 | `completeSubscription(id)` | Mark wallet mandate active (no charge) |
-| `activateSubscription(id, { onChainSubscriptionId? })` | Complete mandate + first charge (sandbox or live) |
-| `cancelSubscription(id, immediate?)` | Cancel at period end or now (+ on-chain cancel via API) |
+| `activateSubscription(id, { onChainSubscriptionId? })` | Complete mandate + first charge |
+| `cancelSubscription(id, immediate?)` | Cancel at period end or now |
 | `listInvoices({ subscriptionId? })` | List invoices |
 | `getInvoice(id)` | Fetch invoice |
 | `chargeInvoice(id, sandboxMode?)` | Attempt invoice payment |
@@ -53,24 +53,24 @@ Pass `Idempotency-Key` on POST requests to the billing API. Replays return the c
 
 ## Hosted billing API
 
-See [docs/recurring-payments-spec.md](../../docs/recurring-payments-spec.md).
+The hosted HTTP surface is operated by Autlantic (or a compatible deployment). See [docs.autlantic.com/api/http](https://docs.autlantic.com/api/http).
 
 Public checkout (no API key):
 
-- `GET /checkout/subscribe/:id` — hosted HTML
-- `GET /checkout/subscribe/:id.json` — session JSON
-- `POST /checkout/subscribe/:id/activate` — sandbox or live (live requires `{ onChainSubscriptionId }`)
+- `GET /checkout/subscribe/:id` - hosted HTML
+- `GET /checkout/subscribe/:id.json` - session JSON
+- `POST /checkout/subscribe/:id/activate` - sandbox or live (live requires `{ onChainSubscriptionId }`)
 
 Authenticated (`X-Autlantic-Api-Key`):
 
-- `GET /v1/subscriptions` — list (`?status=active`)
-- `POST /v1/subscriptions` — create
+- `GET /v1/subscriptions` - list (`?status=active`)
+- `POST /v1/subscriptions` - create
 - `GET /v1/subscriptions/:id`
-- `PATCH /v1/subscriptions/:id` — update plan/amount
+- `PATCH /v1/subscriptions/:id` - update plan/amount
 - `POST /v1/subscriptions/:id/complete`
-- `POST /v1/subscriptions/:id/activate` — live activate with `{ onChainSubscriptionId }`
+- `POST /v1/subscriptions/:id/activate` - live activate with `{ onChainSubscriptionId }`
 - `POST /v1/subscriptions/:id/cancel`
-- `GET /v1/invoices` — list (`?subscriptionId=`)
+- `GET /v1/invoices` - list (`?subscriptionId=`)
 - `GET /v1/invoices/:id`
 - `POST /v1/invoices/:id/charge`
 - `POST /v1/invoices/:id/refund`
