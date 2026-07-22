@@ -1,6 +1,6 @@
 {
   "name": "@autlantic/billing-engine",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Subscription and invoice engine for Autlantic recurring billing",
   "license": "MIT",
   "repository": {

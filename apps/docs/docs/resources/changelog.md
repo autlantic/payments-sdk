@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2 - Repository home
+
+- npm `repository` fields point to https://github.com/autlantic/payments-sdk
+- Brand README, SECURITY policy, and MIT license under Autlantic
+
 ## 0.2.1 - Public docs alignment
 
 - Marketing and getting-started samples match the real `AutlanticBilling` API
