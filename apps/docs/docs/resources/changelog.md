@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3 - Professional npm READMEs
+
+- Branded package READMEs for npm (badges, quick start, docs links)
+- Absolute brand image URLs so npm renders Autlantic branding
+
 ## 0.2.2 - Repository home
 
 - npm `repository` fields point to https://github.com/autlantic/payments-sdk

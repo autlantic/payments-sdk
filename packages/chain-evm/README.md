@@ -1,5 +1,22 @@
 # @autlantic/chain-evm
 
-Base network and USDC constants for Autlantic recurring billing.
+Base network helpers for Autlantic recurring USDC billing.
 
-Phase 1 provides addresses and amount helpers. On-chain reads and relayer txs land in Phase 2.
+Addresses, amount conversion, allowance/vault calldata, transfer verification, and relayer helpers used by the Autlantic Billing stack.
+
+## Install
+
+```bash
+npm install @autlantic/chain-evm
+```
+
+Most integrators only need [`@autlantic/payments-recurring`](https://www.npmjs.com/package/@autlantic/payments-recurring). Use this package directly when you need lower-level Base / USDC utilities.
+
+## Docs
+
+- Product docs: [docs.autlantic.com](https://docs.autlantic.com)
+- Source: [github.com/autlantic/payments-sdk](https://github.com/autlantic/payments-sdk)
+
+## License
+
+[MIT](https://github.com/autlantic/payments-sdk/blob/main/LICENSE) © Autlantic

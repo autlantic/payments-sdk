@@ -75,10 +75,10 @@ Most integrators only need `@autlantic/payments-recurring`.
 
 ## Features
 
-- **Sandbox first** – `AutlanticBilling.sandbox()` for local demos without mainnet funds
-- **Hosted or in-process** – call your billing API, or run the engine in memory for tests
-- **Webhooks** – HMAC `x-autlantic-signature` with helpers to sign, verify, and parse events
-- **Idempotent writes** – SDK sends `Idempotency-Key` on POST requests to the hosted API
+- **Sandbox first.** `AutlanticBilling.sandbox()` for local demos without mainnet funds
+- **Hosted or in-process.** Call your billing API, or run the engine in memory for tests
+- **Webhooks.** HMAC `x-autlantic-signature` with helpers to sign, verify, and parse events
+- **Idempotent writes.** SDK sends `Idempotency-Key` on POST requests to the hosted API
 
 ## Documentation
 
