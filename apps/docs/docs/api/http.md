@@ -2,13 +2,13 @@
 
 The hosted billing HTTP API is operated by **Autlantic**. This open-source repo ships the TypeScript client and engine packages; it does not run the production API process.
 
-Point the SDK at your Autlantic billing base URL:
+Set `AUTLANTIC_BILLING_API_URL` to the base URL Autlantic gives you with your API key (same value you pass to the SDK). Paths below are relative to that base.
 
 ```ts
 import { AutlanticBilling } from "@autlantic/payments-recurring";
 
 const billing = AutlanticBilling.fromEnv();
-// AUTLANTIC_BILLING_API_URL
+// AUTLANTIC_BILLING_API_URL   // base URL from Autlantic
 // AUTLANTIC_BILLING_API_KEY
 // AUTLANTIC_BILLING_MERCHANT_ID
 // AUTLANTIC_BILLING_SANDBOX
@@ -48,4 +48,4 @@ Pass `Idempotency-Key` on POST requests. Replays return the cached response for 
 
 ## Renewals
 
-Due invoices are processed by Autlantic’s billing worker using the same `AUTLANTIC_BILLING_*` configuration as the API.
+On Autlantic’s hosted stack, due invoices are processed by Autlantic’s billing worker using the same `AUTLANTIC_BILLING_*` configuration as the API. Self-hosting that worker is outside the scope of this public SDK repo.

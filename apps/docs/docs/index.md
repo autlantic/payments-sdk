@@ -13,6 +13,9 @@ hero:
       text: npm package
       link: https://www.npmjs.com/package/@autlantic/payments-recurring
     - theme: alt
+      text: GitHub
+      link: https://github.com/autlantic/payments-sdk
+    - theme: alt
       text: Autlantic product
       link: https://autlantic.com
 
@@ -35,7 +38,7 @@ features:
 | **Hosted HTTP API** | Any stack (curl, mobile, PHP), API key only |
 
 ```bash
-npm install @autlantic/payments-recurring
+npm install @autlantic/payments-recurring@^0.2.5
 ```
 
 ```ts

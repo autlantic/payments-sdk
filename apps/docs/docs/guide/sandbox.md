@@ -43,5 +43,5 @@ More detail: [`packages/payments-recurring/TESTING.md`](https://github.com/autla
 
 1. Set `AUTLANTIC_BILLING_SANDBOX` off (or remove it).
 2. Point at Base mainnet chain config and live USDC.
-3. Use Autlantic’s hosted billing API / worker for renewals, or your own deployment of a compatible API.
+3. Set `AUTLANTIC_BILLING_API_URL` to the base URL Autlantic issues with your API key, and use Autlantic’s hosted renewals worker, or run a compatible API yourself.
 4. Verify webhooks with `x-autlantic-signature`.

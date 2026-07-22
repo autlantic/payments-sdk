@@ -2,6 +2,7 @@ import { defineConfig } from "vitepress";
 
 const NPM_BILLING = "https://www.npmjs.com/package/@autlantic/payments-recurring";
 const PRODUCT = "https://autlantic.com";
+const GITHUB = "https://github.com/autlantic/payments-sdk";
 
 export default defineConfig({
   // Markdown lives in ./docs; theme/config/public stay at apps/docs/.vitepress + public.
@@ -20,6 +21,7 @@ export default defineConfig({
       { text: "Guide", link: "/guide/getting-started", activeMatch: "/guide/" },
       { text: "API", link: "/api/nodejs", activeMatch: "/api/" },
       { text: "npm", link: NPM_BILLING },
+      { text: "GitHub", link: GITHUB },
       { text: "Product", link: PRODUCT },
     ],
     sidebar: [
@@ -54,8 +56,7 @@ export default defineConfig({
         ],
       },
     ],
-    // GitHub source links are on package READMEs and docs.autlantic.com.
-    socialLinks: [],
+    socialLinks: [{ icon: "github", link: GITHUB }],
     footer: {
       message: "Autlantic Recurring Billing SDK",
       copyright: "Copyright © Autlantic",

@@ -1,13 +1,16 @@
 # Deploy docs on Railway
 
-This site is a static VitePress build served with `serve`. Deploy it as its own Railway service for `docs.autlantic.com`.
+This page is for **maintaining** [docs.autlantic.com](https://docs.autlantic.com) (Autlantic operators). Integrators do not need to deploy the docs site.
+
+The site is a static VitePress build served with `serve`.
 
 ## 1. Railway service settings
 
-1. Service name: `@autlantic/docs` (or any name you prefer)
-2. **Settings → Config file path:** `/railway.docs.toml`
-3. Root directory: leave empty (repo root)
-4. Custom domain: `docs.autlantic.com`
+1. Connect the service to [autlantic/payments-sdk](https://github.com/autlantic/payments-sdk) (`main`)
+2. Service name: `@autlantic/docs` (or any name you prefer)
+3. **Settings → Config file path:** `railway.docs.toml`
+4. Root directory: leave empty (repo root)
+5. Custom domain: `docs.autlantic.com`
 
 ## 2. Build & start
 

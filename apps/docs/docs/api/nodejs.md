@@ -1,6 +1,6 @@
 # Node.js SDK
 
-`@autlantic/payments-recurring` v0.2
+`@autlantic/payments-recurring` **0.2.5** (related packages: `payments-recurring-core`, `chain-evm`, and `billing-engine` at **0.2.4**).
 
 ## `AutlanticBilling`
 

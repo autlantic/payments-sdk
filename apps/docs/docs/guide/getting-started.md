@@ -5,17 +5,17 @@ Autlantic Billing verifies **USDC** subscriptions on **Base**. Funds settle to *
 ## Install
 
 ```bash
-npm install @autlantic/payments-recurring
+npm install @autlantic/payments-recurring@^0.2.5
 ```
 
-Published packages:
+Published packages (see [Packages](/guide/packages) for versions):
 
 - [@autlantic/payments-recurring](https://www.npmjs.com/package/@autlantic/payments-recurring) - main client (recommended)
 - [@autlantic/payments-recurring-core](https://www.npmjs.com/package/@autlantic/payments-recurring-core) - types and billing rules
 - [@autlantic/chain-evm](https://www.npmjs.com/package/@autlantic/chain-evm) - Base + USDC adapter
 - [@autlantic/billing-engine](https://www.npmjs.com/package/@autlantic/billing-engine) - subscriptions and invoices
 
-Requires **Node.js 20+**.
+Source: [github.com/autlantic/payments-sdk](https://github.com/autlantic/payments-sdk). Requires **Node.js 20+**.
 
 ## Quickstart (sandbox)
 
@@ -46,7 +46,7 @@ Use `chargeInvoice` later for renewals or after `completeSubscription` when you 
 
 | Variable | Purpose |
 |----------|---------|
-| `AUTLANTIC_BILLING_API_URL` | Hosted billing API base URL |
+| `AUTLANTIC_BILLING_API_URL` | Hosted billing API base URL (issued with your API key) |
 | `AUTLANTIC_BILLING_API_KEY` | API key for authenticated routes |
 | `AUTLANTIC_BILLING_MERCHANT_ID` | Default merchant id |
 | `AUTLANTIC_BILLING_SANDBOX` | `true` / `1` for sandbox mode |
@@ -56,9 +56,11 @@ Use `chargeInvoice` later for renewals or after `completeSubscription` when you 
 const billing = AutlanticBilling.fromEnv();
 ```
 
+For local demos without a remote API, use `AutlanticBilling.sandbox()` instead of `fromEnv()`.
+
 ## Hosted API alternative
 
-If you prefer HTTP + API key over embedding Node, see [Hosted HTTP API](/api/http).
+If you prefer HTTP + API key over embedding Node, see [Hosted HTTP API](/api/http). Autlantic provides the base URL and credentials when you enable hosted billing.
 
 ## Next steps
 

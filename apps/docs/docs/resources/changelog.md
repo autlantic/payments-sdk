@@ -4,10 +4,11 @@
 
 - Drop wordmark from package README; keep Autlantic icon only
 - Public docs cleanup: SDK-only testing, hosted API described as Autlantic-operated
+- Docs site points at the public [payments-sdk](https://github.com/autlantic/payments-sdk) repo
 
 ## 0.2.4 - Public brand assets on npm
 
-- README logos use https://autlantic.com/brand/... (works while the GitHub repo is private)
+- README logos use https://autlantic.com/brand/... CDN URLs
 - Consistent Autlantic branding across all four packages
 
 ## 0.2.3 - Professional npm READMEs
@@ -24,7 +25,6 @@
 
 - Marketing and getting-started samples match the real `AutlanticBilling` API
 - Clarify that `activateSubscription` charges the first invoice
-- Docs site no longer links to the private GitHub repo
 
 ## 0.2.0 - Recurring USDC on Base
 
@@ -32,7 +32,7 @@
 - `@autlantic/payments-recurring-core` types and retry policy
 - `@autlantic/chain-evm` Base + USDC adapter
 - `@autlantic/billing-engine` subscriptions, invoices, webhooks
-- Hosted `billing-api` and `billing-worker`
+- Autlantic-operated hosted billing API and renewal worker (not shipped as runnable services in this repo)
 
 ## 0.1.x - Legacy (removed)
 
