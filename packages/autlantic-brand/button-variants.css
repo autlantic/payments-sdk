@@ -1,0 +1,74 @@
+/**
+ * Shared gradient button fills (Autlantic brand).
+ * Used by apps/web and apps/billing-portal Button components.
+ */
+
+.btn-variant-accent,
+.btn-variant-primary,
+.btn-variant-crypto,
+.btn-variant-danger,
+.btn-variant-secondary,
+.btn-variant-outline,
+.btn-variant-ghost {
+  border: none;
+}
+
+.btn-variant-accent,
+.btn-variant-primary {
+  background: var(--button-accent-bg);
+  color: var(--color-on-accent);
+  box-shadow: var(--shadow-card);
+}
+
+.btn-variant-accent:hover:not(:disabled),
+.btn-variant-primary:hover:not(:disabled) {
+  background: var(--button-accent-bg-hover);
+}
+
+.btn-variant-crypto {
+  background: var(--button-crypto-bg);
+  color: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.btn-variant-crypto:hover:not(:disabled) {
+  background: var(--button-crypto-bg-hover);
+}
+
+.btn-variant-danger {
+  background: var(--button-danger-bg);
+  color: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.btn-variant-danger:hover:not(:disabled) {
+  background: var(--button-danger-bg-hover);
+}
+
+.btn-variant-secondary {
+  background: var(--button-secondary-bg);
+  color: var(--color-ink);
+}
+
+.btn-variant-secondary:hover:not(:disabled) {
+  background: var(--button-secondary-bg-hover);
+}
+
+.btn-variant-outline {
+  background: transparent;
+  color: var(--color-accent);
+}
+
+.btn-variant-outline:hover:not(:disabled) {
+  background: var(--color-accent-muted);
+}
+
+.btn-variant-ghost {
+  background: transparent;
+  color: var(--color-ink-secondary);
+}
+
+.btn-variant-ghost:hover:not(:disabled) {
+  background: var(--color-surface-muted);
+  color: var(--color-ink);
+}

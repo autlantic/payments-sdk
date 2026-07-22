@@ -1,0 +1,210 @@
+/**
+ * Autlantic brand tokens — shared by autlantic.com (app) and docs.autlantic.com.
+ * Brand accent = VitePress default indigo (purple-blue), not flat #0666ff blue.
+ */
+
+:root {
+  /* Brand — VitePress indigo palette (docs.autlantic.com look) */
+  --color-accent: #5672cd;
+  --color-accent-hover: #3a5ccc;
+  --color-accent-strong: #3451b2;
+  --color-accent-muted: #ebefff;
+  --color-accent-chart-muted: #8b9cff;
+  --color-on-accent: #ffffff;
+  --color-brand: var(--color-accent-strong);
+
+  --color-crypto: #00875a;
+  --color-crypto-hover: #006644;
+  --color-crypto-strong: #005538;
+  --color-crypto-muted: #e6f7f0;
+  --color-crypto-chart-muted: #4db88a;
+
+  /* Surfaces — VitePress light */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f6f6f7;
+  --color-surface-subtle: #f9f9f9;
+  --color-surface-elevated: #ffffff;
+
+  /* Ink */
+  --color-ink: #191c1f;
+  --color-ink-secondary: #5b667a;
+  --color-ink-muted: #8b95a8;
+  --color-on-inverse: #ffffff;
+
+  /* Borders */
+  --color-border: rgb(25 28 31 / 0.08);
+  --color-border-strong: rgb(25 28 31 / 0.14);
+
+  /* Status */
+  --color-danger: #dc2626;
+  --color-danger-text: #b91c1c;
+  --color-danger-muted: #fef2f2;
+  --color-danger-border: #fecaca;
+
+  --color-warning: #d97706;
+  --color-warning-text: #92400e;
+  --color-warning-muted: #fffbeb;
+  --color-warning-border: #fde68a;
+
+  --color-success-text: #047857;
+  --color-success-muted: #ecfdf5;
+  --color-success-border: #a7f3d0;
+
+  /* Misc */
+  --color-code-bg: #0a0e14;
+  --color-telegram: #229ed9;
+  --color-telegram-hover: #1a8bc4;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgb(25 28 31 / 0.04), 0 8px 24px rgb(25 28 31 / 0.06);
+  --shadow-card-hover: 0 2px 4px rgb(25 28 31 / 0.06), 0 16px 40px rgb(25 28 31 / 0.1);
+  --shadow-elevated: 0 24px 64px rgb(25 28 31 / 0.12);
+
+  --radius-card: 1.25rem;
+  --radius-surface-card: 1.125rem;
+  --surface-card-bg: linear-gradient(
+    165deg,
+    var(--color-surface-elevated) 0%,
+    color-mix(in srgb, var(--color-accent) 3%, var(--color-surface-muted)) 100%
+  );
+  --surface-card-bg-nested: color-mix(in srgb, var(--color-surface-muted) 58%, var(--color-surface));
+  --radius-button: 9999px;
+
+  /* Button fills */
+  --button-accent-bg: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-accent) 88%, white) 0%,
+    var(--color-accent-strong) 100%
+  );
+  --button-accent-bg-hover: linear-gradient(
+    165deg,
+    var(--color-accent) 0%,
+    var(--color-accent-hover) 100%
+  );
+  --button-crypto-bg: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-crypto) 90%, white) 0%,
+    var(--color-crypto-strong) 100%
+  );
+  --button-crypto-bg-hover: linear-gradient(
+    165deg,
+    var(--color-crypto) 0%,
+    var(--color-crypto-hover) 100%
+  );
+  --button-danger-bg: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-danger) 88%, white) 0%,
+    color-mix(in srgb, var(--color-danger) 78%, #7f1d1d) 100%
+  );
+  --button-danger-bg-hover: linear-gradient(
+    165deg,
+    var(--color-danger) 0%,
+    color-mix(in srgb, var(--color-danger) 82%, #991b1b) 100%
+  );
+  --button-secondary-bg: linear-gradient(
+    165deg,
+    var(--color-surface) 0%,
+    color-mix(in srgb, var(--color-accent) 5%, var(--color-surface-muted)) 100%
+  );
+  --button-secondary-bg-hover: linear-gradient(
+    165deg,
+    var(--color-surface-muted) 0%,
+    color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-subtle)) 100%
+  );
+}
+
+html.dark {
+  color-scheme: dark;
+
+  /* Brand — VitePress dark indigo */
+  --color-accent: #5c73e7;
+  --color-accent-hover: #a8b1ff;
+  --color-accent-strong: #3e63dd;
+  --color-accent-muted: rgb(100 108 255 / 0.16);
+  --color-accent-chart-muted: #a8b1ff;
+  --color-brand: var(--color-accent-hover);
+
+  --color-crypto-muted: rgb(0 135 90 / 0.2);
+  --color-crypto: #3dd68c;
+  --color-crypto-hover: #6ee7b7;
+  --color-crypto-strong: #6ee7b7;
+  --color-crypto-chart-muted: #3dd68c;
+
+  --color-surface: #1b1b1f;
+  --color-surface-muted: #252529;
+  --color-surface-subtle: #202127;
+  --color-surface-elevated: #2f2f34;
+
+  --color-ink: rgb(255 255 255 / 0.87);
+  --color-ink-secondary: rgb(255 255 255 / 0.65);
+  --color-ink-muted: rgb(255 255 255 / 0.45);
+
+  --color-border: rgb(255 255 255 / 0.12);
+  --color-border-strong: rgb(255 255 255 / 0.18);
+
+  --color-danger: #f87171;
+  --color-danger-text: #fecaca;
+  --color-danger-muted: rgb(220 38 38 / 0.15);
+  --color-danger-border: rgb(248 113 113 / 0.35);
+
+  --color-warning: #fbbf24;
+  --color-warning-text: #fde68a;
+  --color-warning-muted: rgb(217 119 6 / 0.15);
+  --color-warning-border: rgb(251 191 36 / 0.35);
+
+  --color-success-text: #6ee7b7;
+  --color-success-muted: rgb(0 135 90 / 0.15);
+  --color-success-border: rgb(52 211 153 / 0.35);
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.4);
+  --shadow-card-hover: 0 2px 4px rgb(0 0 0 / 0.4), 0 16px 40px rgb(0 0 0 / 0.45);
+  --shadow-elevated: 0 24px 64px rgb(0 0 0 / 0.55);
+
+  --surface-card-bg: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-accent) 7%, var(--color-surface-elevated)) 0%,
+    var(--color-surface-muted) 100%
+  );
+  --surface-card-bg-nested: color-mix(in srgb, var(--color-surface) 68%, var(--color-surface-muted));
+
+  --button-accent-bg: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-accent) 96%, white) 0%,
+    var(--color-accent-strong) 100%
+  );
+  --button-accent-bg-hover: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-accent-hover) 72%, var(--color-accent)) 0%,
+    var(--color-accent-strong) 100%
+  );
+  --button-crypto-bg: linear-gradient(
+    165deg,
+    var(--color-crypto) 0%,
+    var(--color-crypto-strong) 100%
+  );
+  --button-crypto-bg-hover: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-crypto) 78%, white) 0%,
+    var(--color-crypto-hover) 100%
+  );
+  --button-danger-bg: linear-gradient(
+    165deg,
+    var(--color-danger) 0%,
+    color-mix(in srgb, var(--color-danger) 72%, #7f1d1d) 100%
+  );
+  --button-danger-bg-hover: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-danger) 88%, #fca5a5) 0%,
+    var(--color-danger) 100%
+  );
+  --button-secondary-bg: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-elevated)) 0%,
+    var(--color-surface-muted) 100%
+  );
+  --button-secondary-bg-hover: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated)) 0%,
+    color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-subtle)) 100%
+  );
+}
