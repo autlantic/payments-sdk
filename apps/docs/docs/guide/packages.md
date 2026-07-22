@@ -11,4 +11,4 @@ Most integrators only install `@autlantic/payments-recurring`. The other package
 
 ## Spec
 
-Internal product/architecture notes live in the monorepo at `docs/recurring-payments-spec.md`.
+Product/architecture notes: [recurring-payments-spec.md](https://github.com/autlantic/payments-sdk/blob/main/docs/recurring-payments-spec.md).
