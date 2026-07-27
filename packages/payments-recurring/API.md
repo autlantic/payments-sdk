@@ -1,4 +1,4 @@
-# API reference - @autlantic/payments-recurring 0.2.5
+# API reference - @autlantic/payments-recurring 0.2.6
 
 Canonical docs: [docs.autlantic.com/api/nodejs](https://docs.autlantic.com/api/nodejs)
 
@@ -33,7 +33,8 @@ Env vars: `AUTLANTIC_BILLING_API_URL`, `AUTLANTIC_BILLING_API_KEY`, `AUTLANTIC_B
 
 | Method | Description |
 |--------|-------------|
-| `createSubscription(input)` | Create incomplete subscription + open invoice |
+| `listProducts()` | List active catalog products and prices (hosted API) |
+| `createSubscription(input)` | Create incomplete subscription + open invoice (`priceId` or `amountUsdc` + `interval`) |
 | `listSubscriptions({ status? })` | List merchant subscriptions |
 | `getSubscription(id)` | Fetch subscription |
 | `updateSubscription(id, input)` | Update amount, interval, plan, metadata |

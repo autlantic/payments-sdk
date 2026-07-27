@@ -1,5 +1,10 @@
 export { AutlanticBilling, AUTLANTIC_BILLING_SDK_VERSION } from "./client";
-export type { AutlanticBillingConfig, CreateSubscriptionRequest } from "./config";
+export type {
+  AutlanticBillingConfig,
+  BillingCatalogPrice,
+  BillingCatalogProduct,
+  CreateSubscriptionRequest,
+} from "./config";
 export {
   signBillingWebhook,
   verifyBillingWebhook,

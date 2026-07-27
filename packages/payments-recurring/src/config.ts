@@ -7,12 +7,36 @@ export type AutlanticBillingConfig = {
   webhookSecret?: string;
 };
 
+export type BillingCatalogPrice = {
+  id: string;
+  productId: string;
+  amountUsdc: number;
+  interval: "month" | "year";
+  trialDays: number;
+  active: boolean;
+};
+
+export type BillingCatalogProduct = {
+  id: string;
+  name: string;
+  description: string | null;
+  active: boolean;
+  metadata: Record<string, string> | null;
+  prices: BillingCatalogPrice[];
+};
+
+/**
+ * Create a subscription.
+ * Provide either `priceId` (hosted catalog) or `amountUsdc` + `interval` (ad-hoc / sandbox).
+ */
 export type CreateSubscriptionRequest = {
   merchantRef: string;
   customerWallet: string;
   payoutAddressEvm: string;
-  amountUsdc: number;
-  interval: "month" | "year";
+  amountUsdc?: number;
+  interval?: "month" | "year";
+  /** Portal catalog price id. Resolves amount + interval on the API. */
+  priceId?: string;
   planId?: string;
   metadata?: Record<string, string>;
 };

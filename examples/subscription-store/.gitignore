@@ -1,0 +1,13 @@
+# Local env (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Next.js
+.next/
+out/
+
+# deps / tooling
+node_modules/
+*.tsbuildinfo
+.turbo/

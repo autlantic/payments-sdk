@@ -7,6 +7,7 @@
     "test": "pnpm exec turbo run test --filter=@autlantic/payments-recurring-core --filter=@autlantic/chain-evm --filter=@autlantic/billing-engine --filter=@autlantic/payments-recurring",
     "check": "pnpm build && pnpm test",
     "example": "pnpm --filter @autlantic/payments-recurring example",
+    "example:store": "pnpm --filter @autlantic/example-subscription-store dev",
     "publish:sdk": "pnpm check && pnpm --filter @autlantic/payments-recurring-core --filter @autlantic/chain-evm --filter @autlantic/billing-engine --filter @autlantic/payments-recurring publish",
     "dev:docs": "pnpm --filter @autlantic/docs dev",
     "build:docs": "pnpm --filter @autlantic/docs build",

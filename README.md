@@ -92,8 +92,21 @@ Most integrators only need `@autlantic/payments-recurring`.
 ```bash
 pnpm install
 pnpm check      # build + test all packages
-pnpm example    # sandbox demo
+pnpm example    # sandbox CLI demo
+pnpm example:store  # Next.js example storefront (http://localhost:3040)
 pnpm dev:docs   # local VitePress docs
+```
+
+## Example store
+
+See [`examples/subscription-store`](./examples/subscription-store) for a runnable shop with **both**:
+
+- **One-time** USDC payments (`@autlantic/chain-evm`)
+- **Recurring** subscriptions (`@autlantic/payments-recurring`)
+
+```bash
+pnpm example:store
+# http://localhost:3040  →  /one-time  and  /recurring
 ```
 
 ## Security

@@ -14,9 +14,13 @@ import {
 } from "@autlantic/billing-engine";
 import { defaultSandboxChainId, VAULT_PLACEHOLDER_BASE_SEPOLIA } from "@autlantic/chain-evm";
 import type { BillingInterval, RecurringInvoice, RecurringSubscription } from "@autlantic/payments-recurring-core";
-import type { AutlanticBillingConfig, CreateSubscriptionRequest } from "./config";
+import type {
+  AutlanticBillingConfig,
+  BillingCatalogProduct,
+  CreateSubscriptionRequest,
+} from "./config";
 
-export const AUTLANTIC_BILLING_SDK_VERSION = "0.2.5";
+export const AUTLANTIC_BILLING_SDK_VERSION = "0.2.6";
 
 type ApiEnvelope<T> = T & { error?: string };
 
@@ -56,6 +60,11 @@ export class AutlanticBilling {
     input: CreateSubscriptionRequest,
   ): Promise<CreateSubscriptionResult & { checkoutUrl?: string }> {
     if (this.localStore) {
+      if (input.amountUsdc == null || input.interval == null) {
+        throw new Error(
+          "Sandbox mode requires amountUsdc and interval (priceId is only resolved by the hosted API)",
+        );
+      }
       const result = createSubscription(this.localStore, {
         merchantId: this.config.merchantId,
         merchantRef: input.merchantRef,
@@ -64,7 +73,7 @@ export class AutlanticBilling {
         amountUsdc: input.amountUsdc,
         interval: input.interval,
         chainId: defaultSandboxChainId(),
-        planId: input.planId,
+        planId: input.planId ?? input.priceId,
         metadata: input.metadata,
         vaultAddress: VAULT_PLACEHOLDER_BASE_SEPOLIA,
       });
@@ -75,6 +84,14 @@ export class AutlanticBilling {
     }
 
     return this.post("/v1/subscriptions", input);
+  }
+
+  /** Active products and prices from the merchant catalog (hosted API). */
+  async listProducts(): Promise<{ products: BillingCatalogProduct[] }> {
+    if (this.localStore) {
+      return { products: [] };
+    }
+    return this.get("/v1/products");
   }
 
   async listSubscriptions(input?: { status?: string }): Promise<{ subscriptions: RecurringSubscription[] }> {
