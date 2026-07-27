@@ -57,7 +57,7 @@ const created = await billing.createSubscription({
   payoutAddressEvm: creator.payoutAddressEvm,
   priceId,
 });
-// created.checkoutUrl → hosted checkout
+// created.checkoutUrl → hosted checkout (Connect wallet in the browser)
 ```
 
 Use `chargeInvoice` later for renewals or after `completeSubscription` when you want mandate and charge as separate steps.

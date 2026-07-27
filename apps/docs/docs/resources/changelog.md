@@ -2,6 +2,10 @@
 
 Version history for the Autlantic Payments SDK and docs. Also see GitHub [Releases](https://github.com/autlantic/payments-sdk/releases).
 
+## Unreleased
+
+- Hosted checkout docs: Connect wallet / Approve / Pay via EIP-6963 and WalletConnect. Documented status and wallet sync endpoints under [HTTP API](/api/http).
+
 ## 0.2.7 - Hosted one-time payments
 
 Packages: `@autlantic/payments-recurring@0.2.7`, `@autlantic/billing-engine@0.2.5`, `@autlantic/payments-recurring-core@0.2.5`, `@autlantic/chain-evm@0.2.5`.

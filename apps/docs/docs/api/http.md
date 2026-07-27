@@ -19,13 +19,18 @@ For local demos without a remote API, use `AutlanticBilling.sandbox()` instead. 
 
 ## Public checkout (no API key)
 
+Hosted checkout is a React wallet flow with EIP-6963 discovery, WalletConnect, and Connect → Approve → Pay for subscriptions (Connect → Pay for one-time). Redirect buyers to `checkoutUrl` from `createSubscription` / `createPayment`.
+
 | Method | Path | Purpose |
 |--------|------|---------|
-| `GET` | `/checkout/subscribe/:id` | Hosted HTML subscription checkout |
-| `GET` | `/checkout/subscribe/:id.json` | Session JSON |
+| `GET` | `/checkout/subscribe/:id` | Hosted subscription checkout (React SPA) |
+| `GET` | `/checkout/subscribe/:id/status` | Enriched session (allowance, vault binding, PDFs) |
+| `GET` | `/checkout/subscribe/:id.json` | Same as `/status` |
+| `POST` | `/checkout/subscribe/:id/wallet` | Sync connected `customerWallet` (incomplete only) |
 | `POST` | `/checkout/subscribe/:id/activate` | Activate (sandbox or live with `{ onChainSubscriptionId }`) |
-| `GET` | `/checkout/pay/:id` | Hosted HTML one-time checkout |
-| `GET` | `/checkout/pay/:id.json` | One-time session JSON |
+| `GET` | `/checkout/pay/:id` | Hosted one-time checkout (React SPA) |
+| `GET` | `/checkout/pay/:id/status` | Enriched one-time session |
+| `GET` | `/checkout/pay/:id.json` | Same as `/status` |
 | `POST` | `/checkout/pay/:id/confirm` | Confirm (sandbox, or live with `{ txHash }`) |
 
 ## Authenticated (`X-Autlantic-Api-Key`)

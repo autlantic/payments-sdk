@@ -49,7 +49,7 @@ const { payment, checkoutUrl } = await billing.createPayment({
 On the hosted page:
 
 - Sandbox: **Simulate USDC transfer**
-- Live: buyer sends the transfer, then pastes the tx hash and confirms
+- Live: **Connect wallet** (EIP-6963 / WalletConnect) → send USDC from the browser wallet → checkout confirms on-chain
 
 Confirmation uses `verifyUsdcPassPaymentFromTxHash` from `@autlantic/chain-evm`.
 
@@ -59,8 +59,9 @@ Confirmation uses `verifyUsdcPassPaymentFromTxHash` from `@autlantic/chain-evm`.
 |--------|------|---------|
 | `POST` | `/v1/payments` | Create payment (`priceId` once, or `amountUsdc`) |
 | `GET` | `/v1/payments/:id` | Fetch payment |
-| `GET` | `/checkout/pay/:id` | Hosted HTML checkout |
-| `GET` | `/checkout/pay/:id.json` | Session JSON |
+| `GET` | `/checkout/pay/:id` | Hosted React checkout |
+| `GET` | `/checkout/pay/:id/status` | Enriched session + paid state |
+| `GET` | `/checkout/pay/:id.json` | Same as `/status` |
 | `POST` | `/checkout/pay/:id/confirm` | Sandbox mark paid, or verify `{ txHash }` |
 
 ## Webhooks
