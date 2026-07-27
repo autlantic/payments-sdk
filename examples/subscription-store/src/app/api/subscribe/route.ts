@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       const { products } = await billing.listProducts();
       for (const product of products) {
         const price = product.prices.find((p) => p.id === priceId && p.active);
-        if (price) {
+        if (price && (price.interval === "month" || price.interval === "year")) {
           plan = {
             id: price.id,
             priceId: price.id,
