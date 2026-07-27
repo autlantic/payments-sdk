@@ -1,6 +1,16 @@
 import { getBilling, isHostedMode } from "@/lib/billing";
+import {
+  catalogDisplayName,
+  descriptionFromProduct,
+  featuresFromProduct,
+} from "@/lib/catalog";
 import { ONE_TIME_PRODUCTS, type OneTimeProduct } from "@/lib/one-time-products";
 import { NextResponse } from "next/server";
+
+export type CatalogOneTimeProduct = OneTimeProduct & {
+  priceId?: string;
+  productId?: string;
+};
 
 export async function GET() {
   if (!isHostedMode()) {
@@ -10,21 +20,20 @@ export async function GET() {
   try {
     const billing = getBilling();
     const { products: catalog } = await billing.listProducts();
-    const products: (OneTimeProduct & { priceId: string; productId: string })[] = [];
+    const products: CatalogOneTimeProduct[] = [];
 
     for (const product of catalog) {
-      for (const price of product.prices) {
-        if (!price.active || price.interval !== "once") continue;
-        const multi =
-          product.prices.filter((p) => p.active && p.interval === "once").length > 1;
+      if (!product.active) continue;
+      const oncePrices = product.prices.filter((p) => p.active && p.interval === "once");
+      for (const price of oncePrices) {
         products.push({
           id: price.id,
           priceId: price.id,
           productId: product.id,
-          name: multi ? `${product.name} (once)` : product.name,
-          description: product.description?.trim() || "From your billing portal catalog.",
+          name: catalogDisplayName(product.name, "once", oncePrices.length > 1),
+          description: descriptionFromProduct(product, "once"),
           amountUsdc: price.amountUsdc,
-          features: ["Portal catalog price", `Price ${price.id}`],
+          features: featuresFromProduct(product, "once"),
           highlighted: products.length === 0,
         });
       }

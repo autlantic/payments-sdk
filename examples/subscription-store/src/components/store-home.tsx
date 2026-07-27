@@ -1,5 +1,6 @@
 "use client";
 
+import { formatUsdc } from "@/lib/catalog";
 import type { StorePlan } from "@/lib/plans";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -20,7 +21,7 @@ export function StoreHome() {
   const [plans, setPlans] = useState<StorePlan[]>([]);
   const [catalogHint, setCatalogHint] = useState<string | null>(null);
   const [planId, setPlanId] = useState("");
-  const [wallet, setWallet] = useState(DEMO_WALLET);
+  const [wallet, setWallet] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SubscribeResult | null>(null);
@@ -39,13 +40,21 @@ export function StoreHome() {
         hint?: string;
         error?: string;
       };
-      if (meta.mode) setMode(meta.mode);
+      const nextMode = meta.mode ?? "sandbox";
+      setMode(nextMode);
       const nextPlans = catalog.plans ?? [];
       setPlans(nextPlans);
       setCatalogHint(catalog.hint ?? catalog.error ?? null);
-      const preferred =
-        nextPlans.find((p) => p.highlighted)?.id ?? nextPlans[0]?.id ?? "";
+      const preferred = nextPlans.find((p) => p.highlighted)?.id ?? nextPlans[0]?.id ?? "";
       setPlanId((prev) => (nextPlans.some((p) => p.id === prev) ? prev : preferred));
+      setWallet((prev) => {
+        if (prev) return prev;
+        if (typeof window !== "undefined") {
+          const saved = window.localStorage.getItem("acme_customer_wallet");
+          if (saved) return saved;
+        }
+        return nextMode === "sandbox" ? DEMO_WALLET : "";
+      });
     } catch {
       setCatalogHint("Could not load catalog");
     }
@@ -90,18 +99,27 @@ export function StoreHome() {
   return (
     <>
       <section className="hero">
-        <span className={`badge ${mode === "sandbox" ? "sandbox" : ""}`}>
+        <span className={`badge ${mode === "sandbox" ? "sandbox" : "hosted"}`}>
           {mode === "sandbox" ? "Sandbox mode" : "Hosted API mode"}
         </span>
         <h1>Ship recurring USDC memberships</h1>
         <p>
-          This flow uses <code>@autlantic/payments-recurring</code>. Zero config runs the
-          in-process sandbox. Connect an API key under{" "}
-          <Link href="/settings">Settings</Link> to load products from your{" "}
-          <a href="https://portal.autlantic.com" target="_blank" rel="noreferrer">
-            billing portal
-          </a>{" "}
-          catalog. Prefer a single purchase? See the <Link href="/one-time">one-time example</Link>.
+          {mode === "sandbox" ? (
+            <>
+              Demo plans below run in-process. Connect an API key under{" "}
+              <Link href="/settings">Settings</Link> to load monthly and yearly prices from your{" "}
+              <a href="https://portal.autlantic.com" target="_blank" rel="noreferrer">
+                billing portal
+              </a>
+              . Prefer a single purchase? See the <Link href="/one-time">one-time example</Link>.
+            </>
+          ) : (
+            <>
+              Plans below come from your portal catalog. Subscribe creates a subscription and opens
+              Autlantic checkout. Prefer a single purchase? See the{" "}
+              <Link href="/one-time">one-time example</Link>.
+            </>
+          )}
         </p>
       </section>
 
@@ -116,7 +134,11 @@ export function StoreHome() {
                   Refresh catalog
                 </button>
               </>
-            ) : null}
+            ) : (
+              <>
+                <Link href="/settings">Open Settings</Link> to connect your portal.
+              </>
+            )}
           </p>
         </div>
       ) : null}
@@ -125,16 +147,18 @@ export function StoreHome() {
         {plans.map((plan) => (
           <article key={plan.id} className={`plan ${plan.highlighted ? "highlighted" : ""}`}>
             <h2>{plan.name}</h2>
-            <p className="interval">{plan.description}</p>
+            {plan.description ? <p className="interval">{plan.description}</p> : null}
             <p className="price">
-              ${plan.amountUsdc.toFixed(2)}
+              ${formatUsdc(plan.amountUsdc)}
               <span className="interval"> USDC / {plan.interval}</span>
             </p>
-            <ul>
-              {plan.features.map((f) => (
-                <li key={f}>{f}</li>
-              ))}
-            </ul>
+            {plan.features.length > 0 ? (
+              <ul>
+                {plan.features.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+            ) : null}
             <button
               type="button"
               className={planId === plan.id ? "btn" : "btn secondary"}
@@ -151,7 +175,7 @@ export function StoreHome() {
         <p className="hint">
           {mode === "sandbox"
             ? "Sandbox activates the mandate and pays the first invoice instantly."
-            : "Hosted mode creates the subscription from your portal price and redirects to Autlantic checkout."}
+            : "Creates a subscription from your portal price and redirects to Autlantic checkout."}
         </p>
 
         <div className="field">
@@ -164,7 +188,7 @@ export function StoreHome() {
           >
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} · ${p.amountUsdc} / {p.interval}
+                {p.name} · ${formatUsdc(p.amountUsdc)} / {p.interval}
               </option>
             ))}
           </select>
@@ -190,13 +214,15 @@ export function StoreHome() {
 
         {result ? (
           <div className="success">
-            <strong>Subscription {result.subscription.status}</strong>
+            <strong>
+              {result.plan.name} · {result.subscription.status}
+            </strong>
             <div className="mono" style={{ marginTop: 8 }}>
               {result.subscription.id}
             </div>
             {result.invoice ? (
               <div style={{ marginTop: 8 }}>
-                Invoice {result.invoice.status} · ${result.invoice.amountUsdc.toFixed(2)} USDC
+                Invoice {result.invoice.status} · ${formatUsdc(result.invoice.amountUsdc)} USDC
                 {result.invoice.txHash ? (
                   <div className="mono" style={{ marginTop: 4 }}>
                     tx {result.invoice.txHash}

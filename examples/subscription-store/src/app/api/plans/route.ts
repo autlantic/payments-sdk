@@ -1,4 +1,9 @@
 import { getBilling, isHostedMode } from "@/lib/billing";
+import {
+  catalogDisplayName,
+  descriptionFromProduct,
+  featuresFromProduct,
+} from "@/lib/catalog";
 import { DEMO_PLANS, type StorePlan } from "@/lib/plans";
 import { NextResponse } from "next/server";
 
@@ -13,23 +18,21 @@ export async function GET() {
     const plans: StorePlan[] = [];
 
     for (const product of products) {
-      for (const price of product.prices) {
-        if (!price.active) continue;
-        // Recurring plans only. One-time prices use /one-time → createPayment.
-        if (price.interval !== "month" && price.interval !== "year") continue;
-        const multi =
-          product.prices.filter(
-            (p) => p.active && (p.interval === "month" || p.interval === "year"),
-          ).length > 1;
+      if (!product.active) continue;
+      const recurringPrices = product.prices.filter(
+        (p) => p.active && (p.interval === "month" || p.interval === "year"),
+      );
+      for (const price of recurringPrices) {
+        const interval = price.interval as "month" | "year";
         plans.push({
           id: price.id,
           priceId: price.id,
           productId: product.id,
-          name: multi ? `${product.name} (${price.interval})` : product.name,
-          description: product.description?.trim() || "From your billing portal catalog.",
+          name: catalogDisplayName(product.name, interval, recurringPrices.length > 1),
+          description: descriptionFromProduct(product, interval),
           amountUsdc: price.amountUsdc,
-          interval: price.interval,
-          features: ["Portal catalog price", `Price ${price.id}`],
+          interval,
+          features: featuresFromProduct(product, interval),
           highlighted: plans.length === 0,
         });
       }
@@ -39,7 +42,7 @@ export async function GET() {
       return NextResponse.json({
         source: "portal" as const,
         plans: [],
-        hint: "No active products/prices yet. Create one in the portal under Products, then refresh.",
+        hint: "No active monthly or yearly prices yet. Create one in the portal under Products, then refresh.",
       });
     }
 

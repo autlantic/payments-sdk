@@ -136,6 +136,11 @@ select {
   color: var(--crypto);
 }
 
+.badge.hosted {
+  background: var(--accent-muted);
+  color: var(--accent-strong);
+}
+
 .plans {
   display: grid;
   gap: 1rem;

@@ -1,14 +1,30 @@
+"use client";
+
+import { ModeBadge } from "@/components/mode-badge";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
+  const [mode, setMode] = useState<"sandbox" | "hosted" | null>(null);
+
+  useEffect(() => {
+    void fetch("/api/meta")
+      .then((r) => r.json())
+      .then((data: { mode?: "sandbox" | "hosted" }) => {
+        if (data.mode) setMode(data.mode);
+      })
+      .catch(() => setMode("sandbox"));
+  }, []);
+
   return (
     <>
       <section className="hero">
-        <span className="badge">Autlantic Payments SDK examples</span>
+        <ModeBadge />
         <h1>One-time and recurring USDC on Base</h1>
         <p>
-          Two runnable flows in one demo store. Pick the pattern that matches your product, then
-          copy the API routes into your own app.
+          {mode === "hosted"
+            ? "Connected to your billing API. Open one-time or recurring to shop from your portal catalog."
+            : "Two runnable flows in one demo store. Use sandbox products out of the box, or connect your portal under Settings."}
         </p>
       </section>
 
@@ -16,16 +32,13 @@ export default function HomePage() {
         <article className="plan highlighted">
           <h2>One-time payment</h2>
           <p className="interval">
-            Day pass, lifetime unlock, credit pack. Single USDC transfer to your wallet. No
-            mandate, no renewals.
-          </p>
-          <p className="price" style={{ fontSize: "1.35rem" }}>
-            @autlantic/chain-evm
+            Single USDC charge. Hosted mode loads Once prices from your portal and opens Autlantic
+            checkout.
           </p>
           <ul>
-            <li>UsdcPassPaymentIntent</li>
-            <li>encodeTransferCalldata</li>
-            <li>verifyUsdcPassPaymentFromTxHash</li>
+            <li>createPayment</li>
+            <li>Hosted /checkout/pay</li>
+            <li>No renewals</li>
           </ul>
           <Link className="btn" href="/one-time">
             Open one-time example
@@ -35,15 +48,12 @@ export default function HomePage() {
         <article className="plan">
           <h2>Recurring subscription</h2>
           <p className="interval">
-            Monthly or yearly membership. Create subscription, activate mandate, charge invoices,
-            handle webhooks.
-          </p>
-          <p className="price" style={{ fontSize: "1.35rem" }}>
-            @autlantic/payments-recurring
+            Monthly or yearly membership. Hosted mode loads portal prices and opens Autlantic
+            checkout.
           </p>
           <ul>
             <li>createSubscription</li>
-            <li>activateSubscription</li>
+            <li>Hosted /checkout/subscribe</li>
             <li>Webhooks + cancel</li>
           </ul>
           <Link className="btn secondary" href="/recurring">
@@ -55,11 +65,10 @@ export default function HomePage() {
       <div className="panel">
         <h2>How this pairs with the portal</h2>
         <p className="hint">
-          Open{" "}
-          <Link href="/settings">Settings</Link> and paste your API key, merchant ID, payout wallet,
-          and webhook secret from{" "}
+          Open <Link href="/settings">Settings</Link> and paste your API key, merchant ID, payout
+          wallet, and webhook secret from{" "}
           <a href="https://portal.autlantic.com">portal.autlantic.com</a>. Leave the API key empty to
-          stay in sandbox.
+          stay in sandbox with demo products.
         </p>
       </div>
     </>

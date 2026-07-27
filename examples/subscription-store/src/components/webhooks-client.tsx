@@ -1,5 +1,6 @@
 "use client";
 
+import { ModeBadge } from "@/components/mode-badge";
 import { useCallback, useEffect, useState } from "react";
 
 type EventRow = {
@@ -32,11 +33,12 @@ export function WebhooksClient() {
   return (
     <>
       <section className="hero">
+        <ModeBadge />
         <h1>Webhook inbox</h1>
         <p>
           Point your billing portal webhook endpoint to{" "}
-          <code className="mono">/api/webhooks/billing</code> on this store. Events are verified with{" "}
-          <code>verifyBillingWebhook</code> and listed here.
+          <code className="mono">/api/webhooks/billing</code> on this store. Events are verified and
+          listed here.
         </p>
       </section>
 
@@ -50,8 +52,8 @@ export function WebhooksClient() {
 
         {events.length === 0 ? (
           <p className="hint" style={{ marginTop: 16 }}>
-            No events yet. In sandbox mode, activate a subscription then POST a signed event, or
-            configure an endpoint in the portal for hosted mode.
+            No events yet. Configure an endpoint in the portal (Settings → Webhooks), or POST a
+            signed event while testing locally.
           </p>
         ) : (
           <table className="table" style={{ marginTop: 16 }}>
@@ -68,8 +70,8 @@ export function WebhooksClient() {
                 <tr key={`${row.receivedAt}-${i}`}>
                   <td>{new Date(row.receivedAt).toLocaleString()}</td>
                   <td>{row.verified ? "yes" : "no"}</td>
-                  <td>{row.event.type ?? row.event.parseError ?? "—"}</td>
-                  <td className="mono">{row.event.id ?? "—"}</td>
+                  <td>{row.event.type ?? row.event.parseError ?? "-"}</td>
+                  <td className="mono">{row.event.id ?? "-"}</td>
                 </tr>
               ))}
             </tbody>

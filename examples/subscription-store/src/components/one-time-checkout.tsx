@@ -1,5 +1,6 @@
 "use client";
 
+import { formatUsdc } from "@/lib/catalog";
 import type { OneTimeProduct } from "@/lib/one-time-products";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ type Payment = {
   transferCalldata?: string;
   txHash?: string;
   mode?: "sandbox" | "live";
+  metadata?: Record<string, string>;
 };
 
 const DEMO_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0";
@@ -27,7 +29,7 @@ export function OneTimeCheckout() {
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [productId, setProductId] = useState("");
   const [catalogHint, setCatalogHint] = useState<string | null>(null);
-  const [wallet, setWallet] = useState(DEMO_WALLET);
+  const [wallet, setWallet] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payment, setPayment] = useState<Payment | null>(null);
@@ -49,12 +51,21 @@ export function OneTimeCheckout() {
         hint?: string;
         error?: string;
       };
-      if (meta.mode) setMode(meta.mode);
+      const nextMode = meta.mode ?? "sandbox";
+      setMode(nextMode);
       const next = catalog.products ?? [];
       setProducts(next);
       setCatalogHint(catalog.hint ?? catalog.error ?? null);
       const preferred = next.find((p) => p.highlighted)?.id ?? next[0]?.id ?? "";
       setProductId((prev) => (next.some((p) => p.id === prev) ? prev : preferred));
+      setWallet((prev) => {
+        if (prev) return prev;
+        if (typeof window !== "undefined") {
+          const saved = window.localStorage.getItem("acme_customer_wallet");
+          if (saved) return saved;
+        }
+        return nextMode === "sandbox" ? DEMO_WALLET : "";
+      });
     } catch {
       setCatalogHint("Could not load catalog");
     }
@@ -84,7 +95,6 @@ export function OneTimeCheckout() {
       };
       if (!res.ok || !data.payment) throw new Error(data.error ?? "Create failed");
 
-      // Hosted: redirect to Autlantic checkout (same pattern as subscribe).
       if (data.checkoutUrl && data.mode === "hosted" && !data.checkoutUrl.startsWith("sandbox://")) {
         window.location.href = data.checkoutUrl;
         return;
@@ -93,6 +103,7 @@ export function OneTimeCheckout() {
       setPayment(data.payment);
       if (typeof window !== "undefined") {
         window.localStorage.setItem("acme_one_time_payment_id", data.payment.id);
+        window.localStorage.setItem("acme_customer_wallet", wallet);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Create failed");
@@ -126,15 +137,23 @@ export function OneTimeCheckout() {
   return (
     <>
       <section className="hero">
-        <span className={`badge ${mode === "sandbox" ? "sandbox" : ""}`}>
+        <span className={`badge ${mode === "sandbox" ? "sandbox" : "hosted"}`}>
           {mode === "sandbox" ? "Sandbox mode" : "Hosted API mode"}
         </span>
         <h1>Pay once. No mandate.</h1>
         <p>
-          Zero config uses demo products. Connect an API key under{" "}
-          <Link href="/settings">Settings</Link> to load{" "}
-          <strong>Once</strong> prices from your billing portal, then checkout opens Autlantic{" "}
-          <code>/checkout/pay/:id</code>.
+          {mode === "sandbox" ? (
+            <>
+              Demo products below stay local. Connect an API key under{" "}
+              <Link href="/settings">Settings</Link> to load <strong>Once</strong> prices from your
+              portal.
+            </>
+          ) : (
+            <>
+              Products below come from your portal catalog (interval Once). Checkout opens Autlantic
+              hosted pay.
+            </>
+          )}
         </p>
       </section>
 
@@ -165,16 +184,18 @@ export function OneTimeCheckout() {
             className={`plan ${product.highlighted ? "highlighted" : ""}`}
           >
             <h2>{product.name}</h2>
-            <p className="interval">{product.description}</p>
+            {product.description ? <p className="interval">{product.description}</p> : null}
             <p className="price">
-              ${product.amountUsdc.toFixed(2)}
+              ${formatUsdc(product.amountUsdc)}
               <span className="interval"> USDC once</span>
             </p>
-            <ul>
-              {product.features.map((f) => (
-                <li key={f}>{f}</li>
-              ))}
-            </ul>
+            {product.features.length > 0 ? (
+              <ul>
+                {product.features.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+            ) : null}
             <button
               type="button"
               className={productId === product.id ? "btn" : "btn secondary"}
@@ -191,7 +212,7 @@ export function OneTimeCheckout() {
         <p className="hint">
           {mode === "sandbox"
             ? "Sandbox keeps the intent local and lets you simulate a USDC transfer."
-            : "Hosted mode creates a payment from your portal price and redirects to Autlantic checkout."}
+            : "Creates a payment from your portal price and redirects to Autlantic checkout."}
         </p>
 
         <div className="field">
@@ -204,7 +225,7 @@ export function OneTimeCheckout() {
           >
             {products.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} · ${p.amountUsdc} once
+                {p.name} · ${formatUsdc(p.amountUsdc)} once
               </option>
             ))}
           </select>
@@ -223,7 +244,11 @@ export function OneTimeCheckout() {
         </div>
 
         <button className="btn" type="submit" disabled={busy || !productId}>
-          {busy ? "Creating…" : mode === "sandbox" ? "Create payment (sandbox)" : "Continue to checkout"}
+          {busy
+            ? "Creating…"
+            : mode === "sandbox"
+              ? "Create payment (sandbox)"
+              : "Continue to checkout"}
         </button>
         {error ? <p className="error">{error}</p> : null}
       </form>
@@ -231,8 +256,8 @@ export function OneTimeCheckout() {
       {payment ? (
         <div className="panel">
           <h2>
-            Payment {payment.status === "paid" ? "paid" : "open"} · $
-            {payment.amountUsdc.toFixed(2)} USDC
+            {payment.productName ?? "Payment"} · {payment.status} · $
+            {formatUsdc(payment.amountUsdc)} USDC
           </h2>
           <p className="mono">{payment.id}</p>
           {payout ? (

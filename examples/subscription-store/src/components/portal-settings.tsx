@@ -36,6 +36,7 @@ export function PortalSettings() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
+  const [catalogCount, setCatalogCount] = useState<number | null>(null);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -59,13 +60,28 @@ export function PortalSettings() {
         webhookSecretSet: Boolean(data.webhookSecretSet),
         webhookUrlHint: data.webhookUrlHint || "/api/webhooks/billing",
       });
+      if (data.mode === "hosted") {
+        void probeCatalog();
+      } else {
+        setCatalogCount(null);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load settings");
     }
   }
 
-  function update<K extends keyof ConfigForm>(key: K, value: ConfigForm[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  async function probeCatalog() {
+    try {
+      const [plansRes, onceRes] = await Promise.all([
+        fetch("/api/plans"),
+        fetch("/api/one-time/products"),
+      ]);
+      const plans = (await plansRes.json()) as { plans?: unknown[] };
+      const once = (await onceRes.json()) as { products?: unknown[] };
+      setCatalogCount((plans.plans?.length ?? 0) + (once.products?.length ?? 0));
+    } catch {
+      setCatalogCount(null);
+    }
   }
 
   async function save(e: React.FormEvent) {
@@ -91,8 +107,8 @@ export function PortalSettings() {
       if (!res.ok) throw new Error(data.error ?? "Save failed");
       setMessage(
         data.mode === "hosted"
-          ? "Saved. Store is in hosted mode (billing API + API key)."
-          : "Saved. Still in sandbox (add an API key to use the hosted API).",
+          ? "Connected. Recurring and one-time pages now load your portal catalog."
+          : "Saved. Still in sandbox (paste an API key to connect the billing API).",
       );
       await load();
     } catch (err) {
@@ -113,7 +129,7 @@ export function PortalSettings() {
         body: JSON.stringify({ clear: true }),
       });
       if (!res.ok) throw new Error("Could not reset");
-      setMessage("Cleared. Back to in-process sandbox.");
+      setMessage("Cleared. Back to in-process sandbox with demo products.");
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Reset failed");
@@ -128,18 +144,24 @@ export function PortalSettings() {
   return (
     <>
       <section className="hero">
-        <span className={`badge ${form.mode === "sandbox" ? "sandbox" : ""}`}>
+        <span className={`badge ${form.mode === "sandbox" ? "sandbox" : "hosted"}`}>
           {form.mode === "sandbox" ? "Sandbox mode" : "Hosted API mode"}
         </span>
         <h1>Portal connection</h1>
         <p>
-          Create products and keys in the{" "}
+          Paste credentials from the{" "}
           <a href={portalHref} target="_blank" rel="noreferrer">
             merchant portal
           </a>
-          , then point this store at the <strong>billing API</strong> host (not the portal UI URL).
-          Leave the API key empty to keep using the local sandbox.
+          . An API key switches this store to hosted mode so Recurring and One-time load your real
+          catalog.
         </p>
+        {form.mode === "hosted" && catalogCount != null ? (
+          <p className="hint" style={{ marginTop: 12 }}>
+            Catalog connected · {catalogCount} active price{catalogCount === 1 ? "" : "s"} visible
+            across recurring and one-time.
+          </p>
+        ) : null}
       </section>
 
       <div className="panel">
@@ -153,21 +175,14 @@ export function PortalSettings() {
           </thead>
           <tbody>
             <tr>
-              <td>Portal URL</td>
-              <td>
-                UI only: <code>https://portal.autlantic.com</code>
-              </td>
-            </tr>
-            <tr>
               <td>API URL</td>
               <td>
-                REST host: <code>https://billing.autlantic.com</code> (local:{" "}
-                <code>http://localhost:8788</code>)
+                <code>https://billing.autlantic.com</code> (not the portal UI host)
               </td>
             </tr>
             <tr>
               <td>API key</td>
-              <td>Portal → Developers → API keys → Create (copy once)</td>
+              <td>Portal → Developers → API keys</td>
             </tr>
             <tr>
               <td>Merchant ID</td>
@@ -179,36 +194,30 @@ export function PortalSettings() {
             </tr>
             <tr>
               <td>Webhook secret</td>
-              <td>Portal → Settings → Webhooks (Reveal) or when adding an endpoint</td>
+              <td>Portal → Settings → Webhooks</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <form className="panel" onSubmit={save}>
+      <form
+        className="panel"
+        onSubmit={(e) => {
+          void save(e);
+        }}
+      >
         <h2>Credentials</h2>
         <p className="hint">
-          Stored in this example server&apos;s memory for the current process. Not written to disk.
-          Restart clears overrides unless you also use <code>.env.local</code>.
+          Stored in this example server&apos;s memory for the current process. Prefer Railway /{" "}
+          <code>.env</code> for durable config.
         </p>
-
-        <div className="field">
-          <label htmlFor="portalUrl">Portal URL (UI)</label>
-          <input
-            id="portalUrl"
-            value={form.portalUrl}
-            onChange={(e) => update("portalUrl", e.target.value)}
-            placeholder="https://portal.autlantic.com"
-            spellCheck={false}
-          />
-        </div>
 
         <div className="field">
           <label htmlFor="apiUrl">Billing API URL</label>
           <input
             id="apiUrl"
             value={form.apiUrl}
-            onChange={(e) => update("apiUrl", e.target.value)}
+            onChange={(e) => setForm((prev) => ({ ...prev, apiUrl: e.target.value }))}
             placeholder="https://billing.autlantic.com"
             spellCheck={false}
           />
@@ -216,15 +225,15 @@ export function PortalSettings() {
 
         <div className="field">
           <label htmlFor="apiKey">
-            API key {form.apiKeySet ? "(set)" : "(empty = sandbox)"}
+            API key {form.apiKeySet ? "(saved · leave blank to keep)" : "(required for hosted mode)"}
           </label>
           <input
             id="apiKey"
             type="password"
             autoComplete="off"
             value={form.apiKey}
-            onChange={(e) => update("apiKey", e.target.value)}
-            placeholder="abk_test_…"
+            onChange={(e) => setForm((prev) => ({ ...prev, apiKey: e.target.value }))}
+            placeholder="abk_…"
             spellCheck={false}
           />
         </div>
@@ -234,7 +243,7 @@ export function PortalSettings() {
           <input
             id="merchantId"
             value={form.merchantId}
-            onChange={(e) => update("merchantId", e.target.value)}
+            onChange={(e) => setForm((prev) => ({ ...prev, merchantId: e.target.value }))}
             placeholder="mer_…"
             spellCheck={false}
           />
@@ -245,7 +254,7 @@ export function PortalSettings() {
           <input
             id="payout"
             value={form.payoutAddressEvm}
-            onChange={(e) => update("payoutAddressEvm", e.target.value)}
+            onChange={(e) => setForm((prev) => ({ ...prev, payoutAddressEvm: e.target.value }))}
             placeholder="0x…"
             spellCheck={false}
           />
@@ -253,15 +262,26 @@ export function PortalSettings() {
 
         <div className="field">
           <label htmlFor="webhookSecret">
-            Webhook signing secret {form.webhookSecretSet ? "(set)" : ""}
+            Webhook signing secret {form.webhookSecretSet ? "(saved · leave blank to keep)" : ""}
           </label>
           <input
             id="webhookSecret"
             type="password"
             autoComplete="off"
             value={form.webhookSecret}
-            onChange={(e) => update("webhookSecret", e.target.value)}
+            onChange={(e) => setForm((prev) => ({ ...prev, webhookSecret: e.target.value }))}
             placeholder="whsec_…"
+            spellCheck={false}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="portalUrl">Portal URL (links only)</label>
+          <input
+            id="portalUrl"
+            value={form.portalUrl}
+            onChange={(e) => setForm((prev) => ({ ...prev, portalUrl: e.target.value }))}
+            placeholder="https://portal.autlantic.com"
             spellCheck={false}
           />
         </div>
@@ -270,12 +290,13 @@ export function PortalSettings() {
           <input
             type="checkbox"
             checked={form.sandbox}
-            onChange={(e) => update("sandbox", e.target.checked)}
+            onChange={(e) => setForm((prev) => ({ ...prev, sandbox: e.target.checked }))}
           />
           <span>
-            <strong>Sandbox / test mode</strong>
+            <strong>Test API key</strong>
             <span className="hint" style={{ display: "block", margin: 0 }}>
-              Keep on when using a test API key from the portal.
+              Keep on when using a portal test key. This is separate from Sandbox vs Hosted store
+              mode (which depends on whether an API key is set).
             </span>
           </span>
         </label>

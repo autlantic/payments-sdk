@@ -1,5 +1,7 @@
 "use client";
 
+import { ModeBadge } from "@/components/mode-badge";
+import { formatUsdc } from "@/lib/catalog";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -12,6 +14,7 @@ type AccountPayload = {
     interval: string;
     currentPeriodEnd: string;
     cancelAtPeriodEnd?: boolean;
+    metadata?: Record<string, string> | null;
   };
   invoices: Array<{
     id: string;
@@ -81,11 +84,14 @@ export function AccountClient({ initialId }: { initialId?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const planName = data?.subscription.metadata?.planName?.trim();
+
   return (
     <>
       <section className="hero">
+        <ModeBadge />
         <h1>Your subscription</h1>
-        <p>Look up a subscription by ID from this example store (sandbox or hosted).</p>
+        <p>Look up a subscription created from this store (sandbox or hosted checkout).</p>
       </section>
 
       <div className="panel">
@@ -107,14 +113,20 @@ export function AccountClient({ initialId }: { initialId?: string }) {
 
       {data ? (
         <div className="panel">
-          <h2>Status: {data.subscription.status}</h2>
+          <h2>
+            {planName ? `${planName} · ` : ""}
+            {data.subscription.status}
+          </h2>
           <p className="hint">
-            {data.subscription.amountUsdc.toFixed(2)} USDC / {data.subscription.interval}
+            ${formatUsdc(data.subscription.amountUsdc)} USDC / {data.subscription.interval}
             {data.subscription.cancelAtPeriodEnd ? " · cancels at period end" : ""}
           </p>
           <p className="mono">{data.subscription.walletAddress}</p>
           <p className="hint" style={{ marginTop: 8 }}>
             Period ends {new Date(data.subscription.currentPeriodEnd).toLocaleString()}
+          </p>
+          <p className="mono" style={{ marginTop: 8 }}>
+            {data.subscription.id}
           </p>
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }}>
@@ -134,7 +146,7 @@ export function AccountClient({ initialId }: { initialId?: string }) {
             >
               Cancel now
             </button>
-            <Link className="btn secondary" href="/">
+            <Link className="btn secondary" href="/recurring">
               Back to plans
             </Link>
           </div>
@@ -146,19 +158,19 @@ export function AccountClient({ initialId }: { initialId?: string }) {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Invoice</th>
                   <th>Status</th>
                   <th>Amount</th>
                   <th>Due</th>
+                  <th>Invoice</th>
                 </tr>
               </thead>
               <tbody>
                 {data.invoices.map((inv) => (
                   <tr key={inv.id}>
-                    <td className="mono">{inv.id}</td>
                     <td>{inv.status}</td>
-                    <td>${inv.amountUsdc.toFixed(2)} USDC</td>
+                    <td>${formatUsdc(inv.amountUsdc)} USDC</td>
                     <td>{new Date(inv.dueAt).toLocaleString()}</td>
+                    <td className="mono">{inv.id}</td>
                   </tr>
                 ))}
               </tbody>

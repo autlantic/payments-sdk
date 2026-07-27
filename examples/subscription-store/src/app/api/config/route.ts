@@ -7,15 +7,32 @@ import {
 } from "@/lib/billing";
 import { NextResponse } from "next/server";
 
+const DEMO_MERCHANT = "mer_demo_store";
+const DEMO_PAYOUT = "0x1111111111111111111111111111111111111111";
+const DEMO_WEBHOOK = "whsec_demo_store";
+
 export async function GET() {
   const publicConfig = getPortalConfigPublic();
   const full = getPortalConfig();
+  const hosted = publicConfig.mode === "hosted";
   return NextResponse.json({
     ...publicConfig,
+    // Don't present sandbox demo placeholders as if the merchant configured them.
+    merchantId:
+      !hosted && full.merchantId === DEMO_MERCHANT ? "" : full.merchantId,
+    payoutAddressEvm:
+      !hosted && full.payoutAddressEvm.toLowerCase() === DEMO_PAYOUT.toLowerCase()
+        ? ""
+        : full.payoutAddressEvm,
     apiKey: full.apiKey ? maskSecret(full.apiKey) : "",
-    webhookSecret: full.webhookSecret ? maskSecret(full.webhookSecret) : "",
+    webhookSecret:
+      full.webhookSecret && full.webhookSecret !== DEMO_WEBHOOK
+        ? maskSecret(full.webhookSecret)
+        : full.webhookSecret && hosted
+          ? maskSecret(full.webhookSecret)
+          : "",
     apiKeySet: Boolean(full.apiKey),
-    webhookSecretSet: Boolean(full.webhookSecret),
+    webhookSecretSet: Boolean(full.webhookSecret && full.webhookSecret !== DEMO_WEBHOOK),
   });
 }
 
