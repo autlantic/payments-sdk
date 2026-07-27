@@ -62,6 +62,19 @@ const created = await billing.createSubscription({
 
 Use `chargeInvoice` later for renewals or after `completeSubscription` when you want mandate and charge as separate steps.
 
+## One-time payments
+
+For a single USDC transfer (no mandate), use `createPayment` and hosted `/checkout/pay/:id`. See [One-time payments](/guide/one-time-payments).
+
+```ts
+const { payment, checkoutUrl } = await billing.createPayment({
+  merchantRef: order.id,
+  customerWallet: member.walletAddress,
+  payoutAddressEvm: creator.payoutAddressEvm,
+  amountUsdc: 49, // or priceId with interval "once"
+});
+```
+
 ## Environment variables
 
 | Variable | Purpose |

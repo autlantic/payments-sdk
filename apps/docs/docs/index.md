@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Autlantic Billing
-  text: USDC on Base, recurring
-  tagline: TypeScript SDK and hosted API for USDC subscriptions. Direct payouts to your EVM wallet, vault checkout, sandbox testing.
+  text: USDC on Base
+  tagline: TypeScript SDK and hosted API for USDC subscriptions and one-time payments. Direct payouts to your EVM wallet, vault checkout, sandbox testing.
   actions:
     - theme: brand
       text: Get started
@@ -21,7 +21,7 @@ hero:
 
 features:
   - title: npm SDK
-    details: "@autlantic/payments-recurring 0.2.6: catalog products, create subscriptions, charge invoices, refunds, and verify webhooks. TypeScript, Node 20+."
+    details: "@autlantic/payments-recurring 0.2.6: catalog products, subscriptions, one-time payments, invoices, and webhooks. TypeScript, Node 20+."
   - title: Typed reference
     details: "Exported TypeScript interfaces, InvoiceFailureCode, retry policy, and lifecycle diagrams in the docs."
   - title: Hosted API

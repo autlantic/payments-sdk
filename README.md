@@ -5,8 +5,8 @@
 <h1 align="center">Autlantic Payments SDK</h1>
 
 <p align="center">
-  <strong>USDC recurring billing on Base</strong><br />
-  TypeScript SDK for subscriptions, invoices, webhooks, and sandbox testing.
+  <strong>USDC payments on Base</strong><br />
+  TypeScript SDK for subscriptions, one-time payments, invoices, webhooks, and sandbox testing.
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 Autlantic Billing is the same engine that powers [Autlantic](https://autlantic.com) creator memberships:
 
-- Recurring **USDC** charges on **Base**
+- Recurring **USDC** charges and **one-time** transfers on **Base**
 - Direct settlement to the merchant `payoutAddressEvm` (Autlantic does not custody subscription revenue)
 - Typed Node client, signed webhooks, and an in-process sandbox
 - Optional hosted HTTP API for non-Node stacks

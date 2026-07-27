@@ -1,5 +1,6 @@
 import { createMemoryBillingStore } from "./memory-store";
 import type { BillingStore, BillingStoreSnapshot } from "./types";
+import type { OneTimePayment } from "./one-time";
 import type {
   RecurringCustomer,
   RecurringInvoice,
@@ -12,6 +13,7 @@ export type BillingPersistAdapter = {
   saveCustomer(customer: RecurringCustomer): Promise<void>;
   saveMandate(mandate: RecurringMandate): Promise<void>;
   saveInvoice(invoice: RecurringInvoice): Promise<void>;
+  saveOneTimePayment(payment: OneTimePayment): Promise<void>;
   loadSnapshot(): Promise<BillingStoreSnapshot>;
 };
 
@@ -23,6 +25,7 @@ export function hydrateBillingStore(
   for (const customer of snapshot.customers) store.saveCustomer(customer);
   for (const mandate of snapshot.mandates) store.saveMandate(mandate);
   for (const invoice of snapshot.invoices) store.saveInvoice(invoice);
+  for (const payment of snapshot.oneTimePayments ?? []) store.saveOneTimePayment(payment);
 }
 
 export function createWriteThroughBillingStore(
@@ -82,6 +85,16 @@ export function createWriteThroughBillingStore(
     },
     listInvoicesByMerchant(merchantId) {
       return memory.listInvoicesByMerchant(merchantId);
+    },
+    saveOneTimePayment(payment) {
+      memory.saveOneTimePayment(payment);
+      persistQueued("oneTimePayment", () => persist.saveOneTimePayment(payment));
+    },
+    getOneTimePayment(id) {
+      return memory.getOneTimePayment(id);
+    },
+    listOneTimePaymentsByMerchant(merchantId) {
+      return memory.listOneTimePaymentsByMerchant(merchantId);
     },
     snapshot() {
       return memory.snapshot();

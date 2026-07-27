@@ -3,6 +3,7 @@ export type {
   AutlanticBillingConfig,
   BillingCatalogPrice,
   BillingCatalogProduct,
+  CreatePaymentRequest,
   CreateSubscriptionRequest,
 } from "./config";
 export {
@@ -19,6 +20,12 @@ export type {
   RecurringSubscription,
   SubscriptionStatus,
 } from "@autlantic/payments-recurring-core";
+
+export type {
+  OneTimePayment,
+  OneTimePaymentStatus,
+  CreateOneTimePaymentResult,
+} from "@autlantic/billing-engine";
 
 export {
   defaultSandboxChainId,

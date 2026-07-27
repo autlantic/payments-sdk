@@ -2,14 +2,18 @@ import {
   attemptInvoiceCharge,
   cancelSubscription,
   completeMandate,
+  confirmOneTimePayment,
   createMemoryBillingStore,
+  createOneTimePayment,
   createSubscription,
   refundInvoice,
   updateSubscription,
   voidInvoice,
   type BillingStore,
   type ChargeInvoiceResult,
+  type CreateOneTimePaymentResult,
   type CreateSubscriptionResult,
+  type OneTimePayment,
   type SandboxChargeMode,
 } from "@autlantic/billing-engine";
 import { defaultSandboxChainId, VAULT_PLACEHOLDER_BASE_SEPOLIA } from "@autlantic/chain-evm";
@@ -17,6 +21,7 @@ import type { BillingInterval, RecurringInvoice, RecurringSubscription } from "@
 import type {
   AutlanticBillingConfig,
   BillingCatalogProduct,
+  CreatePaymentRequest,
   CreateSubscriptionRequest,
 } from "./config";
 
@@ -84,6 +89,73 @@ export class AutlanticBilling {
     }
 
     return this.post("/v1/subscriptions", input);
+  }
+
+  /**
+   * Create a one-time USDC payment.
+   * Hosted mode returns `checkoutUrl` for `/checkout/pay/:id`.
+   */
+  async createPayment(
+    input: CreatePaymentRequest,
+  ): Promise<CreateOneTimePaymentResult & { checkoutUrl?: string }> {
+    if (this.localStore) {
+      if (input.amountUsdc == null) {
+        throw new Error(
+          "Sandbox mode requires amountUsdc (priceId is only resolved by the hosted API)",
+        );
+      }
+      const result = createOneTimePayment(this.localStore, {
+        merchantId: this.config.merchantId,
+        merchantRef: input.merchantRef,
+        customerWallet: input.customerWallet,
+        payoutAddressEvm: input.payoutAddressEvm,
+        amountUsdc: input.amountUsdc,
+        chainId: defaultSandboxChainId(),
+        priceId: input.priceId,
+        metadata: input.metadata,
+      });
+      return {
+        ...result,
+        checkoutUrl: `sandbox://pay/${result.payment.id}`,
+      };
+    }
+
+    return this.post("/v1/payments", input);
+  }
+
+  async getPayment(id: string): Promise<OneTimePayment> {
+    if (this.localStore) {
+      const payment = this.localStore.getOneTimePayment(id);
+      if (!payment) throw new Error("Payment not found");
+      return payment;
+    }
+    const res = await this.get<{ payment: OneTimePayment }>(`/v1/payments/${id}`);
+    return res.payment;
+  }
+
+  async confirmPayment(
+    id: string,
+    input: { txHash?: string } = {},
+  ): Promise<{ payment: OneTimePayment; alreadyPaid?: boolean }> {
+    if (this.localStore) {
+      const result = confirmOneTimePayment(this.localStore, id, input);
+      if (!result) throw new Error("Could not confirm payment");
+      return { payment: result.payment, alreadyPaid: result.alreadyPaid };
+    }
+
+    const base = this.config.apiBaseUrl?.replace(/\/$/, "");
+    if (!base) throw new Error("apiBaseUrl is required for remote mode");
+    const res = await fetch(`${base}/checkout/pay/${id}/confirm`, {
+      method: "POST",
+      headers: this.headers({ "Content-Type": "application/json" }),
+      body: JSON.stringify(input),
+    });
+    const json = (await res.json()) as ApiEnvelope<{
+      payment: OneTimePayment;
+      alreadyPaid?: boolean;
+    }>;
+    if (!res.ok) throw new Error(json.error ?? `Confirm failed (${res.status})`);
+    return json;
   }
 
   /** Active products and prices from the merchant catalog (hosted API). */

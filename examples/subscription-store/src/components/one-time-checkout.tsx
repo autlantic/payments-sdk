@@ -6,15 +6,16 @@ import { useState } from "react";
 
 type Payment = {
   id: string;
-  productName: string;
+  productName?: string;
   amountUsdc: number;
-  status: "open" | "paid";
+  status: "open" | "paid" | "canceled";
   customerWallet: string;
-  payoutAddress: string;
-  usdcAddress: string;
-  transferCalldata: string;
+  payoutAddress?: string;
+  payoutAddressEvm?: string;
+  usdcAddress?: string;
+  transferCalldata?: string;
   txHash?: string;
-  mode: "sandbox" | "live";
+  mode?: "sandbox" | "live";
 };
 
 const DEMO_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0";
@@ -39,8 +40,20 @@ export function OneTimeCheckout() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, customerWallet: wallet }),
       });
-      const data = (await res.json()) as { payment?: Payment; error?: string };
+      const data = (await res.json()) as {
+        payment?: Payment;
+        checkoutUrl?: string;
+        mode?: string;
+        error?: string;
+      };
       if (!res.ok || !data.payment) throw new Error(data.error ?? "Create failed");
+
+      // Hosted: redirect to Autlantic checkout (same pattern as subscribe).
+      if (data.checkoutUrl && data.mode === "hosted" && !data.checkoutUrl.startsWith("sandbox://")) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
       setPayment(data.payment);
       if (typeof window !== "undefined") {
         window.localStorage.setItem("acme_one_time_payment_id", data.payment.id);
@@ -72,15 +85,16 @@ export function OneTimeCheckout() {
     }
   }
 
+  const payout = payment?.payoutAddress ?? payment?.payoutAddressEvm ?? "";
+
   return (
     <>
       <section className="hero">
         <span className="badge sandbox">One-time USDC</span>
         <h1>Pay once. No mandate.</h1>
         <p>
-          Built with <code>@autlantic/chain-evm</code>: create a{" "}
-          <code>UsdcPassPaymentIntent</code>, encode a USDC transfer, then verify the tx hash.
-          Sandbox simulates settlement without mainnet funds.
+          Sandbox simulates a local USDC transfer. In hosted mode, checkout opens Autlantic{" "}
+          <code>/checkout/pay/:id</code> (same pattern as subscriptions).
         </p>
       </section>
 
@@ -113,10 +127,9 @@ export function OneTimeCheckout() {
       </div>
 
       <form className="panel" onSubmit={createIntent}>
-        <h2>Create payment intent</h2>
+        <h2>Create payment</h2>
         <p className="hint">
-          This does not charge yet. It prepares the intent + transfer calldata for the customer
-          wallet.
+          Sandbox keeps the intent local. Hosted mode redirects to Autlantic checkout.
         </p>
 
         <div className="field">
@@ -159,16 +172,22 @@ export function OneTimeCheckout() {
             {payment.amountUsdc.toFixed(2)} USDC
           </h2>
           <p className="mono">{payment.id}</p>
-          <p className="hint" style={{ marginTop: 8 }}>
-            Payout {payment.payoutAddress}
-          </p>
-          <p className="hint">USDC {payment.usdcAddress}</p>
-          <p className="hint" style={{ marginTop: 8 }}>
-            Transfer calldata
-          </p>
-          <p className="mono">{payment.transferCalldata.slice(0, 66)}…</p>
+          {payout ? (
+            <p className="hint" style={{ marginTop: 8 }}>
+              Payout {payout}
+            </p>
+          ) : null}
+          {payment.usdcAddress ? <p className="hint">USDC {payment.usdcAddress}</p> : null}
+          {payment.transferCalldata ? (
+            <>
+              <p className="hint" style={{ marginTop: 8 }}>
+                Transfer calldata
+              </p>
+              <p className="mono">{payment.transferCalldata.slice(0, 66)}…</p>
+            </>
+          ) : null}
 
-          {payment.status === "open" && payment.mode === "sandbox" ? (
+          {payment.status === "open" && (payment.mode === "sandbox" || !payment.mode) ? (
             <div style={{ marginTop: 16 }}>
               <button className="btn" type="button" disabled={busy} onClick={() => void sandboxPay()}>
                 {busy ? "Paying…" : "Simulate USDC transfer (sandbox)"}
@@ -178,7 +197,7 @@ export function OneTimeCheckout() {
 
           {payment.status === "paid" ? (
             <div className="success">
-              <strong>Paid · {payment.productName}</strong>
+              <strong>Paid · {payment.productName ?? "One-time"}</strong>
               {payment.txHash ? (
                 <div className="mono" style={{ marginTop: 8 }}>
                   tx {payment.txHash}

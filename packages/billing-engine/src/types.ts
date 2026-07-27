@@ -5,12 +5,14 @@ import type {
   RecurringMandate,
   RecurringSubscription,
 } from "@autlantic/payments-recurring-core";
+import type { OneTimePayment } from "./one-time";
 
 export type BillingStoreSnapshot = {
   subscriptions: RecurringSubscription[];
   customers: RecurringCustomer[];
   mandates: RecurringMandate[];
   invoices: RecurringInvoice[];
+  oneTimePayments?: OneTimePayment[];
 };
 
 export type BillingStore = {
@@ -30,6 +32,10 @@ export type BillingStore = {
   listOpenInvoicesDueBefore(until: Date): RecurringInvoice[];
   listInvoicesBySubscription(subscriptionId: string): RecurringInvoice[];
   listInvoicesByMerchant(merchantId: string): RecurringInvoice[];
+
+  saveOneTimePayment(payment: OneTimePayment): void;
+  getOneTimePayment(id: string): OneTimePayment | null;
+  listOneTimePaymentsByMerchant(merchantId: string): OneTimePayment[];
 
   snapshot(): BillingStoreSnapshot;
 };

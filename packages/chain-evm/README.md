@@ -5,7 +5,7 @@
 <h1 align="center">@autlantic/chain-evm</h1>
 
 <p align="center">
-  Base network helpers for Autlantic recurring USDC billing.
+  Base network helpers for Autlantic USDC billing (recurring vault + one-time UsdcPass).
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 
 ---
 
-Addresses, amount conversion, allowance/vault calldata, transfer verification, and relayer helpers used by the Autlantic Billing stack.
+Addresses, amount conversion, allowance/vault calldata, **UsdcPass** transfer verification, and relayer helpers used by the Autlantic Billing stack.
 
 ## Install
 
@@ -25,6 +25,38 @@ npm install @autlantic/chain-evm
 ```
 
 Most integrators only need [`@autlantic/payments-recurring`](https://www.npmjs.com/package/@autlantic/payments-recurring). Use this package directly when you need lower-level Base / USDC utilities.
+
+## UsdcPass (one-time transfer)
+
+For a single USDC payment (no vault mandate):
+
+```ts
+import {
+  chainConfigFor,
+  encodeTransferCalldata,
+  usdcToMicro,
+  verifyUsdcPassPaymentFromTxHash,
+  type UsdcPassPaymentIntent,
+} from "@autlantic/chain-evm";
+
+const chainId = 84532; // Base Sepolia
+const chain = chainConfigFor(chainId);
+const payoutAddress = "0x…";
+const amountUsdc = 49;
+
+const intent: UsdcPassPaymentIntent = {
+  chainId,
+  usdcAddress: chain.usdcAddress,
+  payoutAddress,
+  expectedAmountUsdc: amountUsdc,
+};
+
+const transferCalldata = encodeTransferCalldata(payoutAddress, usdcToMicro(amountUsdc));
+// Wallet sends { to: usdcAddress, data: transferCalldata }, then:
+const result = await verifyUsdcPassPaymentFromTxHash(intent, txHash);
+```
+
+Hosted Autlantic checkout (`POST /v1/payments` → `/checkout/pay/:id`) uses the same verification path. See [One-time payments](https://docs.autlantic.com/guide/one-time-payments).
 
 ## Docs
 

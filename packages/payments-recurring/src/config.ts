@@ -11,7 +11,7 @@ export type BillingCatalogPrice = {
   id: string;
   productId: string;
   amountUsdc: number;
-  interval: "month" | "year";
+  interval: "month" | "year" | "once";
   trialDays: number;
   active: boolean;
 };
@@ -38,5 +38,19 @@ export type CreateSubscriptionRequest = {
   /** Portal catalog price id. Resolves amount + interval on the API. */
   priceId?: string;
   planId?: string;
+  metadata?: Record<string, string>;
+};
+
+/**
+ * Create a one-time USDC payment.
+ * Provide either `priceId` (catalog interval "once") or `amountUsdc`.
+ */
+export type CreatePaymentRequest = {
+  merchantRef: string;
+  customerWallet: string;
+  payoutAddressEvm: string;
+  amountUsdc?: number;
+  /** Portal catalog price id with interval "once". */
+  priceId?: string;
   metadata?: Record<string, string>;
 };

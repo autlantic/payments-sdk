@@ -4,7 +4,7 @@ A minimal Next.js storefront with **both** Autlantic payment patterns:
 
 | Flow | Package | Route |
 |------|---------|-------|
-| **One-time** USDC transfer | `@autlantic/chain-evm` | [`/one-time`](./src/app/one-time) |
+| **One-time** USDC payment | `@autlantic/payments-recurring` + `@autlantic/chain-evm` | [`/one-time`](./src/app/one-time) |
 | **Recurring** subscription | `@autlantic/payments-recurring` | [`/recurring`](./src/app/recurring) |
 
 Also includes `/account` (subscriptions), `/webhooks` (signed event inbox), and `/settings` (portal + API credentials).
@@ -22,32 +22,36 @@ pnpm --filter @autlantic/example-subscription-store dev
 
 Open [http://localhost:3040](http://localhost:3040).
 
-No API key required. Recurring uses built-in demo plans.
+No API key required. Recurring uses built-in demo plans. One-time uses local simulate pay.
 
-### Try one-time
+### Try one-time (sandbox)
 
 1. Open **One-time**
 2. Select a product → **Create payment**
-3. **Simulate USDC transfer (sandbox)** → receipt + fake tx hash
+3. **Simulate USDC transfer (sandbox)** → paid state + fake tx hash
 
-### Try recurring
+### Try recurring (sandbox)
 
 1. Open **Recurring**
 2. Select a plan → **Subscribe (sandbox)**
 3. Open **Account** to see invoices / cancel
 
-## Production path (portal catalog → checkout)
+## Production path (portal catalog → hosted checkout)
 
-1. In [portal.autlantic.com](https://portal.autlantic.com), create a **Product** with at least one **Price**.
+1. In [portal.autlantic.com](https://portal.autlantic.com), create a **Product** with prices:
+   - **Monthly / Yearly** for subscriptions
+   - **One-time** for single charges
 2. Create an **API key** (Developers → API keys) and note your **Merchant ID** and **payout wallet**.
 3. Open this example → **Settings** and set:
    - **Portal URL**: `https://portal.autlantic.com` (UI links only)
    - **Billing API URL**: `https://billing.autlantic.com` (or `http://localhost:8788` locally)
    - API key, merchant ID, payout wallet, webhook secret
 4. Save. The badge switches to **Hosted API mode**.
-5. Open **Recurring**. Plans load from `GET /v1/products` (your portal catalog).
-6. Subscribe → browser redirects to hosted checkout (`/checkout/subscribe/:id`).
-7. Confirm the subscription and invoice appear under portal → Subscriptions / Invoices.
+5. **Recurring:** plans load from `GET /v1/products` → subscribe redirects to `/checkout/subscribe/:id`.
+6. **One-time:** create payment redirects to `/checkout/pay/:id` (same Autlantic hosted checkout pattern).
+7. Confirm subscriptions / payments appear under the portal where applicable.
+
+See also: [One-time payments guide](https://docs.autlantic.com/guide/one-time-payments).
 
 ### Webhooks (local)
 

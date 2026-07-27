@@ -21,15 +21,20 @@ For local demos without a remote API, use `AutlanticBilling.sandbox()` instead. 
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| `GET` | `/checkout/subscribe/:id` | Hosted HTML checkout |
+| `GET` | `/checkout/subscribe/:id` | Hosted HTML subscription checkout |
 | `GET` | `/checkout/subscribe/:id.json` | Session JSON |
 | `POST` | `/checkout/subscribe/:id/activate` | Activate (sandbox or live with `{ onChainSubscriptionId }`) |
+| `GET` | `/checkout/pay/:id` | Hosted HTML one-time checkout |
+| `GET` | `/checkout/pay/:id.json` | One-time session JSON |
+| `POST` | `/checkout/pay/:id/confirm` | Confirm (sandbox, or live with `{ txHash }`) |
 
 ## Authenticated (`X-Autlantic-Api-Key`)
 
 | Method | Path | Purpose |
 |--------|------|---------|
 | `GET` | `/v1/products` | List active catalog products and prices |
+| `POST` | `/v1/payments` | Create one-time payment (`priceId` once, or `amountUsdc`) |
+| `GET` | `/v1/payments/:id` | Fetch one-time payment |
 | `GET` | `/v1/subscriptions` | List (`?status=active`) |
 | `POST` | `/v1/subscriptions` | Create (`priceId` or `amountUsdc` + `interval`) |
 | `GET` | `/v1/subscriptions/:id` | Fetch |

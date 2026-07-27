@@ -2,6 +2,17 @@
 
 Version history for the Autlantic Payments SDK and docs. Also see GitHub [Releases](https://github.com/autlantic/payments-sdk/releases).
 
+## 0.2.7 - Hosted one-time payments
+
+Packages: `@autlantic/payments-recurring@0.2.7`, `@autlantic/billing-engine@0.2.5`, `@autlantic/payments-recurring-core@0.2.5`, `@autlantic/chain-evm@0.2.5`.
+
+- `AutlanticBilling.createPayment` / `getPayment` / `confirmPayment`
+- Hosted HTTP: `POST /v1/payments`, `GET /checkout/pay/:id`, confirm with sandbox or `txHash`
+- Catalog price interval `once` (portal One-time)
+- Webhooks: `payment.created`, `payment.paid`
+- Docs: [One-time payments](/guide/one-time-payments)
+- Example store: hosted mode redirects to `checkoutUrl`; sandbox keeps local simulate
+
 ## 0.2.6 - Catalog products + example store
 
 - `listProducts()` on `AutlanticBilling` (hosted `GET /v1/products`)

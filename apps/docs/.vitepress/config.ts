@@ -11,7 +11,7 @@ export default withMermaid(
     srcDir: "docs",
     title: "Autlantic Billing",
     description:
-      "USDC subscriptions on Base. Recurring billing SDK, hosted API, and webhooks for Autlantic Payments.",
+      "USDC payments on Base. Recurring subscriptions and one-time checkout, hosted API, and webhooks for Autlantic Payments.",
     lang: "en-US",
     cleanUrls: true,
     lastUpdated: true,
@@ -38,6 +38,7 @@ export default withMermaid(
           text: "Guide",
           items: [
             { text: "Getting started", link: "/guide/getting-started" },
+            { text: "One-time payments", link: "/guide/one-time-payments" },
             { text: "Lifecycle", link: "/guide/lifecycle" },
             { text: "Error codes", link: "/guide/errors" },
             { text: "Retries", link: "/guide/retries" },
@@ -64,7 +65,7 @@ export default withMermaid(
       ],
       socialLinks: [{ icon: "github", link: GITHUB }],
       footer: {
-        message: "Autlantic Recurring Billing SDK",
+        message: "Autlantic Payments SDK",
         copyright: "Copyright © Autlantic",
       },
     },

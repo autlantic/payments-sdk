@@ -66,12 +66,32 @@ type CreateSubscriptionRequest = {
 
 Returns subscription + first open invoice (and `checkoutUrl` when using the hosted API or sandbox).
 
+### `createPayment` input
+
+Provide either a catalog `priceId` with interval `once`, or ad-hoc `amountUsdc`.
+
+```ts
+type CreatePaymentRequest = {
+  merchantRef: string;
+  customerWallet: string;
+  payoutAddressEvm: string;
+  amountUsdc?: number;
+  priceId?: string;
+  metadata?: Record<string, string>;
+};
+```
+
+Returns payment + `checkoutUrl` (`/checkout/pay/:id` hosted, or `sandbox://pay/...`). See [One-time payments](/guide/one-time-payments).
+
 ### Methods
 
 | Method | Returns (conceptually) | Description |
 |--------|------------------------|-------------|
 | `listProducts()` | `{ products }` | Active catalog products and prices (hosted API; empty in sandbox) |
 | `createSubscription(input)` | `{ subscription, invoice, checkoutUrl? }` | Create incomplete subscription + open invoice |
+| `createPayment(input)` | `{ payment, checkoutUrl? }` | Create one-time payment |
+| `getPayment(id)` | payment | Fetch one-time payment |
+| `confirmPayment(id, { txHash? })` | `{ payment, alreadyPaid? }` | Sandbox mark paid, or confirm hosted checkout |
 | `listSubscriptions({ status? })` | `{ subscriptions }` | List merchant subscriptions |
 | `getSubscription(id)` | `{ subscription }` | Fetch subscription |
 | `updateSubscription(id, input)` | `{ subscription }` | Update amount, interval, plan, metadata |

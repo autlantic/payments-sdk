@@ -24,7 +24,9 @@ export type BillingWebhookEventType =
   | "invoice.paid"
   | "invoice.payment_failed"
   | "invoice.refunded"
-  | "invoice.voided";
+  | "invoice.voided"
+  | "payment.created"
+  | "payment.paid";
 
 export type RecurringMerchant = {
   id: string;

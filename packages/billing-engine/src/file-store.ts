@@ -21,7 +21,7 @@ function loadSnapshot(filePath: string): ReturnType<typeof parseBillingSnapshot>
   }
 }
 
-/** JSON file store so API and worker processes can share state in local multi-process setups. */
+/** JSON file store so billing-api and billing-worker share state in dev. */
 export function createFileBillingStore(filePath: string): BillingStore {
   const initial = loadSnapshot(filePath);
   const inner = createMemoryBillingStore(initial ?? undefined);
@@ -71,6 +71,16 @@ export function createFileBillingStore(filePath: string): BillingStore {
     },
     listInvoicesByMerchant(merchantId) {
       return inner.listInvoicesByMerchant(merchantId);
+    },
+    saveOneTimePayment(payment) {
+      inner.saveOneTimePayment(payment);
+      persist();
+    },
+    getOneTimePayment(id) {
+      return inner.getOneTimePayment(id);
+    },
+    listOneTimePaymentsByMerchant(merchantId) {
+      return inner.listOneTimePaymentsByMerchant(merchantId);
     },
     snapshot() {
       return inner.snapshot();
