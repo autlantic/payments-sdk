@@ -5,7 +5,7 @@ Autlantic Billing verifies **USDC** subscriptions on **Base**. Funds settle to *
 ## Install
 
 ```bash
-npm install @autlantic/payments-recurring@^0.2.5
+npm install @autlantic/payments-recurring@^0.2.6
 ```
 
 Published packages (see [Packages](/guide/packages) for versions):
@@ -16,6 +16,8 @@ Published packages (see [Packages](/guide/packages) for versions):
 - [@autlantic/billing-engine](https://www.npmjs.com/package/@autlantic/billing-engine) - subscriptions and invoices
 
 Source: [github.com/autlantic/payments-sdk](https://github.com/autlantic/payments-sdk). Requires **Node.js 20+**.
+
+Runnable example (one-time + recurring): [`examples/subscription-store`](https://github.com/autlantic/payments-sdk/tree/main/examples/subscription-store).
 
 ## Quickstart (sandbox)
 
@@ -38,6 +40,24 @@ const { charge } = await billing.activateSubscription(subscription.id);
 if (charge?.invoice.status === "paid") {
   await markMembershipActive(order.id);
 }
+```
+
+### Hosted catalog (`priceId`)
+
+With `AUTLANTIC_BILLING_API_URL` + API key, load products from the merchant portal catalog and subscribe by price:
+
+```ts
+const billing = AutlanticBilling.fromEnv();
+const { products } = await billing.listProducts();
+const priceId = products[0]?.prices[0]?.id;
+
+const created = await billing.createSubscription({
+  merchantRef: order.id,
+  customerWallet: member.walletAddress,
+  payoutAddressEvm: creator.payoutAddressEvm,
+  priceId,
+});
+// created.checkoutUrl → hosted checkout
 ```
 
 Use `chargeInvoice` later for renewals or after `completeSubscription` when you want mandate and charge as separate steps.

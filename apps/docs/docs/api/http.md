@@ -29,8 +29,9 @@ For local demos without a remote API, use `AutlanticBilling.sandbox()` instead. 
 
 | Method | Path | Purpose |
 |--------|------|---------|
+| `GET` | `/v1/products` | List active catalog products and prices |
 | `GET` | `/v1/subscriptions` | List (`?status=active`) |
-| `POST` | `/v1/subscriptions` | Create |
+| `POST` | `/v1/subscriptions` | Create (`priceId` or `amountUsdc` + `interval`) |
 | `GET` | `/v1/subscriptions/:id` | Fetch |
 | `PATCH` | `/v1/subscriptions/:id` | Update |
 | `POST` | `/v1/subscriptions/:id/complete` | Complete mandate |

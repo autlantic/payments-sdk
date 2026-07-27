@@ -1,6 +1,6 @@
 # Node.js SDK
 
-`@autlantic/payments-recurring` **0.2.5** (related packages: `payments-recurring-core`, `chain-evm`, and `billing-engine` at **0.2.4**).
+`@autlantic/payments-recurring` **0.2.6** (related packages: `payments-recurring-core`, `chain-evm`, and `billing-engine` at **0.2.4**).
 
 Typed domain models: [TypeScript types](/api/types).  
 HTTP twin: [Hosted HTTP API](/api/http).
@@ -8,7 +8,7 @@ HTTP twin: [Hosted HTTP API](/api/http).
 ## Install
 
 ```bash
-npm install @autlantic/payments-recurring@^0.2.5
+npm install @autlantic/payments-recurring@^0.2.6
 ```
 
 ```ts
@@ -20,7 +20,7 @@ import {
 } from "@autlantic/payments-recurring";
 ```
 
-`AUTLANTIC_BILLING_SDK_VERSION` is the string `"0.2.5"`.
+`AUTLANTIC_BILLING_SDK_VERSION` is the string `"0.2.6"`.
 
 ## `AutlanticBilling`
 
@@ -49,24 +49,28 @@ Env vars: `AUTLANTIC_BILLING_API_URL`, `AUTLANTIC_BILLING_API_KEY`, `AUTLANTIC_B
 
 ### `createSubscription` input
 
+Provide either a catalog `priceId` (hosted API) or ad-hoc `amountUsdc` + `interval` (sandbox / custom amounts).
+
 ```ts
 type CreateSubscriptionRequest = {
   merchantRef: string;
   customerWallet: string;
   payoutAddressEvm: string;
-  amountUsdc: number;
-  interval: "month" | "year";
+  amountUsdc?: number;
+  interval?: "month" | "year";
+  priceId?: string;
   planId?: string;
   metadata?: Record<string, string>;
 };
 ```
 
-Returns subscription + first open invoice (and `checkoutUrl` in sandbox).
+Returns subscription + first open invoice (and `checkoutUrl` when using the hosted API or sandbox).
 
 ### Methods
 
 | Method | Returns (conceptually) | Description |
 |--------|------------------------|-------------|
+| `listProducts()` | `{ products }` | Active catalog products and prices (hosted API; empty in sandbox) |
 | `createSubscription(input)` | `{ subscription, invoice, checkoutUrl? }` | Create incomplete subscription + open invoice |
 | `listSubscriptions({ status? })` | `{ subscriptions }` | List merchant subscriptions |
 | `getSubscription(id)` | `{ subscription }` | Fetch subscription |

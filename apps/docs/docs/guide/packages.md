@@ -2,7 +2,7 @@
 
 | Package | Latest | Role |
 |---------|--------|------|
-| [`@autlantic/payments-recurring`](https://www.npmjs.com/package/@autlantic/payments-recurring) | 0.2.5 | Merchant SDK (create subscriptions, charge, webhooks) |
+| [`@autlantic/payments-recurring`](https://www.npmjs.com/package/@autlantic/payments-recurring) | 0.2.6 | Merchant SDK (create subscriptions, charge, webhooks) |
 | [`@autlantic/payments-recurring-core`](https://www.npmjs.com/package/@autlantic/payments-recurring-core) | 0.2.4 | Types, intervals, retry policy |
 | [`@autlantic/chain-evm`](https://www.npmjs.com/package/@autlantic/chain-evm) | 0.2.4 | Base + USDC + vault + preflight |
 | [`@autlantic/billing-engine`](https://www.npmjs.com/package/@autlantic/billing-engine) | 0.2.4 | Subscriptions, invoices, refunds, webhook dispatch |

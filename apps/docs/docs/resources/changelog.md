@@ -2,6 +2,13 @@
 
 Version history for the Autlantic Payments SDK and docs. Also see GitHub [Releases](https://github.com/autlantic/payments-sdk/releases).
 
+## 0.2.6 - Catalog products + example store
+
+- `listProducts()` on `AutlanticBilling` (hosted `GET /v1/products`)
+- `createSubscription` accepts `priceId` (resolves amount + interval from the merchant catalog) or ad-hoc `amountUsdc` + `interval`
+- Example Next.js storefront: [`examples/subscription-store`](https://github.com/autlantic/payments-sdk/tree/main/examples/subscription-store) (`pnpm example:store`)
+- Docs: hosted HTTP catalog route and Node.js SDK updates
+
 ## Docs - reference maturity (site)
 
 Public docs now include:
