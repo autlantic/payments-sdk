@@ -50,6 +50,7 @@ On the hosted page:
 
 - Sandbox: **Simulate USDC transfer**
 - Live: **Connect wallet** (EIP-6963 / WalletConnect) → send USDC from the browser wallet → checkout confirms on-chain
+- Optional: apply or remove a portal coupon before paying (`POST` / `DELETE` `/checkout/pay/:id/coupon`)
 
 Confirmation uses `verifyUsdcPassPaymentFromTxHash` from `@autlantic/chain-evm`.
 
@@ -63,6 +64,8 @@ Confirmation uses `verifyUsdcPassPaymentFromTxHash` from `@autlantic/chain-evm`.
 | `GET` | `/checkout/pay/:id/status` | Enriched session + paid state |
 | `GET` | `/checkout/pay/:id.json` | Same as `/status` |
 | `POST` | `/checkout/pay/:id/confirm` | Sandbox mark paid, or verify `{ txHash }` |
+| `POST` | `/checkout/pay/:id/coupon` | Apply merchant coupon (`{ code }`) |
+| `DELETE` | `/checkout/pay/:id/coupon` | Remove applied coupon; restore list price |
 
 ## Webhooks
 

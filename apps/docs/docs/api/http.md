@@ -21,17 +21,26 @@ For local demos without a remote API, use `AutlanticBilling.sandbox()` instead. 
 
 Hosted checkout is a React wallet flow with EIP-6963 discovery, WalletConnect, and Connect → Approve → Pay for subscriptions (Connect → Pay for one-time). Redirect buyers to `checkoutUrl` from `createSubscription` / `createPayment`.
 
+Subscribe `/status` (and `.json`) is a **fast** session payload: amounts, PDFs, coupon fields, and flags such as `onchainPending`. It does **not** call Base RPC. The hosted SPA then loads `GET .../onchain` for allowance and vault resume when the session is still incomplete on live.
+
 | Method | Path | Purpose |
 |--------|------|---------|
 | `GET` | `/checkout/subscribe/:id` | Hosted subscription checkout (React SPA) |
-| `GET` | `/checkout/subscribe/:id/status` | Enriched session (allowance, vault binding, PDFs) |
+| `GET` | `/checkout/subscribe/:id/status` | Fast session status (no Base RPC) |
 | `GET` | `/checkout/subscribe/:id.json` | Same as `/status` |
+| `GET` | `/checkout/subscribe/:id/onchain` | Allowance + vault resume (Base RPC; live incomplete only) |
 | `POST` | `/checkout/subscribe/:id/wallet` | Sync connected `customerWallet` (incomplete only) |
 | `POST` | `/checkout/subscribe/:id/activate` | Activate (sandbox or live with `{ onChainSubscriptionId }`) |
+| `POST` | `/checkout/subscribe/:id/coupon` | Apply merchant coupon (`{ code }`) |
+| `DELETE` | `/checkout/subscribe/:id/coupon` | Remove applied coupon; restore list price |
 | `GET` | `/checkout/pay/:id` | Hosted one-time checkout (React SPA) |
 | `GET` | `/checkout/pay/:id/status` | Enriched one-time session |
 | `GET` | `/checkout/pay/:id.json` | Same as `/status` |
 | `POST` | `/checkout/pay/:id/confirm` | Confirm (sandbox, or live with `{ txHash }`) |
+| `POST` | `/checkout/pay/:id/coupon` | Apply merchant coupon (`{ code }`) |
+| `DELETE` | `/checkout/pay/:id/coupon` | Remove applied coupon; restore list price |
+
+Coupons are configured in the merchant portal. Apply/remove only works while the checkout session is still open (subscription incomplete, or payment open).
 
 ## Authenticated (`X-Autlantic-Api-Key`)
 

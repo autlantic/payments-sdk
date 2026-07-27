@@ -2,9 +2,14 @@
 
 Version history for the Autlantic Payments SDK and docs. Also see GitHub [Releases](https://github.com/autlantic/payments-sdk/releases).
 
-## Unreleased
+## Docs - hosted checkout API (site)
 
-- Hosted checkout docs: Connect wallet / Approve / Pay via EIP-6963 and WalletConnect. Documented status and wallet sync endpoints under [HTTP API](/api/http).
+Package versions unchanged (`payments-recurring@0.2.7`). Documents Autlantic-operated hosted checkout behavior:
+
+- Connect wallet / Approve / Pay via EIP-6963 and WalletConnect; status and wallet sync under [HTTP API](/api/http)
+- Subscribe `/status` is fast (no Base RPC); deferred `GET /checkout/subscribe/:id/onchain` for allowance + vault resume
+- Coupon apply/remove: `POST` / `DELETE` `/checkout/subscribe/:id/coupon` and `/checkout/pay/:id/coupon`
+- GitHub Release [v0.2.7](https://github.com/autlantic/payments-sdk/releases/tag/v0.2.7)
 
 ## 0.2.7 - Hosted one-time payments
 
@@ -17,6 +22,7 @@ Packages: `@autlantic/payments-recurring@0.2.7`, `@autlantic/billing-engine@0.2.
 - Hosted checkout success: download receipt and invoice PDFs (same signed portal PDF flow as subscriptions)
 - Docs: [One-time payments](/guide/one-time-payments)
 - Example store: hosted mode loads portal catalog and redirects to `checkoutUrl`
+- GitHub Release [v0.2.7](https://github.com/autlantic/payments-sdk/releases/tag/v0.2.7)
 
 ## 0.2.6 - Catalog products + example store
 
