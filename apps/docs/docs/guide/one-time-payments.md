@@ -80,7 +80,9 @@ If you settle outside hosted checkout, use `@autlantic/chain-evm`:
 
 ## Receipts / PDF
 
-Hosted checkout shows a success panel after confirm. PDF receipt and invoice download URLs reuse the subscription invoice document path when a one-time invoice document is available. Until that document model is wired, checkout still completes successfully without PDF links.
+After a one-time payment is confirmed, hosted checkout shows **Download receipt PDF** and **Download invoice PDF** (signed portal links, same pattern as subscription checkout).
+
+Receipts use payment framing (one-time charge, PAID stamp). Invoice PDFs use the payment id as the document id.
 
 ## Example
 

@@ -5,7 +5,7 @@
 <h1 align="center">@autlantic/payments-recurring</h1>
 
 <p align="center">
-  <strong>Autlantic Billing</strong>. TypeScript SDK for USDC recurring subscriptions on Base.
+  <strong>Autlantic Billing</strong>. TypeScript SDK for USDC subscriptions and one-time payments on Base.
 </p>
 
 <p align="center">
@@ -19,9 +19,10 @@
 
 The same billing engine that powers [Autlantic](https://autlantic.com) creator memberships:
 
-- Recurring **USDC** on **Base**
+- Recurring **USDC** subscriptions and **one-time** payments on **Base**
 - Direct settlement to your `payoutAddressEvm` (Autlantic does not custody subscription revenue)
 - Sandbox mode, signed webhooks, and a hosted HTTP API option
+- Hosted checkout: `/checkout/subscribe/:id` and `/checkout/pay/:id`
 
 ## Install
 
@@ -55,6 +56,21 @@ if (charge?.invoice.status === "paid") {
 ```
 
 > Do not call `chargeInvoice` on that same first invoice after `activateSubscription`. Use `chargeInvoice` for later renewals, or after `completeSubscription` when you want mandate and charge as separate steps.
+
+## One-time payment (sandbox)
+
+```ts
+const { payment, checkoutUrl } = await billing.createPayment({
+  merchantRef: "order_once_123",
+  customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+  payoutAddressEvm: "0xYourMerchantWallet",
+  amountUsdc: 49,
+});
+
+await billing.confirmPayment(payment.id);
+```
+
+Hosted: pass a catalog `priceId` with interval `once`, then redirect the buyer to `checkoutUrl` (`/checkout/pay/:id`). See [One-time payments](https://docs.autlantic.com/guide/one-time-payments).
 
 ## Hosted API
 
@@ -102,6 +118,7 @@ Header: `x-autlantic-signature`. Always verify against the **raw** request body.
 |----------|------|
 | Guides | [docs.autlantic.com](https://docs.autlantic.com) |
 | Getting started | [Getting started](https://docs.autlantic.com/guide/getting-started) |
+| One-time payments | [One-time payments](https://docs.autlantic.com/guide/one-time-payments) |
 | Node.js API | [API reference](https://docs.autlantic.com/api/nodejs) |
 | Security | [SECURITY.md](https://github.com/autlantic/payments-sdk/blob/main/SECURITY.md) |
 | Source | [github.com/autlantic/payments-sdk](https://github.com/autlantic/payments-sdk) |

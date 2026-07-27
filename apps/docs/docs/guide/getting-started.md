@@ -5,7 +5,7 @@ Autlantic Billing verifies **USDC** subscriptions on **Base**. Funds settle to *
 ## Install
 
 ```bash
-npm install @autlantic/payments-recurring@^0.2.6
+npm install @autlantic/payments-recurring@^0.2.7
 ```
 
 Published packages (see [Packages](/guide/packages) for versions):

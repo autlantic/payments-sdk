@@ -1,9 +1,10 @@
-# API reference - @autlantic/payments-recurring 0.2.6
+# API reference - @autlantic/payments-recurring 0.2.7
 
 Canonical docs: [docs.autlantic.com/api/nodejs](https://docs.autlantic.com/api/nodejs)
 
 Also see:
 
+- [One-time payments](https://docs.autlantic.com/guide/one-time-payments)
 - [TypeScript types](https://docs.autlantic.com/api/types)
 - [Error codes](https://docs.autlantic.com/guide/errors)
 - [Retries](https://docs.autlantic.com/guide/retries)
@@ -35,6 +36,9 @@ Env vars: `AUTLANTIC_BILLING_API_URL`, `AUTLANTIC_BILLING_API_KEY`, `AUTLANTIC_B
 |--------|-------------|
 | `listProducts()` | List active catalog products and prices (hosted API) |
 | `createSubscription(input)` | Create incomplete subscription + open invoice (`priceId` or `amountUsdc` + `interval`) |
+| `createPayment(input)` | Create one-time payment (`priceId` once, or `amountUsdc`) |
+| `getPayment(id)` | Fetch one-time payment |
+| `confirmPayment(id, { txHash? })` | Sandbox mark paid, or confirm hosted payment |
 | `listSubscriptions({ status? })` | List merchant subscriptions |
 | `getSubscription(id)` | Fetch subscription |
 | `updateSubscription(id, input)` | Update amount, interval, plan, metadata |
@@ -56,7 +60,7 @@ import { signBillingWebhook, verifyBillingWebhook, parseBillingWebhookEvent } fr
 
 Header: `x-autlantic-signature`
 
-Events: `subscription.*`, `invoice.created`, `invoice.paid`, `invoice.payment_failed`, `invoice.refunded`, `invoice.voided`
+Events: `subscription.*`, `invoice.*`, `payment.created`, `payment.paid`
 
 ### Idempotency
 

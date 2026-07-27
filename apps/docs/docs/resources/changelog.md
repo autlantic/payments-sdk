@@ -10,8 +10,9 @@ Packages: `@autlantic/payments-recurring@0.2.7`, `@autlantic/billing-engine@0.2.
 - Hosted HTTP: `POST /v1/payments`, `GET /checkout/pay/:id`, confirm with sandbox or `txHash`
 - Catalog price interval `once` (portal One-time)
 - Webhooks: `payment.created`, `payment.paid`
+- Hosted checkout success: download receipt and invoice PDFs (same signed portal PDF flow as subscriptions)
 - Docs: [One-time payments](/guide/one-time-payments)
-- Example store: hosted mode redirects to `checkoutUrl`; sandbox keeps local simulate
+- Example store: hosted mode loads portal catalog and redirects to `checkoutUrl`
 
 ## 0.2.6 - Catalog products + example store
 

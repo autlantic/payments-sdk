@@ -21,7 +21,7 @@ hero:
 
 features:
   - title: npm SDK
-    details: "@autlantic/payments-recurring 0.2.6: catalog products, subscriptions, one-time payments, invoices, and webhooks. TypeScript, Node 20+."
+    details: "@autlantic/payments-recurring 0.2.7: catalog products, subscriptions, one-time payments, invoices, and webhooks. TypeScript, Node 20+."
   - title: Typed reference
     details: "Exported TypeScript interfaces, InvoiceFailureCode, retry policy, and lifecycle diagrams in the docs."
   - title: Hosted API
@@ -38,7 +38,7 @@ features:
 | **Hosted HTTP API** | Any stack (curl, mobile, PHP), API key only |
 
 ```bash
-npm install @autlantic/payments-recurring@^0.2.6
+npm install @autlantic/payments-recurring@^0.2.7
 ```
 
 ```ts

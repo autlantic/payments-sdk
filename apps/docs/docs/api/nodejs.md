@@ -1,6 +1,6 @@
 # Node.js SDK
 
-`@autlantic/payments-recurring` **0.2.6** (related packages: `payments-recurring-core`, `chain-evm`, and `billing-engine` at **0.2.4**).
+`@autlantic/payments-recurring` **0.2.7** (related packages: `payments-recurring-core`, `chain-evm`, and `billing-engine` at **0.2.5**).
 
 Typed domain models: [TypeScript types](/api/types).  
 HTTP twin: [Hosted HTTP API](/api/http).
@@ -8,7 +8,7 @@ HTTP twin: [Hosted HTTP API](/api/http).
 ## Install
 
 ```bash
-npm install @autlantic/payments-recurring@^0.2.6
+npm install @autlantic/payments-recurring@^0.2.7
 ```
 
 ```ts
@@ -16,11 +16,13 @@ import {
   AutlanticBilling,
   AUTLANTIC_BILLING_SDK_VERSION,
   type CreateSubscriptionRequest,
+  type CreatePaymentRequest,
   type RecurringSubscription,
+  type OneTimePayment,
 } from "@autlantic/payments-recurring";
 ```
 
-`AUTLANTIC_BILLING_SDK_VERSION` is the string `"0.2.6"`.
+`AUTLANTIC_BILLING_SDK_VERSION` is the string `"0.2.7"`.
 
 ## `AutlanticBilling`
 

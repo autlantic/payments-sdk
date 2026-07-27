@@ -1,7 +1,7 @@
 {
   "name": "autlantic-payments-sdk",
   "private": true,
-  "description": "Autlantic Billing SDK: USDC recurring subscriptions on Base",
+  "description": "Autlantic Billing SDK: USDC subscriptions and one-time payments on Base",
   "scripts": {
     "build": "pnpm exec turbo run build --filter=@autlantic/payments-recurring-core --filter=@autlantic/chain-evm --filter=@autlantic/billing-engine --filter=@autlantic/payments-recurring",
     "test": "pnpm exec turbo run test --filter=@autlantic/payments-recurring-core --filter=@autlantic/chain-evm --filter=@autlantic/billing-engine --filter=@autlantic/payments-recurring",

@@ -127,12 +127,44 @@ type CreateSubscriptionRequest = {
   merchantRef: string;
   customerWallet: string;
   payoutAddressEvm: string;
-  amountUsdc: number;
-  interval: "month" | "year";
+  amountUsdc?: number;
+  interval?: "month" | "year";
+  priceId?: string;
   planId?: string;
   metadata?: Record<string, string>;
 };
+
+type CreatePaymentRequest = {
+  merchantRef: string;
+  customerWallet: string;
+  payoutAddressEvm: string;
+  amountUsdc?: number;
+  priceId?: string; // catalog interval "once"
+  metadata?: Record<string, string>;
+};
+
+type OneTimePaymentStatus = "open" | "paid" | "canceled";
+
+type OneTimePayment = {
+  id: string;
+  merchantId: string;
+  merchantRef: string;
+  customerWallet: string;
+  payoutAddressEvm: string;
+  amountUsdc: number;
+  status: OneTimePaymentStatus;
+  priceId?: string;
+  productName?: string;
+  chainId: BillingChainId;
+  metadata?: Record<string, string>;
+  createdAt: Date;
+  paidAt?: Date;
+  txHash?: string;
+  canceledAt?: Date;
+};
 ```
+
+Catalog prices from `listProducts()` use `interval: "month" | "year" | "once"`.
 
 ## Webhook payload shape
 
@@ -147,7 +179,9 @@ type BillingWebhookEventType =
   | "invoice.paid"
   | "invoice.payment_failed"
   | "invoice.refunded"
-  | "invoice.voided";
+  | "invoice.voided"
+  | "payment.created"
+  | "payment.paid";
 
 type BillingWebhookEvent = {
   type: BillingWebhookEventType;

@@ -48,8 +48,10 @@ type BillingWebhookEvent = {
 | `invoice.payment_failed` | Charge failed; see `data.failureCode` / [errors](/guide/errors) |
 | `invoice.refunded` | Refund recorded |
 | `invoice.voided` | Open invoice voided |
+| `payment.created` | One-time payment created (`open`) |
+| `payment.paid` | One-time payment confirmed |
 
-How these line up on a real checkout: [Lifecycle](/guide/lifecycle).
+How these line up on a real checkout: [Lifecycle](/guide/lifecycle). Also see [One-time payments](/guide/one-time-payments).
 
 ## Signing (outbound tests)
 
