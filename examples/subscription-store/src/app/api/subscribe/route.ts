@@ -2,6 +2,11 @@ import { getBilling, getPayoutAddress, isHostedMode } from "@/lib/billing";
 import { getDemoPlan, type StorePlan } from "@/lib/plans";
 import { NextResponse } from "next/server";
 
+/** Sandbox simulate wallet. Hosted checkout replaces this when the buyer connects. */
+const DEMO_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0";
+/** Placeholder until Autlantic hosted checkout wallet connect. */
+const PENDING_CHECKOUT_WALLET = "0x0000000000000000000000000000000000000001";
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as {
@@ -11,8 +16,10 @@ export async function POST(req: Request) {
       activate?: boolean;
     };
 
-    const wallet = body.customerWallet?.trim();
-    if (!wallet || !/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+    const hosted = isHostedMode();
+    const wallet =
+      body.customerWallet?.trim() || (hosted ? PENDING_CHECKOUT_WALLET : DEMO_WALLET);
+    if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
       return NextResponse.json(
         { error: "customerWallet must be a valid 0x… address (40 hex chars)" },
         { status: 400 },
@@ -20,7 +27,6 @@ export async function POST(req: Request) {
     }
 
     const billing = getBilling();
-    const hosted = isHostedMode();
     const priceId = body.priceId?.trim() || undefined;
     let plan: StorePlan | undefined;
 

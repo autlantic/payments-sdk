@@ -27,13 +27,13 @@ No API key required. Recurring uses built-in demo plans. One-time uses local sim
 ### Try one-time (sandbox)
 
 1. Open **One-time**
-2. Select a product → **Create payment**
+2. Click **Pay (sandbox)** on a product card
 3. **Simulate USDC transfer (sandbox)** → paid state + fake tx hash
 
 ### Try recurring (sandbox)
 
 1. Open **Recurring**
-2. Select a plan → **Subscribe (sandbox)**
+2. Click **Subscribe (sandbox)** on a plan card
 3. Open **Account** to see invoices / cancel
 
 ## Production path (portal catalog → hosted checkout)

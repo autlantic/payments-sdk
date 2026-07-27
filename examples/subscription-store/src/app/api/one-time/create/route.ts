@@ -6,6 +6,11 @@ import {
 import { getOneTimeProduct } from "@/lib/one-time-products";
 import { NextResponse } from "next/server";
 
+/** Sandbox simulate wallet. Hosted checkout replaces this when the buyer connects. */
+const DEMO_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0";
+/** Placeholder until Autlantic hosted checkout wallet connect. */
+const PENDING_CHECKOUT_WALLET = "0x0000000000000000000000000000000000000001";
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as {
@@ -15,11 +20,9 @@ export async function POST(req: Request) {
       amountUsdc?: number;
     };
 
-    if (!body.customerWallet) {
-      return NextResponse.json({ error: "customerWallet is required" }, { status: 400 });
-    }
-
     const hosted = isHostedMode();
+    const customerWallet =
+      body.customerWallet?.trim() || (hosted ? PENDING_CHECKOUT_WALLET : DEMO_WALLET);
 
     // Hosted: create via Autlantic API and redirect to checkoutUrl (mirrors subscribe).
     if (hosted) {
@@ -65,7 +68,7 @@ export async function POST(req: Request) {
         priceId
           ? {
               merchantRef: `store_pay_${merchantRefProduct}_${Date.now()}`,
-              customerWallet: body.customerWallet,
+              customerWallet,
               payoutAddressEvm: getPayoutAddress(),
               priceId,
               metadata: {
@@ -75,7 +78,7 @@ export async function POST(req: Request) {
             }
           : {
               merchantRef: `store_pay_${merchantRefProduct}_${Date.now()}`,
-              customerWallet: body.customerWallet,
+              customerWallet,
               payoutAddressEvm: getPayoutAddress(),
               amountUsdc: amountUsdc!,
               metadata: {
@@ -94,15 +97,12 @@ export async function POST(req: Request) {
 
     // Sandbox / local: keep in-memory simulate flow.
     if (!body.productId) {
-      return NextResponse.json(
-        { error: "productId and customerWallet are required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "productId is required" }, { status: 400 });
     }
 
     const payment: LocalOneTimePayment = createOneTimePayment({
       productId: body.productId,
-      customerWallet: body.customerWallet,
+      customerWallet,
       mode: "sandbox",
     });
 

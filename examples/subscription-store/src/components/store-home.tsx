@@ -14,15 +14,12 @@ type SubscribeResult = {
   error?: string;
 };
 
-const DEMO_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0";
-
 export function StoreHome() {
   const [mode, setMode] = useState<"sandbox" | "hosted">("sandbox");
   const [plans, setPlans] = useState<StorePlan[]>([]);
   const [catalogHint, setCatalogHint] = useState<string | null>(null);
   const [planId, setPlanId] = useState("");
-  const [wallet, setWallet] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SubscribeResult | null>(null);
 
@@ -47,33 +44,24 @@ export function StoreHome() {
       setCatalogHint(catalog.hint ?? catalog.error ?? null);
       const preferred = nextPlans.find((p) => p.highlighted)?.id ?? nextPlans[0]?.id ?? "";
       setPlanId((prev) => (nextPlans.some((p) => p.id === prev) ? prev : preferred));
-      setWallet((prev) => {
-        if (prev) return prev;
-        if (typeof window !== "undefined") {
-          const saved = window.localStorage.getItem("acme_customer_wallet");
-          if (saved) return saved;
-        }
-        return nextMode === "sandbox" ? DEMO_WALLET : "";
-      });
     } catch {
       setCatalogHint("Could not load catalog");
     }
   }
 
-  async function subscribe(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
+  async function checkout(nextPlanId: string) {
+    setPlanId(nextPlanId);
+    setBusyId(nextPlanId);
     setError(null);
     setResult(null);
     try {
-      const selected = plans.find((p) => p.id === planId);
+      const selected = plans.find((p) => p.id === nextPlanId);
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          planId,
+          planId: nextPlanId,
           priceId: selected?.priceId,
-          customerWallet: wallet,
           activate: mode === "sandbox",
         }),
       });
@@ -83,7 +71,6 @@ export function StoreHome() {
 
       if (typeof window !== "undefined" && data.subscription?.id) {
         window.localStorage.setItem("acme_subscription_id", data.subscription.id);
-        window.localStorage.setItem("acme_customer_wallet", wallet);
       }
 
       if (mode === "hosted" && data.checkoutUrl && !data.checkoutUrl.startsWith("sandbox://")) {
@@ -92,9 +79,11 @@ export function StoreHome() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Subscribe failed");
     } finally {
-      setBusy(false);
+      setBusyId(null);
     }
   }
+
+  const busy = Boolean(busyId);
 
   return (
     <>
@@ -106,18 +95,15 @@ export function StoreHome() {
         <p>
           {mode === "sandbox" ? (
             <>
-              Demo plans below run in-process. Connect an API key under{" "}
-              <Link href="/settings">Settings</Link> to load monthly and yearly prices from your{" "}
-              <a href="https://portal.autlantic.com" target="_blank" rel="noreferrer">
-                billing portal
-              </a>
-              . Prefer a single purchase? See the <Link href="/one-time">one-time example</Link>.
+              Pick a plan to subscribe. Sandbox activates instantly. Connect an API key under{" "}
+              <Link href="/settings">Settings</Link> for portal prices and Autlantic wallet
+              checkout. Prefer a single purchase? See the <Link href="/one-time">one-time example</Link>
+              .
             </>
           ) : (
             <>
-              Plans below come from your portal catalog. Subscribe creates a subscription and opens
-              Autlantic checkout. Prefer a single purchase? See the{" "}
-              <Link href="/one-time">one-time example</Link>.
+              Pick a plan to open Autlantic hosted checkout. Buyers connect their wallet there.
+              Prefer a single purchase? See the <Link href="/one-time">one-time example</Link>.
             </>
           )}
         </p>
@@ -144,75 +130,54 @@ export function StoreHome() {
       ) : null}
 
       <div className="plans">
-        {plans.map((plan) => (
-          <article key={plan.id} className={`plan ${plan.highlighted ? "highlighted" : ""}`}>
-            <h2>{plan.name}</h2>
-            {plan.description ? <p className="interval">{plan.description}</p> : null}
-            <p className="price">
-              ${formatUsdc(plan.amountUsdc)}
-              <span className="interval"> USDC / {plan.interval}</span>
-            </p>
-            {plan.features.length > 0 ? (
-              <ul>
-                {plan.features.map((f) => (
-                  <li key={f}>{f}</li>
-                ))}
-              </ul>
-            ) : null}
-            <button
-              type="button"
-              className={planId === plan.id ? "btn" : "btn secondary"}
-              onClick={() => setPlanId(plan.id)}
+        {plans.map((plan) => {
+          const selected = planId === plan.id;
+          const loading = busyId === plan.id;
+          return (
+            <article
+              key={plan.id}
+              className={`plan ${plan.highlighted || selected ? "highlighted" : ""}`}
             >
-              {planId === plan.id ? "Selected" : "Select"}
-            </button>
-          </article>
-        ))}
+              <h2>{plan.name}</h2>
+              {plan.description ? <p className="interval">{plan.description}</p> : null}
+              <p className="price">
+                ${formatUsdc(plan.amountUsdc)}
+                <span className="interval"> USDC / {plan.interval}</span>
+              </p>
+              {plan.features.length > 0 ? (
+                <ul>
+                  {plan.features.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <button
+                type="button"
+                className="btn"
+                disabled={busy || plans.length === 0}
+                onClick={() => void checkout(plan.id)}
+              >
+                {loading
+                  ? "Opening…"
+                  : mode === "sandbox"
+                    ? "Subscribe (sandbox)"
+                    : "Continue to checkout"}
+              </button>
+            </article>
+          );
+        })}
       </div>
 
-      <form className="panel" onSubmit={subscribe}>
-        <h2>Subscribe with wallet</h2>
-        <p className="hint">
-          {mode === "sandbox"
-            ? "Sandbox activates the mandate and pays the first invoice instantly."
-            : "Creates a subscription from your portal price and redirects to Autlantic checkout."}
-        </p>
-
-        <div className="field">
-          <label htmlFor="plan">Plan</label>
-          <select
-            id="plan"
-            value={planId}
-            onChange={(e) => setPlanId(e.target.value)}
-            disabled={plans.length === 0}
-          >
-            {plans.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} · ${formatUsdc(p.amountUsdc)} / {p.interval}
-              </option>
-            ))}
-          </select>
+      {error ? (
+        <div className="panel">
+          <p className="error" style={{ margin: 0 }}>
+            {error}
+          </p>
         </div>
+      ) : null}
 
-        <div className="field">
-          <label htmlFor="wallet">Customer wallet (Base)</label>
-          <input
-            id="wallet"
-            value={wallet}
-            onChange={(e) => setWallet(e.target.value)}
-            placeholder="0x…"
-            required
-            spellCheck={false}
-          />
-        </div>
-
-        <button className="btn" type="submit" disabled={busy || plans.length === 0}>
-          {busy ? "Creating…" : mode === "sandbox" ? "Subscribe (sandbox)" : "Continue to checkout"}
-        </button>
-
-        {error ? <p className="error">{error}</p> : null}
-
-        {result ? (
+      {result ? (
+        <div className="panel">
           <div className="success">
             <strong>
               {result.plan.name} · {result.subscription.status}
@@ -236,8 +201,8 @@ export function StoreHome() {
               </Link>
             </div>
           </div>
-        ) : null}
-      </form>
+        </div>
+      ) : null}
     </>
   );
 }

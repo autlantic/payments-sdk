@@ -12,7 +12,7 @@ type Payment = {
   productName?: string;
   amountUsdc: number;
   status: "open" | "paid" | "canceled";
-  customerWallet: string;
+  customerWallet?: string | null;
   payoutAddress?: string;
   payoutAddressEvm?: string;
   usdcAddress?: string;
@@ -22,15 +22,12 @@ type Payment = {
   metadata?: Record<string, string>;
 };
 
-const DEMO_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0";
-
 export function OneTimeCheckout() {
   const [mode, setMode] = useState<"sandbox" | "hosted">("sandbox");
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [productId, setProductId] = useState("");
   const [catalogHint, setCatalogHint] = useState<string | null>(null);
-  const [wallet, setWallet] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [payment, setPayment] = useState<Payment | null>(null);
 
@@ -58,33 +55,24 @@ export function OneTimeCheckout() {
       setCatalogHint(catalog.hint ?? catalog.error ?? null);
       const preferred = next.find((p) => p.highlighted)?.id ?? next[0]?.id ?? "";
       setProductId((prev) => (next.some((p) => p.id === prev) ? prev : preferred));
-      setWallet((prev) => {
-        if (prev) return prev;
-        if (typeof window !== "undefined") {
-          const saved = window.localStorage.getItem("acme_customer_wallet");
-          if (saved) return saved;
-        }
-        return nextMode === "sandbox" ? DEMO_WALLET : "";
-      });
     } catch {
       setCatalogHint("Could not load catalog");
     }
   }
 
-  async function createIntent(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
+  async function checkout(nextProductId: string) {
+    setProductId(nextProductId);
+    setBusyId(nextProductId);
     setError(null);
     setPayment(null);
     try {
-      const selected = products.find((p) => p.id === productId);
+      const selected = products.find((p) => p.id === nextProductId);
       const res = await fetch("/api/one-time/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productId,
+          productId: nextProductId,
           priceId: selected?.priceId,
-          customerWallet: wallet,
         }),
       });
       const data = (await res.json()) as {
@@ -103,18 +91,17 @@ export function OneTimeCheckout() {
       setPayment(data.payment);
       if (typeof window !== "undefined") {
         window.localStorage.setItem("acme_one_time_payment_id", data.payment.id);
-        window.localStorage.setItem("acme_customer_wallet", wallet);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Create failed");
     } finally {
-      setBusy(false);
+      setBusyId(null);
     }
   }
 
   async function sandboxPay() {
     if (!payment) return;
-    setBusy(true);
+    setBusyId(payment.id);
     setError(null);
     try {
       const res = await fetch("/api/one-time/pay", {
@@ -128,11 +115,12 @@ export function OneTimeCheckout() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Pay failed");
     } finally {
-      setBusy(false);
+      setBusyId(null);
     }
   }
 
   const payout = payment?.payoutAddress ?? payment?.payoutAddressEvm ?? "";
+  const busy = Boolean(busyId);
 
   return (
     <>
@@ -144,14 +132,14 @@ export function OneTimeCheckout() {
         <p>
           {mode === "sandbox" ? (
             <>
-              Demo products below stay local. Connect an API key under{" "}
-              <Link href="/settings">Settings</Link> to load <strong>Once</strong> prices from your
-              portal.
+              Pick a product and pay. Sandbox stays local. Connect an API key under{" "}
+              <Link href="/settings">Settings</Link> to use portal Once prices and Autlantic wallet
+              checkout.
             </>
           ) : (
             <>
-              Products below come from your portal catalog (interval Once). Checkout opens Autlantic
-              hosted pay.
+              Pick a product to open Autlantic hosted checkout. Buyers connect their wallet there.
+              Payout uses your portal Settings address.
             </>
           )}
         </p>
@@ -178,80 +166,51 @@ export function OneTimeCheckout() {
       ) : null}
 
       <div className="plans">
-        {products.map((product) => (
-          <article
-            key={product.id}
-            className={`plan ${product.highlighted ? "highlighted" : ""}`}
-          >
-            <h2>{product.name}</h2>
-            {product.description ? <p className="interval">{product.description}</p> : null}
-            <p className="price">
-              ${formatUsdc(product.amountUsdc)}
-              <span className="interval"> USDC once</span>
-            </p>
-            {product.features.length > 0 ? (
-              <ul>
-                {product.features.map((f) => (
-                  <li key={f}>{f}</li>
-                ))}
-              </ul>
-            ) : null}
-            <button
-              type="button"
-              className={productId === product.id ? "btn" : "btn secondary"}
-              onClick={() => setProductId(product.id)}
+        {products.map((product) => {
+          const selected = productId === product.id;
+          const loading = busyId === product.id;
+          return (
+            <article
+              key={product.id}
+              className={`plan ${product.highlighted || selected ? "highlighted" : ""}`}
             >
-              {productId === product.id ? "Selected" : "Select"}
-            </button>
-          </article>
-        ))}
+              <h2>{product.name}</h2>
+              {product.description ? <p className="interval">{product.description}</p> : null}
+              <p className="price">
+                ${formatUsdc(product.amountUsdc)}
+                <span className="interval"> USDC once</span>
+              </p>
+              {product.features.length > 0 ? (
+                <ul>
+                  {product.features.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <button
+                type="button"
+                className="btn"
+                disabled={busy || products.length === 0}
+                onClick={() => void checkout(product.id)}
+              >
+                {loading
+                  ? "Opening…"
+                  : mode === "sandbox"
+                    ? "Pay (sandbox)"
+                    : "Continue to checkout"}
+              </button>
+            </article>
+          );
+        })}
       </div>
 
-      <form className="panel" onSubmit={createIntent}>
-        <h2>Create payment</h2>
-        <p className="hint">
-          {mode === "sandbox"
-            ? "Sandbox keeps the intent local and lets you simulate a USDC transfer."
-            : "Creates a payment from your portal price and redirects to Autlantic checkout."}
-        </p>
-
-        <div className="field">
-          <label htmlFor="product">Product</label>
-          <select
-            id="product"
-            value={productId}
-            onChange={(e) => setProductId(e.target.value)}
-            disabled={products.length === 0}
-          >
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} · ${formatUsdc(p.amountUsdc)} once
-              </option>
-            ))}
-          </select>
+      {error ? (
+        <div className="panel">
+          <p className="error" style={{ margin: 0 }}>
+            {error}
+          </p>
         </div>
-
-        <div className="field">
-          <label htmlFor="wallet">Customer wallet (Base)</label>
-          <input
-            id="wallet"
-            value={wallet}
-            onChange={(e) => setWallet(e.target.value)}
-            placeholder="0x…"
-            required
-            spellCheck={false}
-          />
-        </div>
-
-        <button className="btn" type="submit" disabled={busy || !productId}>
-          {busy
-            ? "Creating…"
-            : mode === "sandbox"
-              ? "Create payment (sandbox)"
-              : "Continue to checkout"}
-        </button>
-        {error ? <p className="error">{error}</p> : null}
-      </form>
+      ) : null}
 
       {payment ? (
         <div className="panel">
@@ -265,20 +224,16 @@ export function OneTimeCheckout() {
               Payout {payout}
             </p>
           ) : null}
-          {payment.usdcAddress ? <p className="hint">USDC {payment.usdcAddress}</p> : null}
-          {payment.transferCalldata ? (
-            <>
-              <p className="hint" style={{ marginTop: 8 }}>
-                Transfer calldata
-              </p>
-              <p className="mono">{payment.transferCalldata.slice(0, 66)}…</p>
-            </>
-          ) : null}
 
           {payment.status === "open" && (payment.mode === "sandbox" || !payment.mode) ? (
             <div style={{ marginTop: 16 }}>
-              <button className="btn" type="button" disabled={busy} onClick={() => void sandboxPay()}>
-                {busy ? "Paying…" : "Simulate USDC transfer (sandbox)"}
+              <button
+                className="btn"
+                type="button"
+                disabled={busy}
+                onClick={() => void sandboxPay()}
+              >
+                {busyId === payment.id ? "Paying…" : "Simulate USDC transfer (sandbox)"}
               </button>
             </div>
           ) : null}
