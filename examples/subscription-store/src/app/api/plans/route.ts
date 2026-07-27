@@ -15,7 +15,12 @@ export async function GET() {
     for (const product of products) {
       for (const price of product.prices) {
         if (!price.active) continue;
-        const multi = product.prices.filter((p) => p.active).length > 1;
+        // Recurring plans only. One-time prices use /one-time → createPayment.
+        if (price.interval !== "month" && price.interval !== "year") continue;
+        const multi =
+          product.prices.filter(
+            (p) => p.active && (p.interval === "month" || p.interval === "year"),
+          ).length > 1;
         plans.push({
           id: price.id,
           priceId: price.id,
