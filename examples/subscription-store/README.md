@@ -103,7 +103,8 @@ await billing.createSubscription({
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| `GET` | `/api/plans` | Demo plans (sandbox) or portal catalog (hosted) |
+| `GET` | `/api/plans` | Demo plans (sandbox) or portal month/year prices (hosted) |
+| `GET` | `/api/one-time/products` | Demo products (sandbox) or portal once prices (hosted) |
 | `POST` | `/api/one-time/create` | Create payment intent + transfer calldata |
 | `POST` | `/api/one-time/pay` | Sandbox: mark paid |
 | `POST` | `/api/one-time/verify` | Verify tx hash against intent |

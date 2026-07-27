@@ -1,8 +1,10 @@
 "use client";
 
-import { ONE_TIME_PRODUCTS } from "@/lib/one-time-products";
+import type { OneTimeProduct } from "@/lib/one-time-products";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+type CatalogProduct = OneTimeProduct & { priceId?: string; productId?: string };
 
 type Payment = {
   id: string;
@@ -21,13 +23,42 @@ type Payment = {
 const DEMO_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0";
 
 export function OneTimeCheckout() {
-  const [productId, setProductId] = useState(
-    ONE_TIME_PRODUCTS.find((p) => p.highlighted)?.id ?? ONE_TIME_PRODUCTS[0].id,
-  );
+  const [mode, setMode] = useState<"sandbox" | "hosted">("sandbox");
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
+  const [productId, setProductId] = useState("");
+  const [catalogHint, setCatalogHint] = useState<string | null>(null);
   const [wallet, setWallet] = useState(DEMO_WALLET);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payment, setPayment] = useState<Payment | null>(null);
+
+  useEffect(() => {
+    void loadCatalog();
+  }, []);
+
+  async function loadCatalog() {
+    try {
+      const [metaRes, productsRes] = await Promise.all([
+        fetch("/api/meta"),
+        fetch("/api/one-time/products"),
+      ]);
+      const meta = (await metaRes.json()) as { mode?: "sandbox" | "hosted" };
+      const catalog = (await productsRes.json()) as {
+        source?: string;
+        products?: CatalogProduct[];
+        hint?: string;
+        error?: string;
+      };
+      if (meta.mode) setMode(meta.mode);
+      const next = catalog.products ?? [];
+      setProducts(next);
+      setCatalogHint(catalog.hint ?? catalog.error ?? null);
+      const preferred = next.find((p) => p.highlighted)?.id ?? next[0]?.id ?? "";
+      setProductId((prev) => (next.some((p) => p.id === prev) ? prev : preferred));
+    } catch {
+      setCatalogHint("Could not load catalog");
+    }
+  }
 
   async function createIntent(e: React.FormEvent) {
     e.preventDefault();
@@ -35,10 +66,15 @@ export function OneTimeCheckout() {
     setError(null);
     setPayment(null);
     try {
+      const selected = products.find((p) => p.id === productId);
       const res = await fetch("/api/one-time/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, customerWallet: wallet }),
+        body: JSON.stringify({
+          productId,
+          priceId: selected?.priceId,
+          customerWallet: wallet,
+        }),
       });
       const data = (await res.json()) as {
         payment?: Payment;
@@ -90,16 +126,40 @@ export function OneTimeCheckout() {
   return (
     <>
       <section className="hero">
-        <span className="badge sandbox">One-time USDC</span>
+        <span className={`badge ${mode === "sandbox" ? "sandbox" : ""}`}>
+          {mode === "sandbox" ? "Sandbox mode" : "Hosted API mode"}
+        </span>
         <h1>Pay once. No mandate.</h1>
         <p>
-          Sandbox simulates a local USDC transfer. In hosted mode, checkout opens Autlantic{" "}
-          <code>/checkout/pay/:id</code> (same pattern as subscriptions).
+          Zero config uses demo products. Connect an API key under{" "}
+          <Link href="/settings">Settings</Link> to load{" "}
+          <strong>Once</strong> prices from your billing portal, then checkout opens Autlantic{" "}
+          <code>/checkout/pay/:id</code>.
         </p>
       </section>
 
+      {catalogHint ? (
+        <div className="panel">
+          <p className="hint" style={{ margin: 0 }}>
+            {catalogHint}{" "}
+            {mode === "hosted" ? (
+              <>
+                <Link href="/settings">Settings</Link> ·{" "}
+                <button type="button" className="btn secondary" onClick={() => void loadCatalog()}>
+                  Refresh catalog
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/settings">Open Settings</Link> to connect your portal.
+              </>
+            )}
+          </p>
+        </div>
+      ) : null}
+
       <div className="plans">
-        {ONE_TIME_PRODUCTS.map((product) => (
+        {products.map((product) => (
           <article
             key={product.id}
             className={`plan ${product.highlighted ? "highlighted" : ""}`}
@@ -129,7 +189,9 @@ export function OneTimeCheckout() {
       <form className="panel" onSubmit={createIntent}>
         <h2>Create payment</h2>
         <p className="hint">
-          Sandbox keeps the intent local. Hosted mode redirects to Autlantic checkout.
+          {mode === "sandbox"
+            ? "Sandbox keeps the intent local and lets you simulate a USDC transfer."
+            : "Hosted mode creates a payment from your portal price and redirects to Autlantic checkout."}
         </p>
 
         <div className="field">
@@ -138,8 +200,9 @@ export function OneTimeCheckout() {
             id="product"
             value={productId}
             onChange={(e) => setProductId(e.target.value)}
+            disabled={products.length === 0}
           >
-            {ONE_TIME_PRODUCTS.map((p) => (
+            {products.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name} · ${p.amountUsdc} once
               </option>
@@ -159,8 +222,8 @@ export function OneTimeCheckout() {
           />
         </div>
 
-        <button className="btn" type="submit" disabled={busy}>
-          {busy ? "Creating…" : "Create payment"}
+        <button className="btn" type="submit" disabled={busy || !productId}>
+          {busy ? "Creating…" : mode === "sandbox" ? "Create payment (sandbox)" : "Continue to checkout"}
         </button>
         {error ? <p className="error">{error}</p> : null}
       </form>
