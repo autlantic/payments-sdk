@@ -1,0 +1,19 @@
+# Autlantic example subscription store (webhook demo)
+# Railway: Settings → Config-as-code → Config file path → railway.example-store.toml
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @autlantic/payments-recurring build && pnpm --filter @autlantic/chain-evm build && pnpm --filter @autlantic/example-subscription-store build"
+watchPatterns = [
+  "examples/subscription-store/**",
+  "packages/payments-recurring/**",
+  "packages/payments-recurring-core/**",
+  "packages/chain-evm/**",
+  "packages/billing-engine/**",
+  "railway.example-store.toml",
+  "pnpm-lock.yaml",
+]
+
+[deploy]
+startCommand = "pnpm --filter @autlantic/example-subscription-store exec next start -p ${PORT:-3040}"
+restartPolicyType = "ON_FAILURE"
