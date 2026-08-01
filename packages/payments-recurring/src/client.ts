@@ -5,8 +5,12 @@ import {
   confirmOneTimePayment,
   createMemoryBillingStore,
   createOneTimePayment,
+  createPaymentLink,
   createSubscription,
+  disablePaymentLink,
+  openPaymentLink,
   refundInvoice,
+  resolvePaymentLinkStatus,
   updateSubscription,
   voidInvoice,
   type BillingStore,
@@ -14,6 +18,7 @@ import {
   type CreateOneTimePaymentResult,
   type CreateSubscriptionResult,
   type OneTimePayment,
+  type PaymentLink,
   type SandboxChargeMode,
 } from "@autlantic/billing-engine";
 import { defaultSandboxChainId, VAULT_PLACEHOLDER_BASE_SEPOLIA } from "@autlantic/chain-evm";
@@ -21,11 +26,12 @@ import type { BillingInterval, RecurringInvoice, RecurringSubscription } from "@
 import type {
   AutlanticBillingConfig,
   BillingCatalogProduct,
+  CreatePaymentLinkRequest,
   CreatePaymentRequest,
   CreateSubscriptionRequest,
 } from "./config";
 
-export const AUTLANTIC_BILLING_SDK_VERSION = "0.2.7";
+export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.0";
 
 type ApiEnvelope<T> = T & { error?: string };
 
@@ -121,6 +127,111 @@ export class AutlanticBilling {
     }
 
     return this.post("/v1/payments", input);
+  }
+
+  /**
+   * Create a shareable payment link. Hosted mode returns `url` for `/checkout/link/:id`.
+   */
+  async createPaymentLink(
+    input: CreatePaymentLinkRequest,
+  ): Promise<{ paymentLink: PaymentLink; url: string }> {
+    if (this.localStore) {
+      if (input.amountUsdc == null) {
+        throw new Error(
+          "Sandbox mode requires amountUsdc (priceId is only resolved by the hosted API)",
+        );
+      }
+      const paymentLink = createPaymentLink(this.localStore, {
+        merchantId: this.config.merchantId,
+        merchantRefPrefix: input.merchantRefPrefix?.trim() || "link",
+        payoutAddressEvm: input.payoutAddressEvm,
+        amountUsdc: input.amountUsdc,
+        chainId: defaultSandboxChainId(),
+        priceId: input.priceId,
+        description: input.description,
+        maxUses: input.maxUses,
+        expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
+        metadata: input.metadata,
+      });
+      return {
+        paymentLink,
+        url: `sandbox://link/${paymentLink.id}`,
+      };
+    }
+
+    return this.post("/v1/payment-links", input);
+  }
+
+  async listPaymentLinks(): Promise<Array<PaymentLink & { url?: string }>> {
+    if (this.localStore) {
+      return this.localStore.listPaymentLinksByMerchant(this.config.merchantId).map((l) => ({
+        ...l,
+        status: resolvePaymentLinkStatus(l),
+        url: `sandbox://link/${l.id}`,
+      }));
+    }
+    const res = await this.get<{ paymentLinks: Array<PaymentLink & { url?: string }> }>(
+      "/v1/payment-links",
+    );
+    return res.paymentLinks;
+  }
+
+  async getPaymentLink(id: string): Promise<{ paymentLink: PaymentLink; url?: string }> {
+    if (this.localStore) {
+      const paymentLink = this.localStore.getPaymentLink(id);
+      if (!paymentLink) throw new Error("Payment link not found");
+      return {
+        paymentLink: { ...paymentLink, status: resolvePaymentLinkStatus(paymentLink) },
+        url: `sandbox://link/${paymentLink.id}`,
+      };
+    }
+    return this.get(`/v1/payment-links/${id}`);
+  }
+
+  async disablePaymentLink(id: string): Promise<{ paymentLink: PaymentLink; url?: string }> {
+    if (this.localStore) {
+      const paymentLink = disablePaymentLink(this.localStore, id);
+      if (!paymentLink) throw new Error("Payment link not found");
+      return { paymentLink, url: `sandbox://link/${paymentLink.id}` };
+    }
+    return this.post(`/v1/payment-links/${id}/disable`, {});
+  }
+
+  /**
+   * Open a payment link (mint a one-time payment). Sandbox-only helper;
+   * hosted checkout uses POST /checkout/link/:id/open.
+   */
+  async openPaymentLink(
+    id: string,
+    input: { customerWallet: string },
+  ): Promise<{
+    payment: OneTimePayment;
+    paymentLink: PaymentLink;
+    checkoutUrl?: string;
+  }> {
+    if (this.localStore) {
+      const result = openPaymentLink(this.localStore, id, input);
+      if ("error" in result) throw new Error(result.error);
+      return {
+        payment: result.payment,
+        paymentLink: result.paymentLink,
+        checkoutUrl: `sandbox://pay/${result.payment.id}`,
+      };
+    }
+    const base = this.config.apiBaseUrl?.replace(/\/$/, "");
+    if (!base) throw new Error("apiBaseUrl is required for remote mode");
+    const res = await fetch(`${base}/checkout/link/${id}/open`, {
+      method: "POST",
+      headers: this.headers({ "Content-Type": "application/json" }),
+      body: JSON.stringify(input),
+    });
+    const json = (await res.json()) as ApiEnvelope<{
+      payment: OneTimePayment;
+      paymentLink: PaymentLink;
+      checkoutUrl?: string;
+    }>;
+    if (!res.ok) throw new Error(json.error ?? `Open failed (${res.status})`);
+    return json;
   }
 
   async getPayment(id: string): Promise<OneTimePayment> {

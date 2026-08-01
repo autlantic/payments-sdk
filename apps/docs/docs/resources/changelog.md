@@ -1,74 +1,31 @@
 # Changelog
 
-Version history for the Autlantic Payments SDK and docs. Also see GitHub [Releases](https://github.com/autlantic/payments-sdk/releases).
+## 0.3.0 - Payment links (URL / QR)
 
-## Docs - hosted checkout API (site)
+- Shareable **payment links**: fixed USDC amount, optional max uses / expiry
+- SDK: `createPaymentLink`, `listPaymentLinks`, `getPaymentLink`, `disablePaymentLink`, `openPaymentLink`
+- Hosted: `POST /v1/payment-links`, public `/checkout/link/:id` (opens into one-time pay checkout)
+- Merchant portal: **Payment links** page with copy URL and QR
+- Webhooks: `payment.created` / `payment.paid` when a link is opened and paid
+- E2E smoke: `pnpm test:e2e:payment-links`
 
-Package versions unchanged (`payments-recurring@0.2.7`). Documents Autlantic-operated hosted checkout behavior:
+## Docs - Test / Live API keys
 
-- Connect wallet / Approve / Pay via EIP-6963 and WalletConnect; status and wallet sync under [HTTP API](/api/http)
-- Subscribe `/status` is fast (no Base RPC); deferred `GET /checkout/subscribe/:id/onchain` for allowance + vault resume
-- Coupon apply/remove: `POST` / `DELETE` `/checkout/subscribe/:id/coupon` and `/checkout/pay/:id/coupon`
-- GitHub Release [v0.2.7](https://github.com/autlantic/payments-sdk/releases/tag/v0.2.7)
-
-## 0.2.7 - Hosted one-time payments
-
-Packages: `@autlantic/payments-recurring@0.2.7`, `@autlantic/billing-engine@0.2.5`, `@autlantic/payments-recurring-core@0.2.5`, `@autlantic/chain-evm@0.2.5`.
-
-- `AutlanticBilling.createPayment` / `getPayment` / `confirmPayment`
-- Hosted HTTP: `POST /v1/payments`, `GET /checkout/pay/:id`, confirm with sandbox or `txHash`
-- Catalog price interval `once` (portal One-time)
-- Webhooks: `payment.created`, `payment.paid`
-- Hosted checkout success: download receipt and invoice PDFs (same signed portal PDF flow as subscriptions)
-- Docs: [One-time payments](/guide/one-time-payments)
-- Example store: hosted mode loads portal catalog and redirects to `checkoutUrl`
-- GitHub Release [v0.2.7](https://github.com/autlantic/payments-sdk/releases/tag/v0.2.7)
+- Document Stripe-style Test and Live: portal toggle, `abk_test_` / `abk_live_` keys, Sepolia vs Base mainnet
+- Webhook docs use per-mode endpoint signing secrets
+- Clarify `AUTLANTIC_BILLING_SANDBOX` is not the primary hosted mode switch
 
 ## 0.2.6 - Catalog products + example store
 
-- `listProducts()` on `AutlanticBilling` (hosted `GET /v1/products`)
-- `createSubscription` accepts `priceId` (resolves amount + interval from the merchant catalog) or ad-hoc `amountUsdc` + `interval`
-- Example Next.js storefront: [`examples/subscription-store`](https://github.com/autlantic/payments-sdk/tree/main/examples/subscription-store) (`pnpm example:store`)
-- Docs: hosted HTTP catalog route and Node.js SDK updates
-
-## Docs - reference maturity (site)
-
-Public docs now include:
-
-- [Lifecycle](/guide/lifecycle) with sequence and state diagrams
-- [Error codes](/guide/errors) (`InvoiceFailureCode`)
-- [Retries](/guide/retries) (`DEFAULT_RETRY_POLICY`)
-- [TypeScript types](/api/types)
-- Expanded [Node.js SDK](/api/nodejs) and [Webhooks](/guide/webhooks) references
-
-Package versions below are unchanged unless noted.
-
-## 0.2.5 - README branding
-
-- Drop wordmark from package README; keep Autlantic icon only
-- Public docs cleanup: SDK-only testing, hosted API described as Autlantic-operated
-- Docs site points at the public [payments-sdk](https://github.com/autlantic/payments-sdk) repo
-- GitHub Release [v0.2.5](https://github.com/autlantic/payments-sdk/releases/tag/v0.2.5)
-
-## 0.2.4 - Public brand assets on npm
-
-- README logos use https://autlantic.com/brand/... CDN URLs
-- Consistent Autlantic branding across all four packages
-
-## 0.2.3 - Professional npm READMEs
-
-- Branded package READMEs for npm (badges, quick start, docs links)
-- Absolute brand image URLs so npm renders Autlantic branding
-
-## 0.2.2 - Repository home
-
-- npm `repository` fields point to https://github.com/autlantic/payments-sdk
-- Brand README, SECURITY policy, and MIT license under Autlantic
+- `listProducts()` and `priceId` on `createSubscription`
+- Hosted `GET /v1/products`
+- Example storefront in the public [payments-sdk](https://github.com/autlantic/payments-sdk/tree/main/examples/subscription-store) repo
 
 ## 0.2.1 - Public docs alignment
 
 - Marketing and getting-started samples match the real `AutlanticBilling` API
 - Clarify that `activateSubscription` charges the first invoice
+- Docs site no longer links to the private GitHub repo
 
 ## 0.2.0 - Recurring USDC on Base
 
@@ -76,7 +33,7 @@ Package versions below are unchanged unless noted.
 - `@autlantic/payments-recurring-core` types and retry policy
 - `@autlantic/chain-evm` Base + USDC adapter
 - `@autlantic/billing-engine` subscriptions, invoices, webhooks
-- Autlantic-operated hosted billing API and renewal worker (not shipped as runnable services in this repo)
+- Hosted `billing-api` and `billing-worker`
 
 ## 0.1.x - Legacy (removed)
 

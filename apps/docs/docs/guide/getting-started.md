@@ -1,27 +1,87 @@
 # Getting started
 
-Autlantic Billing verifies **USDC** subscriptions on **Base**. Funds settle to **your** EVM wallet (`payoutAddressEvm`). Autlantic does not custody member revenue.
+Autlantic Billing verifies **USDC** on **Base**: recurring subscriptions, one-time payments, and shareable payment links. Funds settle to **your** EVM wallet (`payoutAddressEvm`). Autlantic does not custody member revenue.
+
+Test and Live work like Stripe: the **API key** selects the environment. Hosted checkout and data follow that key.
 
 ## Install
 
 ```bash
-npm install @autlantic/payments-recurring@^0.2.7
+npm install @autlantic/payments-recurring
 ```
 
-Published packages (see [Packages](/guide/packages) for versions):
+Published packages:
 
 - [@autlantic/payments-recurring](https://www.npmjs.com/package/@autlantic/payments-recurring) - main client (recommended)
 - [@autlantic/payments-recurring-core](https://www.npmjs.com/package/@autlantic/payments-recurring-core) - types and billing rules
 - [@autlantic/chain-evm](https://www.npmjs.com/package/@autlantic/chain-evm) - Base + USDC adapter
-- [@autlantic/billing-engine](https://www.npmjs.com/package/@autlantic/billing-engine) - subscriptions and invoices
+- [@autlantic/billing-engine](https://www.npmjs.com/package/@autlantic/billing-engine) - subscriptions, invoices, payment links
 
-Source: [github.com/autlantic/payments-sdk](https://github.com/autlantic/payments-sdk). Requires **Node.js 20+**.
+Requires **Node.js 20+**.
 
-Runnable example (one-time + recurring): [`examples/subscription-store`](https://github.com/autlantic/payments-sdk/tree/main/examples/subscription-store).
+## Test vs Live (hosted API)
 
-## Quickstart (sandbox)
+| Deploy | API key | Chain | Checkout badge |
+|--------|---------|-------|----------------|
+| Local / staging | `abk_test_…` from the portal (Test mode) | Base Sepolia | Test |
+| Production | `abk_live_…` from the portal (Live mode) | Base mainnet | Live |
 
-`activateSubscription` completes the wallet mandate and charges the first open invoice. Do not call `chargeInvoice` on that same invoice afterward.
+Use the **same env var names** in every deploy. Change the values, not the names:
+
+```bash
+# Staging
+AUTLANTIC_BILLING_API_KEY=abk_test_…
+AUTLANTIC_BILLING_WEBHOOK_SECRET=whsec_…   # secret from your Test webhook endpoint
+
+# Production
+AUTLANTIC_BILLING_API_KEY=abk_live_…
+AUTLANTIC_BILLING_WEBHOOK_SECRET=whsec_…   # secret from your Live webhook endpoint
+```
+
+Create keys and webhook endpoints in the [merchant portal](https://portal.autlantic.com) while Test or Live is selected. Do not put both test and live keys in one production app.
+
+## Quickstart (subscription)
+
+```ts
+import { AutlanticBilling } from "@autlantic/payments-recurring";
+
+const billing = AutlanticBilling.fromEnv();
+
+const { products } = await billing.listProducts();
+const priceId = products[0]?.prices[0]?.id;
+
+const { subscription, checkoutUrl } = await billing.createSubscription({
+  merchantRef: order.id,
+  customerWallet: member.walletAddress,
+  priceId,
+});
+
+// Send the customer to checkoutUrl (hosted Test or Live UI)
+```
+
+`activateSubscription` completes the wallet mandate and charges the first open invoice when you drive activation from your backend. Prefer hosted checkout for wallet UX.
+
+## Quickstart (payment link)
+
+Share a URL or QR. The payer connects a wallet on hosted checkout; USDC settles to your payout address.
+
+```ts
+const { paymentLink, url } = await billing.createPaymentLink({
+  merchantRefPrefix: "invoice",
+  payoutAddressEvm: creator.payoutAddressEvm,
+  amountUsdc: 42,
+  description: "Consulting",
+  maxUses: 1, // optional single-use
+});
+
+// Share `url` (/checkout/link/:id) or encode as QR
+```
+
+You can also create links in the [merchant portal](https://portal.autlantic.com) under **Payment links**.
+
+## Quickstart (in-process sandbox)
+
+For local demos without the hosted API:
 
 ```ts
 import { AutlanticBilling } from "@autlantic/payments-recurring";
@@ -42,66 +102,27 @@ if (charge?.invoice.status === "paid") {
 }
 ```
 
-### Hosted catalog (`priceId`)
-
-With `AUTLANTIC_BILLING_API_URL` + API key, load products from the merchant portal catalog and subscribe by price:
-
-```ts
-const billing = AutlanticBilling.fromEnv();
-const { products } = await billing.listProducts();
-const priceId = products[0]?.prices[0]?.id;
-
-const created = await billing.createSubscription({
-  merchantRef: order.id,
-  customerWallet: member.walletAddress,
-  payoutAddressEvm: creator.payoutAddressEvm,
-  priceId,
-});
-// created.checkoutUrl → hosted checkout (Connect wallet in the browser)
-```
-
-Use `chargeInvoice` later for renewals or after `completeSubscription` when you want mandate and charge as separate steps.
-
-## One-time payments
-
-For a single USDC transfer (no mandate), use `createPayment` and hosted `/checkout/pay/:id`. See [One-time payments](/guide/one-time-payments).
-
-```ts
-const { payment, checkoutUrl } = await billing.createPayment({
-  merchantRef: order.id,
-  customerWallet: member.walletAddress,
-  payoutAddressEvm: creator.payoutAddressEvm,
-  amountUsdc: 49, // or priceId with interval "once"
-});
-```
-
 ## Environment variables
 
 | Variable | Purpose |
 |----------|---------|
-| `AUTLANTIC_BILLING_API_URL` | Hosted billing API base URL (issued with your API key) |
-| `AUTLANTIC_BILLING_API_KEY` | API key for authenticated routes |
-| `AUTLANTIC_BILLING_MERCHANT_ID` | Default merchant id |
-| `AUTLANTIC_BILLING_SANDBOX` | `true` / `1` for sandbox mode |
-| `AUTLANTIC_BILLING_WEBHOOK_SECRET` | HMAC secret for `x-autlantic-signature` |
+| `AUTLANTIC_BILLING_API_URL` | Hosted billing API base URL |
+| `AUTLANTIC_BILLING_API_KEY` | `abk_test_…` or `abk_live_…` (mode comes from the key) |
+| `AUTLANTIC_BILLING_MERCHANT_ID` | Your merchant id from the portal |
+| `AUTLANTIC_BILLING_WEBHOOK_SECRET` | Signing secret from the matching Test or Live webhook endpoint |
+| `AUTLANTIC_BILLING_SANDBOX` | Optional. Only for in-process / forcing sandbox locally. **Not** the primary Test/Live switch for hosted API |
 
 ```ts
 const billing = AutlanticBilling.fromEnv();
 ```
 
-For local demos without a remote API, use `AutlanticBilling.sandbox()` instead of `fromEnv()`.
-
 ## Hosted API alternative
 
-If you prefer HTTP + API key over embedding Node, see [Hosted HTTP API](/api/http). Autlantic provides the base URL and credentials when you enable hosted billing.
+If you prefer HTTP + API key over embedding Node, see [Hosted HTTP API](/api/http).
 
 ## Next steps
 
-- [Lifecycle](/guide/lifecycle) (diagrams + activate vs renew)
-- [Error codes](/guide/errors) and [Retries](/guide/retries)
-- [TypeScript types](/api/types)
-- [Sandbox & testing](/guide/sandbox)
+- [Test & Live](/guide/sandbox)
 - [Webhooks](/guide/webhooks)
 - [Node.js API reference](/api/nodejs)
-- [Changelog](/resources/changelog)
 - [Security](/guide/security)

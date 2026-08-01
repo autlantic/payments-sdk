@@ -1,6 +1,7 @@
 import { createMemoryBillingStore } from "./memory-store";
 import type { BillingStore, BillingStoreSnapshot } from "./types";
 import type { OneTimePayment } from "./one-time";
+import type { PaymentLink } from "./payment-links";
 import type {
   RecurringCustomer,
   RecurringInvoice,
@@ -14,6 +15,7 @@ export type BillingPersistAdapter = {
   saveMandate(mandate: RecurringMandate): Promise<void>;
   saveInvoice(invoice: RecurringInvoice): Promise<void>;
   saveOneTimePayment(payment: OneTimePayment): Promise<void>;
+  savePaymentLink(link: PaymentLink): Promise<void>;
   loadSnapshot(): Promise<BillingStoreSnapshot>;
 };
 
@@ -26,6 +28,7 @@ export function hydrateBillingStore(
   for (const mandate of snapshot.mandates) store.saveMandate(mandate);
   for (const invoice of snapshot.invoices) store.saveInvoice(invoice);
   for (const payment of snapshot.oneTimePayments ?? []) store.saveOneTimePayment(payment);
+  for (const link of snapshot.paymentLinks ?? []) store.savePaymentLink(link);
 }
 
 export function createWriteThroughBillingStore(
@@ -95,6 +98,16 @@ export function createWriteThroughBillingStore(
     },
     listOneTimePaymentsByMerchant(merchantId) {
       return memory.listOneTimePaymentsByMerchant(merchantId);
+    },
+    savePaymentLink(link) {
+      memory.savePaymentLink(link);
+      persistQueued("paymentLink", () => persist.savePaymentLink(link));
+    },
+    getPaymentLink(id) {
+      return memory.getPaymentLink(id);
+    },
+    listPaymentLinksByMerchant(merchantId) {
+      return memory.listPaymentLinksByMerchant(merchantId);
     },
     snapshot() {
       return memory.snapshot();

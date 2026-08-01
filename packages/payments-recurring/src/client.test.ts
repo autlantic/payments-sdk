@@ -40,6 +40,31 @@ describe("AutlanticBilling sandbox", () => {
     assert.equal(confirmed.payment.status, "paid");
   });
 
+  it("creates a payment link and opens it into a one-time payment", async () => {
+    const billing = AutlanticBilling.sandbox({ merchantId: "mer_demo" });
+
+    const created = await billing.createPaymentLink({
+      merchantRefPrefix: "qr",
+      payoutAddressEvm: "0x1111111111111111111111111111111111111111",
+      amountUsdc: 30,
+      description: "Table 4",
+      maxUses: 2,
+    });
+
+    assert.equal(created.paymentLink.status, "active");
+    assert.ok(created.url.includes(created.paymentLink.id));
+
+    const opened = await billing.openPaymentLink(created.paymentLink.id, {
+      customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+    });
+    assert.equal(opened.payment.amountUsdc, 30);
+    assert.equal(opened.payment.merchantRef, "qr_1");
+    assert.ok(opened.checkoutUrl?.includes(opened.payment.id));
+
+    const confirmed = await billing.confirmPayment(opened.payment.id);
+    assert.equal(confirmed.payment.status, "paid");
+  });
+
   it("signs and verifies webhooks", () => {
     const event = {
       type: "invoice.paid" as const,

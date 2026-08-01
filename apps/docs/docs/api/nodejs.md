@@ -1,28 +1,15 @@
 # Node.js SDK
 
-`@autlantic/payments-recurring` **0.2.7** (related packages: `payments-recurring-core`, `chain-evm`, and `billing-engine` at **0.2.5**).
+`@autlantic/payments-recurring`
 
-Typed domain models: [TypeScript types](/api/types).  
-HTTP twin: [Hosted HTTP API](/api/http).
+## Test vs Live
 
-## Install
+Hosted mode follows the API key:
 
-```bash
-npm install @autlantic/payments-recurring@^0.2.7
-```
+- `abk_test_…` → Test · Base Sepolia
+- `abk_live_…` → Live · Base mainnet
 
-```ts
-import {
-  AutlanticBilling,
-  AUTLANTIC_BILLING_SDK_VERSION,
-  type CreateSubscriptionRequest,
-  type CreatePaymentRequest,
-  type RecurringSubscription,
-  type OneTimePayment,
-} from "@autlantic/payments-recurring";
-```
-
-`AUTLANTIC_BILLING_SDK_VERSION` is the string `"0.2.7"`.
+Use a test key in staging and a live key in production. Webhook secrets come from the matching portal webhook endpoint.
 
 ## `AutlanticBilling`
 
@@ -30,7 +17,7 @@ import {
 
 ```ts
 new AutlanticBilling({
-  apiBaseUrl?: string;   // omit for in-process sandbox
+  apiBaseUrl?: string;
   apiKey?: string;
   merchantId: string;
   sandbox?: boolean;
@@ -41,124 +28,68 @@ AutlanticBilling.sandbox({ merchantId, webhookSecret? });
 AutlanticBilling.fromEnv();
 ```
 
-| Factory | Behavior |
-|---------|----------|
-| `sandbox(...)` | In-memory store. No remote API. |
-| `fromEnv()` | Uses env vars below. Remote if `AUTLANTIC_BILLING_API_URL` is set. |
-| `new AutlanticBilling({...})` | Explicit config. |
-
-Env vars: `AUTLANTIC_BILLING_API_URL`, `AUTLANTIC_BILLING_API_KEY`, `AUTLANTIC_BILLING_MERCHANT_ID`, `AUTLANTIC_BILLING_SANDBOX`, `AUTLANTIC_BILLING_WEBHOOK_SECRET`
-
-### `createSubscription` input
-
-Provide either a catalog `priceId` (hosted API) or ad-hoc `amountUsdc` + `interval` (sandbox / custom amounts).
-
-```ts
-type CreateSubscriptionRequest = {
-  merchantRef: string;
-  customerWallet: string;
-  payoutAddressEvm: string;
-  amountUsdc?: number;
-  interval?: "month" | "year";
-  priceId?: string;
-  planId?: string;
-  metadata?: Record<string, string>;
-};
-```
-
-Returns subscription + first open invoice (and `checkoutUrl` when using the hosted API or sandbox).
-
-### `createPayment` input
-
-Provide either a catalog `priceId` with interval `once`, or ad-hoc `amountUsdc`.
-
-```ts
-type CreatePaymentRequest = {
-  merchantRef: string;
-  customerWallet: string;
-  payoutAddressEvm: string;
-  amountUsdc?: number;
-  priceId?: string;
-  metadata?: Record<string, string>;
-};
-```
-
-Returns payment + `checkoutUrl` (`/checkout/pay/:id` hosted, or `sandbox://pay/...`). See [One-time payments](/guide/one-time-payments).
+| Env var | Purpose |
+|---------|---------|
+| `AUTLANTIC_BILLING_API_URL` | Hosted API base URL |
+| `AUTLANTIC_BILLING_API_KEY` | `abk_test_…` or `abk_live_…` |
+| `AUTLANTIC_BILLING_MERCHANT_ID` | Merchant id |
+| `AUTLANTIC_BILLING_WEBHOOK_SECRET` | Endpoint signing secret for this env |
+| `AUTLANTIC_BILLING_SANDBOX` | Optional in-process / local override |
 
 ### Methods
 
-| Method | Returns (conceptually) | Description |
-|--------|------------------------|-------------|
-| `listProducts()` | `{ products }` | Active catalog products and prices (hosted API; empty in sandbox) |
-| `createSubscription(input)` | `{ subscription, invoice, checkoutUrl? }` | Create incomplete subscription + open invoice |
-| `createPayment(input)` | `{ payment, checkoutUrl? }` | Create one-time payment |
-| `getPayment(id)` | payment | Fetch one-time payment |
-| `confirmPayment(id, { txHash? })` | `{ payment, alreadyPaid? }` | Sandbox mark paid, or confirm hosted checkout |
-| `listSubscriptions({ status? })` | `{ subscriptions }` | List merchant subscriptions |
-| `getSubscription(id)` | `{ subscription }` | Fetch subscription |
-| `updateSubscription(id, input)` | `{ subscription }` | Update amount, interval, plan, metadata |
-| `getCheckoutSession(id)` | `{ session }` | Hosted checkout session JSON (remote) |
-| `completeSubscription(id)` | `{ subscription }` | Mark wallet mandate active (**no** charge) |
-| `activateSubscription(id, { onChainSubscriptionId? })` | `{ subscription, charge, txHash? }` | Complete mandate **+ first charge** |
-| `cancelSubscription(id, immediate?)` | `{ subscription }` | Cancel at period end or now |
-| `listInvoices({ subscriptionId? })` | `{ invoices }` | List invoices |
-| `getInvoice(id)` | `{ invoice }` | Fetch invoice |
-| `chargeInvoice(id, sandboxMode?)` | charge result | Attempt invoice payment / renewal |
-| `refundInvoice(id, { amountUsdc? })` | refund result | Refund a paid invoice |
-| `voidInvoice(id)` | void result | Void an open invoice |
+| Method | Description |
+|--------|-------------|
+| `listProducts()` | List active catalog products and prices (hosted API) |
+| `createPayment(input)` | Create one-time USDC payment + `/checkout/pay/:id` |
+| `getPayment(id)` | Fetch one-time payment |
+| `confirmPayment(id, { txHash? })` | Confirm one-time payment |
+| `createPaymentLink(input)` | Create shareable payment link + `/checkout/link/:id` |
+| `listPaymentLinks()` | List payment links |
+| `getPaymentLink(id)` | Fetch a payment link |
+| `disablePaymentLink(id)` | Disable a payment link |
+| `openPaymentLink(id, { customerWallet })` | Mint a one-time payment from a link |
+| `createSubscription(input)` | Create incomplete subscription + open invoice (`priceId` or `amountUsdc` + `interval`) |
+| `listSubscriptions({ status? })` | List merchant subscriptions |
+| `getSubscription(id)` | Fetch subscription |
+| `updateSubscription(id, input)` | Update amount, interval, plan, metadata |
+| `getCheckoutSession(id)` | Fetch hosted checkout session JSON |
+| `completeSubscription(id)` | Mark wallet mandate active (no charge) |
+| `activateSubscription(id, { onChainSubscriptionId? })` | Complete mandate + first charge |
+| `cancelSubscription(id, immediate?)` | Cancel at period end or now |
+| `listInvoices({ subscriptionId? })` | List invoices |
+| `getInvoice(id)` | Fetch invoice |
+| `chargeInvoice(id, sandboxMode?)` | Attempt invoice payment |
+| `refundInvoice(id, { amountUsdc? })` | Refund a paid invoice |
+| `voidInvoice(id)` | Void an open invoice |
 
-`sandboxMode` for `chargeInvoice`: `"success" | "insufficient_balance" | "allowance_revoked"` (in-process sandbox only).
+### Payment links
 
-### Activate vs charge
+Share a fixed-amount URL (or QR of that URL). The payer opens hosted checkout; USDC settles to your payout wallet.
 
 ```ts
-const { subscription } = await billing.createSubscription({ /* ... */ });
-const { charge } = await billing.activateSubscription(subscription.id);
-// charge pays the first invoice. Do not chargeInvoice that same invoice again.
-
-// Later renewals:
-await billing.chargeInvoice(renewalInvoiceId);
+const { paymentLink, url } = await billing.createPaymentLink({
+  merchantRefPrefix: "invoice",
+  payoutAddressEvm: "0xYourMerchantWallet…",
+  amountUsdc: 42,
+  description: "Consulting",
+  maxUses: 1, // optional
+});
+// Share `url` or encode as QR → /checkout/link/:id
 ```
 
-See [Lifecycle](/guide/lifecycle).
+Portal merchants can also create links under **Payment links** (URL + QR).
 
-### Errors
-
-- Transport / API failures: thrown `Error` with message.
-- Soft charge declines: invoice `failureCode` ([Error codes](/guide/errors)) and `invoice.payment_failed` webhooks.
-- Exhausted retries: [Retries](/guide/retries) → `past_due`.
-
-### Webhooks helpers
+### Webhooks
 
 ```ts
 import {
   signBillingWebhook,
   verifyBillingWebhook,
   parseBillingWebhookEvent,
-  BILLING_WEBHOOK_SIGNATURE_HEADER,
 } from "@autlantic/payments-recurring";
 ```
 
-Header name: `x-autlantic-signature` (`BILLING_WEBHOOK_SIGNATURE_HEADER`).
+Header: `x-autlantic-signature`. Verify with the portal endpoint secret for Test or Live.
 
-### Idempotency
-
-Pass `Idempotency-Key` on POST requests to the hosted billing API. Replays return the cached response for 24 hours.
-
-### Re-exported chain helpers
-
-```ts
-import {
-  defaultSandboxChainId,
-  chainConfigFor,
-  usdcToMicro,
-  encodeApproveCalldata,
-} from "@autlantic/payments-recurring";
-```
-
-## Next
-
-- [TypeScript types](/api/types)
-- [Hosted HTTP API](/api/http)
-- [Lifecycle](/guide/lifecycle)
-- [Changelog](/resources/changelog)
+Events include `subscription.*`, `invoice.*`, and `payment.created` / `payment.paid` (one-time and payment-link flows).

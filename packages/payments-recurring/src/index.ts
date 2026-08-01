@@ -3,6 +3,7 @@ export type {
   AutlanticBillingConfig,
   BillingCatalogPrice,
   BillingCatalogProduct,
+  CreatePaymentLinkRequest,
   CreatePaymentRequest,
   CreateSubscriptionRequest,
 } from "./config";
@@ -25,6 +26,8 @@ export type {
   OneTimePayment,
   OneTimePaymentStatus,
   CreateOneTimePaymentResult,
+  PaymentLink,
+  PaymentLinkStatus,
 } from "@autlantic/billing-engine";
 
 export {

@@ -2,17 +2,16 @@
 
 Billing events are POSTed to your endpoint with HMAC header `x-autlantic-signature`.
 
+Signing uses the **webhook endpoint secret** from the merchant portal (Test and Live each have their own endpoints and secrets). Put that value in `AUTLANTIC_BILLING_WEBHOOK_SECRET` for the matching deploy.
+
 ## Verify
 
 ```ts
 import {
   verifyBillingWebhook,
   parseBillingWebhookEvent,
-  BILLING_WEBHOOK_SIGNATURE_HEADER,
-  type BillingWebhookEvent,
 } from "@autlantic/payments-recurring";
 
-const signatureHeader = req.headers[BILLING_WEBHOOK_SIGNATURE_HEADER]; // x-autlantic-signature
 const ok = verifyBillingWebhook(
   rawBody,
   signatureHeader,
@@ -20,50 +19,32 @@ const ok = verifyBillingWebhook(
 );
 if (!ok) throw new Error("bad signature");
 
-const event: BillingWebhookEvent = parseBillingWebhookEvent(JSON.parse(rawBody));
+const event = parseBillingWebhookEvent(JSON.parse(rawBody));
 ```
 
 Always verify against the **raw** request body. Do not re-serialize JSON before checking the signature.
 
-## Event types
+## Test vs Live
 
-```ts
-type BillingWebhookEvent = {
-  type: BillingWebhookEventType;
-  id: string;
-  createdAt: string;
-  data: Record<string, unknown>;
-};
-```
+| Deploy | Portal | Secret source |
+|--------|--------|---------------|
+| Staging | Test mode → Webhooks | That Test endpoint’s signing secret |
+| Production | Live mode → Webhooks | That Live endpoint’s signing secret |
 
-| Event | When |
-|-------|------|
-| `subscription.created` | Subscription created (`incomplete`) |
-| `subscription.activated` | Mandate completed / subscription became `active` |
-| `subscription.updated` | Amount, interval, plan, or metadata changed |
-| `subscription.past_due` | Automatic [retries](/guide/retries) exhausted |
-| `subscription.canceled` | Subscription canceled |
-| `invoice.created` | Invoice opened (first or renewal) |
-| `invoice.paid` | Charge succeeded |
-| `invoice.payment_failed` | Charge failed; see `data.failureCode` / [errors](/guide/errors) |
-| `invoice.refunded` | Refund recorded |
-| `invoice.voided` | Open invoice voided |
-| `payment.created` | One-time payment created (`open`) |
-| `payment.paid` | One-time payment confirmed |
+Test events are delivered only to Test endpoints. Live events only to Live endpoints.
 
-How these line up on a real checkout: [Lifecycle](/guide/lifecycle). Also see [One-time payments](/guide/one-time-payments).
+## Common events
 
-## Signing (outbound tests)
-
-```ts
-import { signBillingWebhook } from "@autlantic/payments-recurring";
-
-const signature = signBillingWebhook(rawBody, process.env.AUTLANTIC_BILLING_WEBHOOK_SECRET!);
-```
+- `subscription.created` / `subscription.activated` / `subscription.canceled`
+- `invoice.paid`
+- `invoice.payment_failed`
+- `invoice.refunded`
+- `invoice.voided`
+- `payment.created` / `payment.paid` (one-time payments and payment links)
 
 ## Env
 
 | Variable | Purpose |
 |----------|---------|
-| `AUTLANTIC_BILLING_WEBHOOK_SECRET` | Shared HMAC secret |
-| `AUTLANTIC_BILLING_WEBHOOK_URL` | Destination URL for delivered events (hosted API / worker) |
+| `AUTLANTIC_BILLING_WEBHOOK_SECRET` | Endpoint signing secret for this environment |
+| `AUTLANTIC_BILLING_WEBHOOK_URL` | Optional platform destination (billing-worker / engine), not your merchant URL |

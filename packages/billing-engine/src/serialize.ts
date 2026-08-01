@@ -5,6 +5,7 @@ import type {
   RecurringSubscription,
 } from "@autlantic/payments-recurring-core";
 import type { OneTimePayment } from "./one-time";
+import type { PaymentLink } from "./payment-links";
 
 export type BillingStoreSnapshot = {
   subscriptions: RecurringSubscription[];
@@ -12,6 +13,7 @@ export type BillingStoreSnapshot = {
   mandates: RecurringMandate[];
   invoices: RecurringInvoice[];
   oneTimePayments?: OneTimePayment[];
+  paymentLinks?: PaymentLink[];
 };
 
 const DATE_FIELDS_SUB = new Set([
@@ -33,6 +35,8 @@ const DATE_FIELDS_INV = new Set([
 const DATE_FIELDS_MANDATE = new Set(["createdAt", "activatedAt"]);
 
 const DATE_FIELDS_PAYMENT = new Set(["createdAt", "paidAt", "canceledAt"]);
+
+const DATE_FIELDS_LINK = new Set(["createdAt", "expiresAt", "disabledAt"]);
 
 function reviveDates<T extends Record<string, unknown>>(
   row: T,
@@ -70,5 +74,8 @@ export function parseBillingSnapshot(raw: string): BillingStoreSnapshot {
     oneTimePayments: (parsed.oneTimePayments ?? []).map((p) =>
       reviveDates(p as unknown as Record<string, unknown>, DATE_FIELDS_PAYMENT),
     ) as OneTimePayment[],
+    paymentLinks: (parsed.paymentLinks ?? []).map((l) =>
+      reviveDates(l as unknown as Record<string, unknown>, DATE_FIELDS_LINK),
+    ) as PaymentLink[],
   };
 }

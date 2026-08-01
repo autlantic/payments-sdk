@@ -5,6 +5,7 @@ import type {
   RecurringSubscription,
 } from "@autlantic/payments-recurring-core";
 import type { OneTimePayment } from "./one-time";
+import type { PaymentLink } from "./payment-links";
 import type { BillingStoreSnapshot } from "./types";
 import type { BillingStore } from "./types";
 
@@ -16,6 +17,7 @@ export function createMemoryBillingStore(
   const mandates = new Map<string, RecurringMandate>();
   const invoices = new Map<string, RecurringInvoice>();
   const oneTimePayments = new Map<string, OneTimePayment>();
+  const paymentLinks = new Map<string, PaymentLink>();
 
   if (initial) {
     for (const row of initial.subscriptions) subscriptions.set(row.id, row);
@@ -23,6 +25,7 @@ export function createMemoryBillingStore(
     for (const row of initial.mandates) mandates.set(row.id, row);
     for (const row of initial.invoices) invoices.set(row.id, row);
     for (const row of initial.oneTimePayments ?? []) oneTimePayments.set(row.id, row);
+    for (const row of initial.paymentLinks ?? []) paymentLinks.set(row.id, row);
   }
 
   return {
@@ -84,6 +87,16 @@ export function createMemoryBillingStore(
       return [...oneTimePayments.values()].filter((p) => p.merchantId === merchantId);
     },
 
+    savePaymentLink(link) {
+      paymentLinks.set(link.id, link);
+    },
+    getPaymentLink(id) {
+      return paymentLinks.get(id) ?? null;
+    },
+    listPaymentLinksByMerchant(merchantId) {
+      return [...paymentLinks.values()].filter((l) => l.merchantId === merchantId);
+    },
+
     snapshot() {
       return {
         subscriptions: [...subscriptions.values()],
@@ -91,6 +104,7 @@ export function createMemoryBillingStore(
         mandates: [...mandates.values()],
         invoices: [...invoices.values()],
         oneTimePayments: [...oneTimePayments.values()],
+        paymentLinks: [...paymentLinks.values()],
       };
     },
   };

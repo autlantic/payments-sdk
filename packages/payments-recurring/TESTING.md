@@ -1,60 +1,116 @@
-# Testing - @autlantic/payments-recurring
-
-All commands below run in this repository (`autlantic/payments-sdk`).
+# Testing — @autlantic/payments-recurring
 
 ## Quick check
 
 ```bash
-pnpm check      # build + unit tests for all packages
-pnpm example    # in-process sandbox demo
+pnpm check:recurring-sdk
+pnpm --filter @autlantic/payments-recurring example
 ```
 
-## In-process sandbox
+## Sandbox SDK (in-process)
 
-No hosted API required. State lives in memory for the process lifetime.
+No billing API required.
 
 ```ts
-import { AutlanticBilling } from "@autlantic/payments-recurring";
-
 const billing = AutlanticBilling.sandbox({ merchantId: "mer_demo" });
-
-const { subscription } = await billing.createSubscription({
-  merchantRef: "order_123",
-  customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
-  payoutAddressEvm: "0x1111111111111111111111111111111111111111",
-  amountUsdc: 20,
-  interval: "month",
-});
-
-const { charge } = await billing.activateSubscription(subscription.id);
-// charge.invoice.status === "paid" in the default sandbox path
+const { subscription, invoice } = await billing.createSubscription({ ... });
+await billing.activateSubscription(subscription.id);
 ```
 
-## What to cover
+## Billing API + worker (shared file store)
 
-1. Create subscription (status `incomplete`, first invoice `open`)
-2. `activateSubscription` (mandate + first charge)
-3. Later renewals with `chargeInvoice` on a new open invoice
-4. Cancel, refund, and void
-5. Webhook sign / verify with `signBillingWebhook` and `verifyBillingWebhook`
-
-## E2E smoke (no servers)
+Terminal 1:
 
 ```bash
-pnpm --filter @autlantic/payments-recurring exec tsx examples/e2e-recurring-billing.mts
+export AUTLANTIC_BILLING_STORE_PATH=.autlantic/billing-store.json
+pnpm dev:billing-api
 ```
 
-## Webhooks
+Terminal 2:
 
-Use a test secret only. Never commit production webhook secrets.
-
-```ts
-import { signBillingWebhook, verifyBillingWebhook } from "@autlantic/payments-recurring";
-
-const { body, signature } = signBillingWebhook("whsec_test", event);
-verifyBillingWebhook("whsec_test", body, signature);
+```bash
+export AUTLANTIC_BILLING_STORE_PATH=.autlantic/billing-store.json
+pnpm dev:billing-worker
 ```
 
-## Hosted API
+Create a subscription:
 
-Remote billing (`apiBaseUrl` + API key) is provided by Autlantic’s hosted service, not by scripts in this repo. See [Hosted HTTP API](https://docs.autlantic.com/api/http) and `AutlanticBilling.fromEnv()`.
+```bash
+curl -s -X POST http://localhost:8788/v1/subscriptions \
+  -H "X-Autlantic-Api-Key: abk_test_local" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchantRef": "order_api_1",
+    "customerWallet": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+    "payoutAddressEvm": "0x1111111111111111111111111111111111111111",
+    "amountUsdc": 20,
+    "interval": "month"
+  }'
+```
+
+Open the returned `checkoutUrl` in a browser. Test key: **Pay in test mode** (badge **Test · Base Sepolia**). Live key: **Connect wallet**, then approve and pay on Base mainnet.
+
+## Failure scenarios
+
+```bash
+curl -s -X POST http://localhost:8788/v1/invoices/INV_ID/charge \
+  -H "X-Autlantic-Api-Key: abk_test_local" \
+  -H "Content-Type: application/json" \
+  -d '{"sandboxMode":"insufficient_balance"}'
+```
+
+Retries follow the default policy: immediate, +1d, +2d, +4d, then `past_due`.
+
+## Autlantic web app (Postgres store)
+
+When `DATABASE_URL` is set, billing defaults to `AUTLANTIC_BILLING_STORE=prisma` automatically.
+
+Terminal 1 (web):
+
+```bash
+export AUTLANTIC_BILLING_SANDBOX=1
+pnpm dev
+```
+
+Terminal 2 (renewals worker):
+
+```bash
+export AUTLANTIC_BILLING_SANDBOX=1
+export AUTLANTIC_BILLING_WEBHOOK_URL=http://localhost:3001/api/webhooks/recurring-billing
+pnpm dev:billing-worker
+```
+
+Or run API + worker together:
+
+```bash
+pnpm dev:billing-all
+```
+
+Creator flow:
+
+1. Settings → Payout wallet → add EVM address + enable USDC auto-renew
+2. Storefront → **Subscribe with USDC (auto-renew)** → connect wallet (browser or WalletConnect)
+3. Test checkout → **Pay in test mode**
+
+WalletConnect (optional): set `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` from [Reown Cloud](https://cloud.reown.com).
+
+Member can cancel auto-renew under Account → Memberships → USDC auto-renew.
+
+E2E smoke (no servers):
+
+```bash
+pnpm test:e2e:recurring-billing
+pnpm test:e2e:payment-links
+```
+
+## Smart contract tests (Foundry)
+
+```bash
+cd contracts
+forge install foundry-rs/forge-std --no-commit 2>/dev/null || true
+forge test
+```
+
+## Webhook verification
+
+Set `AUTLANTIC_BILLING_WEBHOOK_URL` to a request bin or your app endpoint. Events are POSTed with HMAC `x-autlantic-signature`.

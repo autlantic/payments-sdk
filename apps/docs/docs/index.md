@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Autlantic Billing
   text: USDC on Base
-  tagline: TypeScript SDK and hosted API for USDC subscriptions and one-time payments. Direct payouts to your EVM wallet, vault checkout, sandbox testing.
+  tagline: TypeScript SDK and hosted API for USDC subscriptions, one-time payments, and shareable payment links. Direct payouts to your EVM wallet, Test and Live keys.
   actions:
     - theme: brand
       text: Get started
@@ -13,21 +13,18 @@ hero:
       text: npm package
       link: https://www.npmjs.com/package/@autlantic/payments-recurring
     - theme: alt
-      text: GitHub
-      link: https://github.com/autlantic/payments-sdk
-    - theme: alt
       text: Autlantic product
       link: https://autlantic.com
 
 features:
   - title: npm SDK
-    details: "@autlantic/payments-recurring 0.2.7: catalog products, subscriptions, one-time payments, invoices, and webhooks. TypeScript, Node 20+."
-  - title: Typed reference
-    details: "Exported TypeScript interfaces, InvoiceFailureCode, retry policy, and lifecycle diagrams in the docs."
+    details: "@autlantic/payments-recurring: subscriptions, one-time payments, payment links, refunds, and webhooks. TypeScript, Node 20+."
+  - title: Payment links
+    details: "Fixed-amount shareable URL and QR. Payer opens hosted checkout; USDC settles to your wallet."
   - title: Hosted API
     details: "REST with API key when you do not want Node in your stack. Same billing engine as the SDK."
-  - title: Sandbox mode
-    details: "Base Sepolia / in-process sandbox. Test activate, failures, and renewals before mainnet."
+  - title: Test and Live
+    details: "abk_test_ keys on Base Sepolia, abk_live_ keys on Base mainnet. Same Stripe-style split as the merchant portal."
 ---
 
 ## Two ways to integrate
@@ -38,21 +35,25 @@ features:
 | **Hosted HTTP API** | Any stack (curl, mobile, PHP), API key only |
 
 ```bash
-npm install @autlantic/payments-recurring@^0.2.7
+npm install @autlantic/payments-recurring
 ```
 
 ```ts
 import { AutlanticBilling } from "@autlantic/payments-recurring";
 
-const billing = AutlanticBilling.sandbox({ merchantId: "mer_demo" });
+// Hosted: set AUTLANTIC_BILLING_API_KEY to abk_test_… or abk_live_…
+const billing = AutlanticBilling.fromEnv();
 
-const { subscription, invoice } = await billing.createSubscription({
-  merchantRef: "order_123",
-  customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+// Or local in-process demo:
+// const billing = AutlanticBilling.sandbox({ merchantId: "mer_demo" });
+
+const { url } = await billing.createPaymentLink({
+  merchantRefPrefix: "invoice",
   payoutAddressEvm: "0xYourMerchantWallet…",
-  amountUsdc: 20,
-  interval: "month",
+  amountUsdc: 42,
+  description: "Consulting",
 });
+// Share url or QR → /checkout/link/:id
 ```
 
-See [Getting started](/guide/getting-started) for the full flow.
+See [Getting started](/guide/getting-started) for subscriptions, one-time pay, and payment links.

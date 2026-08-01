@@ -54,3 +54,22 @@ export type CreatePaymentRequest = {
   priceId?: string;
   metadata?: Record<string, string>;
 };
+
+/**
+ * Create a shareable payment link (URL / QR).
+ * Provide either `priceId` (catalog interval "once") or `amountUsdc`.
+ * Payer wallet is collected when the link is opened.
+ */
+export type CreatePaymentLinkRequest = {
+  /** Used as merchantRef prefix when minting payments (`prefix_1`, `prefix_2`, …). */
+  merchantRefPrefix?: string;
+  payoutAddressEvm: string;
+  amountUsdc?: number;
+  priceId?: string;
+  description?: string;
+  /** null / omit = unlimited opens */
+  maxUses?: number | null;
+  /** ISO date string when the link stops accepting opens */
+  expiresAt?: string | null;
+  metadata?: Record<string, string>;
+};

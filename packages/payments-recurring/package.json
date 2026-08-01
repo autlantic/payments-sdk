@@ -1,7 +1,7 @@
 {
   "name": "@autlantic/payments-recurring",
-  "version": "0.2.7",
-  "description": "Autlantic Billing SDK. USDC subscriptions and one-time payments on Base",
+  "version": "0.3.0",
+  "description": "Autlantic Billing SDK. USDC subscriptions, one-time payments, and payment links on Base",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
     "recurring",
     "one-time",
     "payments",
+    "payment-links",
     "billing",
     "crypto",
     "autlantic"

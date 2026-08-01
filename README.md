@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>USDC payments on Base</strong><br />
-  TypeScript SDK for subscriptions, one-time payments, invoices, webhooks, and sandbox testing.
+  TypeScript SDK for subscriptions, one-time payments, payment links, invoices, webhooks, and sandbox testing.
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 Autlantic Billing is the same engine that powers [Autlantic](https://autlantic.com) creator memberships:
 
-- Recurring **USDC** charges and **one-time** transfers on **Base**
+- Recurring **USDC** charges, **one-time** transfers, and shareable **payment links** on **Base**
 - Direct settlement to the merchant `payoutAddressEvm` (Autlantic does not custody subscription revenue)
 - Typed Node client, signed webhooks, and an in-process sandbox
 - Optional hosted HTTP API for non-Node stacks
@@ -40,6 +40,15 @@ import { AutlanticBilling } from "@autlantic/payments-recurring";
 
 const billing = AutlanticBilling.sandbox({ merchantId: "mer_demo" });
 
+// Payment link (share URL / QR)
+const { url } = await billing.createPaymentLink({
+  merchantRefPrefix: "invoice",
+  payoutAddressEvm: "0xYourMerchantWallet",
+  amountUsdc: 42,
+  description: "Consulting",
+});
+
+// Or subscription
 const { subscription } = await billing.createSubscription({
   merchantRef: "order_123",
   customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
@@ -62,10 +71,10 @@ Full guides: [docs.autlantic.com](https://docs.autlantic.com)
 
 | Package | Description |
 |---------|-------------|
-| [`@autlantic/payments-recurring`](./packages/payments-recurring) | Merchant client: subscriptions, invoices, refunds, webhooks |
+| [`@autlantic/payments-recurring`](./packages/payments-recurring) | Merchant client: subscriptions, one-time payments, payment links, webhooks |
 | [`@autlantic/payments-recurring-core`](./packages/payments-recurring-core) | Shared types, intervals, retry policy |
 | [`@autlantic/chain-evm`](./packages/chain-evm) | Base + USDC + vault helpers |
-| [`@autlantic/billing-engine`](./packages/billing-engine) | Subscription and invoice engine |
+| [`@autlantic/billing-engine`](./packages/billing-engine) | Subscription, invoice, and payment-link engine |
 
 Most integrators only need `@autlantic/payments-recurring`.
 

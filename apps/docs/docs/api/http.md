@@ -1,54 +1,39 @@
 # Hosted HTTP API
 
-The hosted billing HTTP API is operated by **Autlantic**. This open-source repo ships the TypeScript client and engine packages; it does not run the production API process.
+Run `pnpm dev:billing-api` (default `:8788`) or deploy `apps/billing-api`.
 
-Set `AUTLANTIC_BILLING_API_URL` to the base URL Autlantic gives you with your API key (same value you pass to the SDK). Paths below are relative to that base.
+Authenticate with `x-autlantic-api-key` (or `Authorization: Bearer`). Mode follows the key:
 
-```ts
-import { AutlanticBilling } from "@autlantic/payments-recurring";
+- `abk_test_…` → Test · Base Sepolia
+- `abk_live_…` → Live · Base mainnet
 
-const billing = AutlanticBilling.fromEnv();
-// AUTLANTIC_BILLING_API_URL   // base URL from Autlantic
-// AUTLANTIC_BILLING_API_KEY
-// AUTLANTIC_BILLING_MERCHANT_ID
-// AUTLANTIC_BILLING_SANDBOX
-// AUTLANTIC_BILLING_WEBHOOK_SECRET
-```
-
-For local demos without a remote API, use `AutlanticBilling.sandbox()` instead. See [Sandbox & testing](/guide/sandbox).
+Catalog, subscriptions, invoices, payments, payment links, and webhooks are scoped to that mode.
 
 ## Public checkout (no API key)
 
-Hosted checkout is a React wallet flow with EIP-6963 discovery, WalletConnect, and Connect → Approve → Pay for subscriptions (Connect → Pay for one-time). Redirect buyers to `checkoutUrl` from `createSubscription` / `createPayment`.
-
-Subscribe `/status` (and `.json`) is a **fast** session payload: amounts, PDFs, coupon fields, and flags such as `onchainPending`. It does **not** call Base RPC. The hosted SPA then loads `GET .../onchain` for allowance and vault resume when the session is still incomplete on live.
-
 | Method | Path | Purpose |
 |--------|------|---------|
-| `GET` | `/checkout/subscribe/:id` | Hosted subscription checkout (React SPA) |
-| `GET` | `/checkout/subscribe/:id/status` | Fast session status (no Base RPC) |
-| `GET` | `/checkout/subscribe/:id.json` | Same as `/status` |
-| `GET` | `/checkout/subscribe/:id/onchain` | Allowance + vault resume (Base RPC; live incomplete only) |
-| `POST` | `/checkout/subscribe/:id/wallet` | Sync connected `customerWallet` (incomplete only) |
-| `POST` | `/checkout/subscribe/:id/activate` | Activate (sandbox or live with `{ onChainSubscriptionId }`) |
-| `POST` | `/checkout/subscribe/:id/coupon` | Apply merchant coupon (`{ code }`) |
-| `DELETE` | `/checkout/subscribe/:id/coupon` | Remove applied coupon; restore list price |
-| `GET` | `/checkout/pay/:id` | Hosted one-time checkout (React SPA) |
-| `GET` | `/checkout/pay/:id/status` | Enriched one-time session |
-| `GET` | `/checkout/pay/:id.json` | Same as `/status` |
-| `POST` | `/checkout/pay/:id/confirm` | Confirm (sandbox, or live with `{ txHash }`) |
-| `POST` | `/checkout/pay/:id/coupon` | Apply merchant coupon (`{ code }`) |
-| `DELETE` | `/checkout/pay/:id/coupon` | Remove applied coupon; restore list price |
-
-Coupons are configured in the merchant portal. Apply/remove only works while the checkout session is still open (subscription incomplete, or payment open).
+| `GET` | `/checkout/subscribe/:id` | Hosted HTML subscription checkout |
+| `GET` | `/checkout/subscribe/:id.json` | Session JSON |
+| `POST` | `/checkout/subscribe/:id/activate` | Activate (test or live with `{ onChainSubscriptionId }`) |
+| `GET` | `/checkout/pay/:id` | Hosted one-time payment checkout |
+| `GET` | `/checkout/pay/:id/status` | Payment session JSON |
+| `POST` | `/checkout/pay/:id/confirm` | Confirm payment (`{ txHash? }`) |
+| `GET` | `/checkout/link/:id` | Payment link landing (URL / QR target) |
+| `GET` | `/checkout/link/:id/status` | Payment link status JSON |
+| `POST` | `/checkout/link/:id/open` | Mint a one-time payment from the link (`{ customerWallet? }`) |
 
 ## Authenticated (`X-Autlantic-Api-Key`)
 
 | Method | Path | Purpose |
 |--------|------|---------|
 | `GET` | `/v1/products` | List active catalog products and prices |
-| `POST` | `/v1/payments` | Create one-time payment (`priceId` once, or `amountUsdc`) |
-| `GET` | `/v1/payments/:id` | Fetch one-time payment |
+| `POST` | `/v1/payments` | Create one-time payment (`priceId` once or `amountUsdc`) |
+| `GET` | `/v1/payments/:id` | Fetch payment |
+| `POST` | `/v1/payment-links` | Create shareable payment link (returns `url`) |
+| `GET` | `/v1/payment-links` | List payment links |
+| `GET` | `/v1/payment-links/:id` | Fetch payment link |
+| `POST` | `/v1/payment-links/:id/disable` | Disable a payment link |
 | `GET` | `/v1/subscriptions` | List (`?status=active`) |
 | `POST` | `/v1/subscriptions` | Create (`priceId` or `amountUsdc` + `interval`) |
 | `GET` | `/v1/subscriptions/:id` | Fetch |
@@ -62,10 +47,25 @@ Coupons are configured in the merchant portal. Apply/remove only works while the
 | `POST` | `/v1/invoices/:id/refund` | Refund |
 | `POST` | `/v1/invoices/:id/void` | Void |
 
+### Create payment link body
+
+```json
+{
+  "amountUsdc": 42,
+  "merchantRefPrefix": "invoice",
+  "description": "Consulting",
+  "maxUses": 1,
+  "expiresAt": null,
+  "payoutAddressEvm": "0x…"
+}
+```
+
+Or pass a catalog `priceId` with interval `"once"` instead of `amountUsdc`. Response includes `paymentLink` and `url` (`/checkout/link/:id`). Encode `url` as a QR for in-person or shareable pay.
+
 ## Idempotency
 
 Pass `Idempotency-Key` on POST requests. Replays return the cached response for 24 hours.
 
 ## Renewals
 
-On Autlantic’s hosted stack, due invoices are processed by Autlantic’s billing worker using the same `AUTLANTIC_BILLING_*` configuration as the API. Self-hosting that worker is outside the scope of this public SDK repo.
+Due invoices are processed by `apps/billing-worker`. Test invoices sandbox-charge; live invoices use the mainnet vault/relayer path.

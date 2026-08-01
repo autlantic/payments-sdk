@@ -6,6 +6,7 @@ import type {
   RecurringSubscription,
 } from "@autlantic/payments-recurring-core";
 import type { OneTimePayment } from "./one-time";
+import type { PaymentLink } from "./payment-links";
 
 export type BillingStoreSnapshot = {
   subscriptions: RecurringSubscription[];
@@ -13,6 +14,7 @@ export type BillingStoreSnapshot = {
   mandates: RecurringMandate[];
   invoices: RecurringInvoice[];
   oneTimePayments?: OneTimePayment[];
+  paymentLinks?: PaymentLink[];
 };
 
 export type BillingStore = {
@@ -36,6 +38,10 @@ export type BillingStore = {
   saveOneTimePayment(payment: OneTimePayment): void;
   getOneTimePayment(id: string): OneTimePayment | null;
   listOneTimePaymentsByMerchant(merchantId: string): OneTimePayment[];
+
+  savePaymentLink(link: PaymentLink): void;
+  getPaymentLink(id: string): PaymentLink | null;
+  listPaymentLinksByMerchant(merchantId: string): PaymentLink[];
 
   snapshot(): BillingStoreSnapshot;
 };
