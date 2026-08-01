@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.1 - Align engine with hosted portal / billing
+
+Upstream features required by Autlantic hosted billing (portal, API, worker) so npm matches production behavior:
+
+- Test/Live `mode` on customers, subscriptions, invoices, and one-time payments
+- `resumeSubscription` for cancel-at-period-end undo
+- `chainIdForBillingMode("test" | "live")` (Sepolia vs Base)
+- `processDueInvoices` / `processDueInvoicesLive` optional `mode` filter
+- Checkout session extras: coupons, `listAmountUsdc`, `nextPaymentAt`, merchant branding
+- `BillingPersistAdapter.loadPaymentLink?` for cross-process link loads
+- Payment links stamp `mode` on minted one-time payments
+
+Package versions: `@autlantic/payments-recurring` / `@autlantic/billing-engine` **0.3.1**, `@autlantic/payments-recurring-core` / `@autlantic/chain-evm` **0.2.6**.
+
 ## 0.3.0 - Payment links (URL / QR)
 
 - Shareable **payment links**: fixed USDC amount, optional max uses / expiry

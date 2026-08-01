@@ -31,7 +31,7 @@ import type {
   CreateSubscriptionRequest,
 } from "./config";
 
-export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.0";
+export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.1";
 
 type ApiEnvelope<T> = T & { error?: string };
 

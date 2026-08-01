@@ -174,8 +174,8 @@ export function openPaymentLink(
       ...(existing.metadata ?? {}),
       paymentLinkId: existing.id,
       ...(existing.description ? { paymentLinkDescription: existing.description } : {}),
-      ...(existing.mode ? { billingMode: existing.mode } : {}),
     },
+    mode: existing.mode,
   });
 
   const link: PaymentLink = {

@@ -40,4 +40,29 @@ describe("one-time payments", () => {
     const again = confirmOneTimePayment(store, created.payment.id);
     assert.equal(again?.alreadyPaid, true);
   });
+
+  it("exposes coupon discount fields on checkout session", () => {
+    const store = createMemoryBillingStore();
+    const created = createOneTimePayment(store, {
+      merchantId: "mer_test",
+      merchantRef: "order_2",
+      customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+      payoutAddressEvm: "0x1111111111111111111111111111111111111111",
+      amountUsdc: 80,
+      chainId: 84532,
+      metadata: {
+        listAmountUsdc: "100",
+        couponCode: "SAVE20",
+        couponLabel: "20% off",
+      },
+    });
+
+    const session = buildOneTimeCheckoutSessionView(store, created.payment.id, {
+      sandbox: true,
+    });
+    assert.equal(session?.amountUsdc, 80);
+    assert.equal(session?.listAmountUsdc, 100);
+    assert.equal(session?.couponCode, "SAVE20");
+    assert.equal(session?.couponLabel, "20% off");
+  });
 });

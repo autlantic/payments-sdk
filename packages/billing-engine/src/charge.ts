@@ -189,12 +189,17 @@ function failCharge(
 export function processDueInvoices(
   store: BillingStore,
   until: Date,
-  options: { sandbox?: boolean } = {},
+  options: { sandbox?: boolean; mode?: "test" | "live" } = {},
 ): ChargeInvoiceResult[] {
   const due = store.listOpenInvoicesDueBefore(until);
   const results: ChargeInvoiceResult[] = [];
 
   for (const invoice of due) {
+    if (options.mode) {
+      const subscription = store.getSubscription(invoice.subscriptionId);
+      const recordMode = invoice.mode ?? subscription?.mode ?? "test";
+      if (recordMode !== options.mode) continue;
+    }
     const result = attemptInvoiceCharge(store, invoice.id, options);
     if (result) results.push(result);
   }
@@ -215,6 +220,7 @@ export async function processDueInvoicesLive(
     invoice: RecurringInvoice;
     onChainSubscriptionId: string;
   }) => Promise<LiveChargeSubmitResult>,
+  options: { mode?: "test" | "live" } = {},
 ): Promise<ChargeInvoiceResult[]> {
   const due = store.listOpenInvoicesDueBefore(until);
   const results: ChargeInvoiceResult[] = [];
@@ -222,6 +228,10 @@ export async function processDueInvoicesLive(
   for (const invoice of due) {
     const subscription = store.getSubscription(invoice.subscriptionId);
     if (!subscription) continue;
+    if (options.mode) {
+      const recordMode = invoice.mode ?? subscription.mode ?? "test";
+      if (recordMode !== options.mode) continue;
+    }
 
     const onChainSubscriptionId = getOnChainSubscriptionId(subscription);
     if (!onChainSubscriptionId) {

@@ -39,6 +39,8 @@ export type RecurringCustomer = {
   id: string;
   merchantId: string;
   walletAddress: string;
+  /** test | live — matches the API key that created this customer */
+  mode?: "test" | "live";
 };
 
 export type RecurringMandate = {
@@ -72,6 +74,8 @@ export type RecurringSubscription = {
   cancelAtPeriodEnd: boolean;
   canceledAt?: Date;
   metadata?: Record<string, string>;
+  /** test | live — matches the API key that created this subscription */
+  mode?: "test" | "live";
   createdAt: Date;
   updatedAt: Date;
 };
@@ -92,6 +96,8 @@ export type RecurringInvoice = {
   refundAmountUsdc?: number;
   failureCode?: InvoiceFailureCode;
   failureMessage?: string;
+  /** test | live — matches the subscription / API key */
+  mode?: "test" | "live";
   createdAt: Date;
   updatedAt: Date;
 };
@@ -119,6 +125,8 @@ export type CreateSubscriptionInput = {
   /** Max single charge in USDC (default: amountUsdc). */
   maxChargeUsdc?: number;
   vaultAddress: string;
+  /** test | live — stamped from the authenticating API key */
+  mode?: "test" | "live";
 };
 
 export type BillingWebhookEvent<T extends BillingWebhookEventType = BillingWebhookEventType> = {

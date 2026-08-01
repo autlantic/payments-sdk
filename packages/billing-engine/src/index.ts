@@ -18,6 +18,7 @@ export {
   createSubscription,
   completeMandate,
   cancelSubscription,
+  resumeSubscription,
   createRenewalInvoice,
   createRenewalInvoiceWithEvent,
   advanceSubscriptionPeriod,
@@ -54,8 +55,8 @@ export {
 } from "./one-time";
 export {
   createPaymentLink,
-  openPaymentLink,
   disablePaymentLink,
+  openPaymentLink,
   paymentLinkIsOpen,
   resolvePaymentLinkStatus,
   type PaymentLink,

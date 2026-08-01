@@ -53,6 +53,8 @@ export type CheckoutSessionView = {
   subscriptionId: string;
   status: string;
   amountUsdc: number;
+  /** Pre-discount list price when a coupon is applied. */
+  listAmountUsdc?: number | null;
   interval: string;
   chainId: number;
   network: string;
@@ -66,13 +68,26 @@ export type CheckoutSessionView = {
   subscribeCalldata: string;
   planRef: string;
   periodDurationSeconds: number;
+  /** ISO timestamp for the next renewal charge (end of current period). */
+  nextPaymentAt: string;
   sandbox: boolean;
+  merchantDisplayName?: string | null;
+  merchantLogoUrl?: string | null;
+  merchantWebsiteUrl?: string | null;
+  couponCode?: string | null;
+  couponLabel?: string | null;
 };
 
 export function buildCheckoutSessionView(
   store: BillingStore,
   subscriptionId: string,
-  input: { vaultAddress: string; sandbox: boolean },
+  input: {
+    vaultAddress: string;
+    sandbox: boolean;
+    merchantDisplayName?: string | null;
+    merchantLogoUrl?: string | null;
+    merchantWebsiteUrl?: string | null;
+  },
 ): CheckoutSessionView | null {
   const subscription = store.getSubscription(subscriptionId);
   if (!subscription?.mandateId) return null;
@@ -101,10 +116,23 @@ export function buildCheckoutSessionView(
     periodDurationSeconds,
   });
 
+  const openInvoice = store
+    .listInvoicesBySubscription(subscriptionId)
+    .find((inv) => inv.status === "open");
+  const listFromMeta = subscription.metadata?.listAmountUsdc
+    ? Number(subscription.metadata.listAmountUsdc)
+    : null;
+  const amountUsdc = openInvoice?.amountUsdc ?? subscription.amountUsdc;
+  const listAmountUsdc =
+    listFromMeta != null && Number.isFinite(listFromMeta) && listFromMeta > amountUsdc
+      ? listFromMeta
+      : null;
+
   return {
     subscriptionId: subscription.id,
     status: subscription.status,
-    amountUsdc: subscription.amountUsdc,
+    amountUsdc,
+    listAmountUsdc,
     interval: subscription.interval,
     chainId: subscription.chainId,
     network: chain.name,
@@ -118,6 +146,16 @@ export function buildCheckoutSessionView(
     subscribeCalldata: subscribe.data,
     planRef,
     periodDurationSeconds,
+    nextPaymentAt: subscription.currentPeriodEnd.toISOString(),
     sandbox: input.sandbox,
+    merchantDisplayName: input.merchantDisplayName ?? null,
+    merchantLogoUrl: input.merchantLogoUrl ?? null,
+    merchantWebsiteUrl:
+      input.merchantWebsiteUrl ??
+      subscription.metadata?.returnUrl ??
+      subscription.metadata?.successUrl ??
+      null,
+    couponCode: subscription.metadata?.couponCode ?? null,
+    couponLabel: subscription.metadata?.couponLabel ?? null,
   };
 }

@@ -27,6 +27,8 @@ export type OneTimePayment = {
   productName?: string;
   chainId: BillingChainId;
   metadata?: Record<string, string>;
+  /** test | live — matches the API key that created this payment */
+  mode?: "test" | "live";
   createdAt: Date;
   paidAt?: Date;
   txHash?: string;
@@ -43,6 +45,8 @@ export type CreateOneTimePaymentInput = {
   priceId?: string;
   productName?: string;
   metadata?: Record<string, string>;
+  /** test | live — stamped from the authenticating API key */
+  mode?: "test" | "live";
 };
 
 export type CreateOneTimePaymentResult = {
@@ -60,6 +64,8 @@ export type OneTimeCheckoutSessionView = {
   paymentId: string;
   status: OneTimePaymentStatus;
   amountUsdc: number;
+  /** Pre-discount list price when a coupon is applied. */
+  listAmountUsdc?: number | null;
   interval: "once";
   chainId: number;
   network: string;
@@ -72,6 +78,8 @@ export type OneTimeCheckoutSessionView = {
   merchantDisplayName?: string | null;
   merchantLogoUrl?: string | null;
   merchantWebsiteUrl?: string | null;
+  couponCode?: string | null;
+  couponLabel?: string | null;
 };
 
 export function createOneTimePayment(
@@ -95,6 +103,7 @@ export function createOneTimePayment(
     productName: input.productName,
     chainId: input.chainId,
     metadata: input.metadata,
+    mode: input.mode,
     createdAt: now,
   };
 
@@ -169,11 +178,19 @@ export function buildOneTimeCheckoutSessionView(
   const chain = chainConfigFor(payment.chainId);
   const amountMicro = usdcToMicro(payment.amountUsdc);
   const transferCalldata = encodeTransferCalldata(payment.payoutAddressEvm, amountMicro);
+  const listFromMeta = payment.metadata?.listAmountUsdc
+    ? Number(payment.metadata.listAmountUsdc)
+    : null;
+  const listAmountUsdc =
+    listFromMeta != null && Number.isFinite(listFromMeta) && listFromMeta > payment.amountUsdc
+      ? listFromMeta
+      : null;
 
   return {
     paymentId: payment.id,
     status: payment.status,
     amountUsdc: payment.amountUsdc,
+    listAmountUsdc,
     interval: "once",
     chainId: payment.chainId,
     network: chain.name,
@@ -186,5 +203,7 @@ export function buildOneTimeCheckoutSessionView(
     merchantDisplayName: input.merchantDisplayName,
     merchantLogoUrl: input.merchantLogoUrl,
     merchantWebsiteUrl: input.merchantWebsiteUrl,
+    couponCode: payment.metadata?.couponCode ?? null,
+    couponLabel: payment.metadata?.couponLabel ?? null,
   };
 }

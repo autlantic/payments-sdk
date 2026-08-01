@@ -16,6 +16,8 @@ export type BillingPersistAdapter = {
   saveInvoice(invoice: RecurringInvoice): Promise<void>;
   saveOneTimePayment(payment: OneTimePayment): Promise<void>;
   savePaymentLink(link: PaymentLink): Promise<void>;
+  /** Optional: load a single link when another process created it (portal ↔ API). */
+  loadPaymentLink?(id: string): Promise<PaymentLink | null>;
   loadSnapshot(): Promise<BillingStoreSnapshot>;
 };
 

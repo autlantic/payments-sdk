@@ -8,6 +8,7 @@ export {
   CHAIN_CONFIG,
   chainConfigFor,
   defaultSandboxChainId,
+  chainIdForBillingMode,
   usdcToMicro,
   microToUsdc,
   encodeApproveCalldata,

@@ -38,6 +38,7 @@ export function createSubscription(
     id: customerId,
     merchantId: input.merchantId,
     walletAddress,
+    mode: input.mode,
   };
 
   const periodStart = now;
@@ -72,6 +73,7 @@ export function createSubscription(
     currentPeriodEnd: periodEnd,
     cancelAtPeriodEnd: false,
     metadata: input.metadata,
+    mode: input.mode,
     createdAt: now,
     updatedAt: now,
   };
@@ -84,6 +86,7 @@ export function createSubscription(
     amountUsdc: input.amountUsdc,
     dueAt: now,
     attemptCount: 0,
+    mode: input.mode,
     createdAt: now,
     updatedAt: now,
   };
@@ -169,6 +172,29 @@ export function cancelSubscription(
   };
 }
 
+/** Clear cancel-at-period-end so renewals resume. */
+export function resumeSubscription(
+  store: BillingStore,
+  subscriptionId: string,
+): { subscription: RecurringSubscription; events: BillingWebhookEvent[] } | null {
+  const subscription = store.getSubscription(subscriptionId);
+  if (!subscription || subscription.status === "canceled") return null;
+  if (!subscription.cancelAtPeriodEnd) return null;
+
+  const now = new Date();
+  const updated: RecurringSubscription = {
+    ...subscription,
+    cancelAtPeriodEnd: false,
+    updatedAt: now,
+  };
+  store.saveSubscription(updated);
+
+  return {
+    subscription: updated,
+    events: [createWebhookEvent("subscription.updated", { subscription: updated })],
+  };
+}
+
 export function createRenewalInvoice(
   store: BillingStore,
   subscriptionId: string,
@@ -186,6 +212,7 @@ export function createRenewalInvoice(
     amountUsdc: subscription.amountUsdc,
     dueAt: subscription.currentPeriodEnd,
     attemptCount: 0,
+    mode: subscription.mode,
     createdAt: now,
     updatedAt: now,
   };

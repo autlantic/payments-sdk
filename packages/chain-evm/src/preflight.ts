@@ -36,6 +36,7 @@ export async function findVaultSubscriptionForCheckout(input: {
   const merchant = normalizeEvmAddress(input.merchantWallet);
   const amountMicro = usdcToMicro(input.amountUsdc);
   const maxScan = input.maxScan ?? 32;
+  const concurrency = 8;
 
   let upperBound = maxScan;
   try {
@@ -46,21 +47,33 @@ export async function findVaultSubscriptionForCheckout(input: {
 
   if (upperBound < 1) return null;
 
-  for (let id = upperBound; id >= 1; id--) {
-    try {
-      const sub = await readVaultSubscription({
-        chainId: input.chainId,
-        vaultAddress: input.vaultAddress,
-        onChainSubscriptionId: String(id),
-      });
-      if (!sub?.active) continue;
-      if (normalizeEvmAddress(sub.customer) !== customer) continue;
-      if (normalizeEvmAddress(sub.merchant) !== merchant) continue;
-      if (sub.amountPerPeriodMicro !== amountMicro) continue;
-      return String(id);
-    } catch {
-      continue;
+  for (let start = upperBound; start >= 1; start -= concurrency) {
+    const ids: number[] = [];
+    for (let id = start; id >= Math.max(1, start - concurrency + 1); id -= 1) {
+      ids.push(id);
     }
+
+    const matches = await Promise.all(
+      ids.map(async (id) => {
+        try {
+          const sub = await readVaultSubscription({
+            chainId: input.chainId,
+            vaultAddress: input.vaultAddress,
+            onChainSubscriptionId: String(id),
+          });
+          if (!sub?.active) return null;
+          if (normalizeEvmAddress(sub.customer) !== customer) return null;
+          if (normalizeEvmAddress(sub.merchant) !== merchant) return null;
+          if (sub.amountPerPeriodMicro !== amountMicro) return null;
+          return String(id);
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    const hit = matches.find((value): value is string => Boolean(value));
+    if (hit) return hit;
   }
 
   return null;
