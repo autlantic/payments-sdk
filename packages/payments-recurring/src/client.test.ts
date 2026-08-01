@@ -76,4 +76,53 @@ describe("AutlanticBilling sandbox", () => {
     assert.equal(verifyBillingWebhook("secret", body, signature), true);
     assert.equal(verifyBillingWebhook("wrong", body, signature), false);
   });
+
+  it("covers list/get/cancel/refund/void sandbox client surface", async () => {
+    const billing = AutlanticBilling.sandbox({ merchantId: "mer_demo" });
+    const wallet = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0";
+    const payout = "0x1111111111111111111111111111111111111111";
+
+    const created = await billing.createSubscription({
+      merchantRef: "order_surface_1",
+      customerWallet: wallet,
+      payoutAddressEvm: payout,
+      amountUsdc: 18,
+      interval: "month",
+    });
+    await billing.activateSubscription(created.subscription.id);
+
+    const listed = await billing.listSubscriptions();
+    assert.ok(listed.subscriptions.some((s) => s.id === created.subscription.id));
+    assert.equal((await billing.getSubscription(created.subscription.id)).status, "active");
+
+    const invoices = await billing.listInvoices({ subscriptionId: created.subscription.id });
+    const paid = invoices.invoices.find((i) => i.status === "paid");
+    assert.ok(paid);
+    assert.equal((await billing.refundInvoice(paid.id)).invoice.status, "refunded");
+
+    const openSub = await billing.createSubscription({
+      merchantRef: "order_surface_void",
+      customerWallet: wallet,
+      payoutAddressEvm: payout,
+      amountUsdc: 11,
+      interval: "month",
+    });
+    const openInv = (await billing.listInvoices({ subscriptionId: openSub.subscription.id }))
+      .invoices[0];
+    assert.ok(openInv);
+    assert.equal((await billing.voidInvoice(openInv.id)).invoice.status, "void");
+
+    const canceled = await billing.cancelSubscription(created.subscription.id, false);
+    assert.equal(canceled.subscription.cancelAtPeriodEnd, true);
+
+    const pay = await billing.createPayment({
+      merchantRef: "order_surface_pay",
+      customerWallet: wallet,
+      payoutAddressEvm: payout,
+      amountUsdc: 7,
+    });
+    assert.equal((await billing.getPayment(pay.payment.id)).id, pay.payment.id);
+    assert.ok(Array.isArray(await billing.listPaymentLinks()));
+    assert.ok(Array.isArray((await billing.listProducts()).products));
+  });
 });
