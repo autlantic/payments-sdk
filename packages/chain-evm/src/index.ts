@@ -34,6 +34,7 @@ export {
   encodeChargeCalldata,
   logRelayerIntent,
   type RelayerChargeIntent,
+  type RelayerLogFn,
 } from "./relayer";
 
 export {

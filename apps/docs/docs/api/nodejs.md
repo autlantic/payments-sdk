@@ -22,9 +22,12 @@ new AutlanticBilling({
   merchantId: string;
   sandbox?: boolean;
   webhookSecret?: string;
+  debug?: boolean;
+  logLevel?: "debug" | "info" | "warn" | "error";
+  logger?: BillingLogger;
 });
 
-AutlanticBilling.sandbox({ merchantId, webhookSecret? });
+AutlanticBilling.sandbox({ merchantId, webhookSecret?, debug?, logger? });
 AutlanticBilling.fromEnv();
 ```
 
@@ -35,6 +38,8 @@ AutlanticBilling.fromEnv();
 | `AUTLANTIC_BILLING_MERCHANT_ID` | Merchant id |
 | `AUTLANTIC_BILLING_WEBHOOK_SECRET` | Endpoint signing secret for this env |
 | `AUTLANTIC_BILLING_SANDBOX` | Optional in-process / local override |
+| `AUTLANTIC_BILLING_DEBUG` | Opt-in redacted HTTP / SDK debug logs |
+| `AUTLANTIC_BILLING_LOG_LEVEL` | `debug` \| `info` \| `warn` \| `error` |
 
 ### Methods
 
@@ -86,10 +91,17 @@ Portal merchants can also create links under **Payment links** (URL + QR).
 import {
   signBillingWebhook,
   verifyBillingWebhook,
+  verifyBillingWebhookDetailed,
   parseBillingWebhookEvent,
+  parseBillingWebhookEventDetailed,
+  assertBillingWebhook,
 } from "@autlantic/payments-recurring";
 ```
 
-Header: `x-autlantic-signature`. Verify with the portal endpoint secret for Test or Live.
+Header: `x-autlantic-signature`. Verify with the portal endpoint secret for Test or Live. Argument order: `(secret, rawBody, signatureHeader)`.
 
 Events include `subscription.*`, `invoice.*`, and `payment.created` / `payment.paid` (one-time and payment-link flows).
+
+### Errors and debugging
+
+Throws **`AutlanticBillingError`** (`code`, `type`, `statusCode`, `requestId`). Enable `debug: true` or `AUTLANTIC_BILLING_DEBUG=1` for redacted HTTP traces. Full guide: [Debugging](/guide/debugging).

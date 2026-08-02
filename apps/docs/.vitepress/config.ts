@@ -42,6 +42,7 @@ export default withMermaid(
             { text: "Payment links", link: "/guide/payment-links" },
             { text: "Lifecycle", link: "/guide/lifecycle" },
             { text: "Error codes", link: "/guide/errors" },
+            { text: "Debugging", link: "/guide/debugging" },
             { text: "Retries", link: "/guide/retries" },
             { text: "Sandbox & testing", link: "/guide/sandbox" },
             { text: "Webhooks", link: "/guide/webhooks" },

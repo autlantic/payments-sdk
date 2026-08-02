@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.2 - Enterprise SDK diagnostics
+
+- Pluggable **`BillingLogger`** + opt-in **`debug`** / `AUTLANTIC_BILLING_DEBUG`
+- Redacted HTTP request/response traces (`X-Autlantic-Client-Request-Id`, sdk version header)
+- Typed **`AutlanticBillingError`** (`code`, `type`, `statusCode`, `requestId`)
+- Webhook **`verifyBillingWebhookDetailed`**, **`parseBillingWebhookEventDetailed`**, **`assertBillingWebhook`**
+- Write-through store persist failures no longer hardcode `console.error` (optional `onPersistError`)
+- `logRelayerIntent` is silent unless a log fn is passed
+- Docs: [Debugging](/guide/debugging); fixed webhook verify argument order
+
+Package versions: `@autlantic/payments-recurring` / `@autlantic/billing-engine` **0.3.2**, `@autlantic/chain-evm` **0.2.7**.
+
 ## 0.3.1 - Align engine with hosted portal / billing
 
 Upstream features required by Autlantic hosted billing (portal, API, worker) so npm matches production behavior:

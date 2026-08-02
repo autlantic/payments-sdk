@@ -74,15 +74,21 @@ export function buildApproveTransaction(input: {
   };
 }
 
-export function logRelayerIntent(intent: RelayerChargeIntent): void {
-  console.log(
-    `[relayer${intent.sandbox ? "-sandbox" : ""}] charge`,
-    `onChain=${intent.onChainSubscriptionId}`,
-    intent.engineSubscriptionId ? `engine=${intent.engineSubscriptionId}` : "",
-    `${intent.amountUsdc} USDC`,
-    intent.customerWallet,
-    "→",
-    intent.merchantWallet,
-    intent.chargeCalldata.slice(0, 18) + "…",
-  );
+export type RelayerLogFn = (message: string, meta?: Record<string, unknown>) => void;
+
+/**
+ * Format a relayer charge intent for ops logs.
+ * Silent by default; pass `log` to emit (e.g. your BillingLogger.info).
+ */
+export function logRelayerIntent(intent: RelayerChargeIntent, log?: RelayerLogFn): void {
+  if (!log) return;
+  log(`[relayer${intent.sandbox ? "-sandbox" : ""}] charge`, {
+    onChainSubscriptionId: intent.onChainSubscriptionId,
+    engineSubscriptionId: intent.engineSubscriptionId ?? null,
+    amountUsdc: intent.amountUsdc,
+    customerWallet: intent.customerWallet,
+    merchantWallet: intent.merchantWallet,
+    calldataPrefix: `${intent.chargeCalldata.slice(0, 18)}…`,
+    sandbox: intent.sandbox,
+  });
 }

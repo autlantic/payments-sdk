@@ -22,9 +22,12 @@ new AutlanticBilling({
   merchantId: string;
   sandbox?: boolean;
   webhookSecret?: string;
+  debug?: boolean;
+  logLevel?: "debug" | "info" | "warn" | "error";
+  logger?: BillingLogger;
 });
 
-AutlanticBilling.sandbox({ merchantId, webhookSecret? });
+AutlanticBilling.sandbox({ merchantId, webhookSecret?, debug?, logger? });
 AutlanticBilling.fromEnv();
 ```
 
@@ -37,6 +40,8 @@ Env vars:
 | `AUTLANTIC_BILLING_MERCHANT_ID` | Merchant id |
 | `AUTLANTIC_BILLING_WEBHOOK_SECRET` | Endpoint signing secret for this env |
 | `AUTLANTIC_BILLING_SANDBOX` | Optional; in-process / local override |
+| `AUTLANTIC_BILLING_DEBUG` | `1` / `true` enables redacted HTTP + SDK debug logs |
+| `AUTLANTIC_BILLING_LOG_LEVEL` | `debug` \| `info` \| `warn` \| `error` |
 
 ### Methods
 
@@ -66,14 +71,32 @@ Env vars:
 ### Webhooks
 
 ```ts
-import { signBillingWebhook, verifyBillingWebhook, parseBillingWebhookEvent } from "@autlantic/payments-recurring";
+import {
+  signBillingWebhook,
+  verifyBillingWebhook,
+  verifyBillingWebhookDetailed,
+  parseBillingWebhookEvent,
+  parseBillingWebhookEventDetailed,
+  assertBillingWebhook,
+} from "@autlantic/payments-recurring";
 ```
 
 Header: `x-autlantic-signature`
 
 Events: `subscription.*`, `invoice.paid`, `invoice.payment_failed`, `invoice.refunded`, `invoice.voided`, `payment.*`
 
-Verify with the **endpoint** secret from the portal for that mode.
+Verify with the **endpoint** secret from the portal for that mode. Argument order: `(secret, rawBody, signatureHeader)`.
+
+### Errors and logging
+
+```ts
+import {
+  AutlanticBillingError,
+  createConsoleBillingLogger,
+} from "@autlantic/payments-recurring";
+```
+
+See [Debugging](https://docs.autlantic.com/guide/debugging).
 
 ### Idempotency
 

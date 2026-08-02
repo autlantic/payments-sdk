@@ -30,28 +30,73 @@ import type {
   CreatePaymentRequest,
   CreateSubscriptionRequest,
 } from "./config";
+import { AutlanticBillingError } from "./errors";
+import {
+  redactForLog,
+  redactHeadersForLog,
+  resolveBillingLogger,
+  type BillingLogger,
+} from "./logger";
 
-export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.1";
+export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.2";
 
-type ApiEnvelope<T> = T & { error?: string };
+type ApiEnvelope<T> = T & { error?: string; code?: string; requestId?: string };
+
+function newClientRequestId(): string {
+  return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function readRequestId(res: Response, fallback: string): string {
+  return (
+    res.headers.get("x-request-id") ||
+    res.headers.get("x-autlantic-request-id") ||
+    fallback
+  );
+}
 
 export class AutlanticBilling {
   private readonly config: AutlanticBillingConfig;
   private readonly localStore: BillingStore | null;
+  private readonly logger: BillingLogger;
 
   constructor(config: AutlanticBillingConfig) {
     this.config = config;
+    this.logger = resolveBillingLogger({
+      logger: config.logger,
+      debug: config.debug,
+      logLevel: config.logLevel,
+    });
     this.localStore =
       !config.apiBaseUrl && config.sandbox !== false
         ? createMemoryBillingStore()
         : null;
+    this.logger.debug("client.init", {
+      sdkVersion: AUTLANTIC_BILLING_SDK_VERSION,
+      merchantId: config.merchantId,
+      mode: this.localStore ? "sandbox-in-process" : "hosted",
+      sandbox: config.sandbox ?? null,
+      hasApiKey: Boolean(config.apiKey),
+      apiBaseUrl: config.apiBaseUrl ?? null,
+    });
   }
 
-  static sandbox(input: { merchantId: string; webhookSecret?: string }): AutlanticBilling {
+  /** Effective logger (custom or resolved console / noop). */
+  getLogger(): BillingLogger {
+    return this.logger;
+  }
+
+  static sandbox(input: {
+    merchantId: string;
+    webhookSecret?: string;
+    debug?: boolean;
+    logger?: BillingLogger;
+  }): AutlanticBilling {
     return new AutlanticBilling({
       merchantId: input.merchantId,
       sandbox: true,
       webhookSecret: input.webhookSecret ?? "whsec_billing_test",
+      debug: input.debug,
+      logger: input.logger,
     });
   }
 
@@ -64,6 +109,14 @@ export class AutlanticBilling {
         env.AUTLANTIC_BILLING_SANDBOX === "1" ||
         env.AUTLANTIC_BILLING_SANDBOX === "true",
       webhookSecret: env.AUTLANTIC_BILLING_WEBHOOK_SECRET?.trim(),
+      debug:
+        env.AUTLANTIC_BILLING_DEBUG === "1" ||
+        env.AUTLANTIC_BILLING_DEBUG === "true",
+      logLevel: (() => {
+        const raw = env.AUTLANTIC_BILLING_LOG_LEVEL?.trim().toLowerCase();
+        if (raw === "debug" || raw === "info" || raw === "warn" || raw === "error") return raw;
+        return undefined;
+      })(),
     });
   }
 
@@ -72,7 +125,7 @@ export class AutlanticBilling {
   ): Promise<CreateSubscriptionResult & { checkoutUrl?: string }> {
     if (this.localStore) {
       if (input.amountUsdc == null || input.interval == null) {
-        throw new Error(
+        throw AutlanticBillingError.validation(
           "Sandbox mode requires amountUsdc and interval (priceId is only resolved by the hosted API)",
         );
       }
@@ -87,6 +140,11 @@ export class AutlanticBilling {
         planId: input.planId ?? input.priceId,
         metadata: input.metadata,
         vaultAddress: VAULT_PLACEHOLDER_BASE_SEPOLIA,
+      });
+      this.logger.debug("sandbox.createSubscription", {
+        subscriptionId: result.subscription.id,
+        amountUsdc: input.amountUsdc,
+        interval: input.interval,
       });
       return {
         ...result,
@@ -106,7 +164,7 @@ export class AutlanticBilling {
   ): Promise<CreateOneTimePaymentResult & { checkoutUrl?: string }> {
     if (this.localStore) {
       if (input.amountUsdc == null) {
-        throw new Error(
+        throw AutlanticBillingError.validation(
           "Sandbox mode requires amountUsdc (priceId is only resolved by the hosted API)",
         );
       }
@@ -119,6 +177,10 @@ export class AutlanticBilling {
         chainId: defaultSandboxChainId(),
         priceId: input.priceId,
         metadata: input.metadata,
+      });
+      this.logger.debug("sandbox.createPayment", {
+        paymentId: result.payment.id,
+        amountUsdc: input.amountUsdc,
       });
       return {
         ...result,
@@ -137,7 +199,7 @@ export class AutlanticBilling {
   ): Promise<{ paymentLink: PaymentLink; url: string }> {
     if (this.localStore) {
       if (input.amountUsdc == null) {
-        throw new Error(
+        throw AutlanticBillingError.validation(
           "Sandbox mode requires amountUsdc (priceId is only resolved by the hosted API)",
         );
       }
@@ -152,6 +214,10 @@ export class AutlanticBilling {
         maxUses: input.maxUses,
         expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
         metadata: input.metadata,
+      });
+      this.logger.debug("sandbox.createPaymentLink", {
+        paymentLinkId: paymentLink.id,
+        amountUsdc: input.amountUsdc,
       });
       return {
         paymentLink,
@@ -179,7 +245,9 @@ export class AutlanticBilling {
   async getPaymentLink(id: string): Promise<{ paymentLink: PaymentLink; url?: string }> {
     if (this.localStore) {
       const paymentLink = this.localStore.getPaymentLink(id);
-      if (!paymentLink) throw new Error("Payment link not found");
+      if (!paymentLink) {
+        throw AutlanticBillingError.notFound("Payment link not found", { id });
+      }
       return {
         paymentLink: { ...paymentLink, status: resolvePaymentLinkStatus(paymentLink) },
         url: `sandbox://link/${paymentLink.id}`,
@@ -191,7 +259,9 @@ export class AutlanticBilling {
   async disablePaymentLink(id: string): Promise<{ paymentLink: PaymentLink; url?: string }> {
     if (this.localStore) {
       const paymentLink = disablePaymentLink(this.localStore, id);
-      if (!paymentLink) throw new Error("Payment link not found");
+      if (!paymentLink) {
+        throw AutlanticBillingError.notFound("Payment link not found", { id });
+      }
       return { paymentLink, url: `sandbox://link/${paymentLink.id}` };
     }
     return this.post(`/v1/payment-links/${id}/disable`, {});
@@ -211,33 +281,33 @@ export class AutlanticBilling {
   }> {
     if (this.localStore) {
       const result = openPaymentLink(this.localStore, id, input);
-      if ("error" in result) throw new Error(result.error);
+      if ("error" in result) {
+        throw new AutlanticBillingError({
+          message: result.error,
+          code: "payment_link_error",
+          type: "validation_error",
+          statusCode: 400,
+          details: { paymentLinkId: id },
+        });
+      }
       return {
         payment: result.payment,
         paymentLink: result.paymentLink,
         checkoutUrl: `sandbox://pay/${result.payment.id}`,
       };
     }
-    const base = this.config.apiBaseUrl?.replace(/\/$/, "");
-    if (!base) throw new Error("apiBaseUrl is required for remote mode");
-    const res = await fetch(`${base}/checkout/link/${id}/open`, {
+    const base = this.requireApiBase();
+    return this.fetchJson(`${base}/checkout/link/${id}/open`, {
       method: "POST",
-      headers: this.headers({ "Content-Type": "application/json" }),
-      body: JSON.stringify(input),
+      path: `/checkout/link/${id}/open`,
+      body: input,
     });
-    const json = (await res.json()) as ApiEnvelope<{
-      payment: OneTimePayment;
-      paymentLink: PaymentLink;
-      checkoutUrl?: string;
-    }>;
-    if (!res.ok) throw new Error(json.error ?? `Open failed (${res.status})`);
-    return json;
   }
 
   async getPayment(id: string): Promise<OneTimePayment> {
     if (this.localStore) {
       const payment = this.localStore.getOneTimePayment(id);
-      if (!payment) throw new Error("Payment not found");
+      if (!payment) throw AutlanticBillingError.notFound("Payment not found", { id });
       return payment;
     }
     const res = await this.get<{ payment: OneTimePayment }>(`/v1/payments/${id}`);
@@ -250,23 +320,23 @@ export class AutlanticBilling {
   ): Promise<{ payment: OneTimePayment; alreadyPaid?: boolean }> {
     if (this.localStore) {
       const result = confirmOneTimePayment(this.localStore, id, input);
-      if (!result) throw new Error("Could not confirm payment");
+      if (!result) {
+        throw new AutlanticBillingError({
+          message: "Could not confirm payment",
+          code: "payment_confirm_failed",
+          type: "api_error",
+          details: { paymentId: id },
+        });
+      }
       return { payment: result.payment, alreadyPaid: result.alreadyPaid };
     }
 
-    const base = this.config.apiBaseUrl?.replace(/\/$/, "");
-    if (!base) throw new Error("apiBaseUrl is required for remote mode");
-    const res = await fetch(`${base}/checkout/pay/${id}/confirm`, {
+    const base = this.requireApiBase();
+    return this.fetchJson(`${base}/checkout/pay/${id}/confirm`, {
       method: "POST",
-      headers: this.headers({ "Content-Type": "application/json" }),
-      body: JSON.stringify(input),
+      path: `/checkout/pay/${id}/confirm`,
+      body: input,
     });
-    const json = (await res.json()) as ApiEnvelope<{
-      payment: OneTimePayment;
-      alreadyPaid?: boolean;
-    }>;
-    if (!res.ok) throw new Error(json.error ?? `Confirm failed (${res.status})`);
-    return json;
   }
 
   /** Active products and prices from the merchant catalog (hosted API). */
@@ -277,7 +347,9 @@ export class AutlanticBilling {
     return this.get("/v1/products");
   }
 
-  async listSubscriptions(input?: { status?: string }): Promise<{ subscriptions: RecurringSubscription[] }> {
+  async listSubscriptions(input?: {
+    status?: string;
+  }): Promise<{ subscriptions: RecurringSubscription[] }> {
     if (this.localStore) {
       let subs = this.localStore.listSubscriptionsByMerchant(this.config.merchantId);
       if (input?.status) subs = subs.filter((s) => s.status === input.status);
@@ -288,12 +360,12 @@ export class AutlanticBilling {
   }
 
   async getCheckoutSession(id: string): Promise<{ session: unknown }> {
-    const base = this.config.apiBaseUrl?.replace(/\/$/, "");
-    if (!base) throw new Error("apiBaseUrl is required for remote mode");
-    const res = await fetch(`${base}/checkout/subscribe/${id}.json`);
-    const json = (await res.json()) as ApiEnvelope<{ session: unknown }>;
-    if (!res.ok) throw new Error(json.error ?? `Session failed (${res.status})`);
-    return json;
+    const base = this.requireApiBase();
+    return this.fetchJson(`${base}/checkout/subscribe/${id}.json`, {
+      method: "GET",
+      path: `/checkout/subscribe/${id}.json`,
+      auth: false,
+    });
   }
 
   async activateSubscription(
@@ -307,7 +379,14 @@ export class AutlanticBilling {
     if (this.localStore) {
       const { activateSubscriptionCheckout } = await import("@autlantic/billing-engine");
       const result = activateSubscriptionCheckout(this.localStore, id, { sandbox: true });
-      if (!result) throw new Error("Could not activate subscription");
+      if (!result) {
+        throw new AutlanticBillingError({
+          message: "Could not activate subscription",
+          code: "subscription_activate_failed",
+          type: "api_error",
+          details: { subscriptionId: id },
+        });
+      }
       return { subscription: result.subscription, charge: result.charge };
     }
 
@@ -315,26 +394,18 @@ export class AutlanticBilling {
       return this.post(`/v1/subscriptions/${id}/activate`, input);
     }
 
-    const base = this.config.apiBaseUrl?.replace(/\/$/, "");
-    if (!base) throw new Error("apiBaseUrl is required for remote mode");
-    const res = await fetch(`${base}/checkout/subscribe/${id}/activate`, {
+    const base = this.requireApiBase();
+    return this.fetchJson(`${base}/checkout/subscribe/${id}/activate`, {
       method: "POST",
-      headers: this.headers({ "Content-Type": "application/json" }),
-      body: JSON.stringify(input),
+      path: `/checkout/subscribe/${id}/activate`,
+      body: input,
     });
-    const json = (await res.json()) as ApiEnvelope<{
-      subscription: RecurringSubscription;
-      charge: ChargeInvoiceResult | null;
-      txHash?: string;
-    }>;
-    if (!res.ok) throw new Error(json.error ?? `Activation failed (${res.status})`);
-    return json;
   }
 
   async getSubscription(id: string): Promise<RecurringSubscription> {
     if (this.localStore) {
       const sub = this.localStore.getSubscription(id);
-      if (!sub) throw new Error("Subscription not found");
+      if (!sub) throw AutlanticBillingError.notFound("Subscription not found", { id });
       return sub;
     }
     return this.get(`/v1/subscriptions/${id}`);
@@ -351,7 +422,14 @@ export class AutlanticBilling {
   ): Promise<{ subscription: RecurringSubscription }> {
     if (this.localStore) {
       const result = updateSubscription(this.localStore, id, input);
-      if (!result) throw new Error("Could not update subscription");
+      if (!result) {
+        throw new AutlanticBillingError({
+          message: "Could not update subscription",
+          code: "subscription_update_failed",
+          type: "api_error",
+          details: { subscriptionId: id },
+        });
+      }
       return { subscription: result.subscription };
     }
     return this.patch(`/v1/subscriptions/${id}`, input);
@@ -360,7 +438,14 @@ export class AutlanticBilling {
   async completeSubscription(id: string): Promise<{ subscription: RecurringSubscription }> {
     if (this.localStore) {
       const result = completeMandate(this.localStore, id);
-      if (!result) throw new Error("Could not complete subscription");
+      if (!result) {
+        throw new AutlanticBillingError({
+          message: "Could not complete subscription",
+          code: "subscription_activate_failed",
+          type: "api_error",
+          details: { subscriptionId: id },
+        });
+      }
       return { subscription: result.subscription };
     }
     return this.post(`/v1/subscriptions/${id}/complete`, {});
@@ -372,7 +457,14 @@ export class AutlanticBilling {
   ): Promise<{ subscription: RecurringSubscription }> {
     if (this.localStore) {
       const result = cancelSubscription(this.localStore, id, immediate);
-      if (!result) throw new Error("Could not cancel subscription");
+      if (!result) {
+        throw new AutlanticBillingError({
+          message: "Could not cancel subscription",
+          code: "subscription_cancel_failed",
+          type: "api_error",
+          details: { subscriptionId: id },
+        });
+      }
       return { subscription: result.subscription };
     }
     return this.post(`/v1/subscriptions/${id}/cancel`, { immediate });
@@ -401,7 +493,14 @@ export class AutlanticBilling {
         sandbox: true,
         sandboxMode,
       });
-      if (!result) throw new Error("Invoice not chargeable");
+      if (!result) {
+        throw new AutlanticBillingError({
+          message: "Invoice not chargeable",
+          code: "invoice_not_chargeable",
+          type: "api_error",
+          details: { invoiceId },
+        });
+      }
       return result;
     }
     return this.post(`/v1/invoices/${invoiceId}/charge`, { sandboxMode });
@@ -416,7 +515,14 @@ export class AutlanticBilling {
         sandbox: true,
         refundAmountUsdc: input.amountUsdc,
       });
-      if (!result) throw new Error("Invoice not refundable");
+      if (!result) {
+        throw new AutlanticBillingError({
+          message: "Invoice not refundable",
+          code: "invoice_not_refundable",
+          type: "api_error",
+          details: { invoiceId },
+        });
+      }
       return { invoice: result.invoice };
     }
     return this.post(`/v1/invoices/${invoiceId}/refund`, input);
@@ -425,7 +531,14 @@ export class AutlanticBilling {
   async voidInvoice(invoiceId: string): Promise<{ invoice: RecurringInvoice }> {
     if (this.localStore) {
       const result = voidInvoice(this.localStore, invoiceId);
-      if (!result) throw new Error("Invoice not voidable");
+      if (!result) {
+        throw new AutlanticBillingError({
+          message: "Invoice not voidable",
+          code: "invoice_not_voidable",
+          type: "api_error",
+          details: { invoiceId },
+        });
+      }
       return { invoice: result.invoice };
     }
     return this.post(`/v1/invoices/${invoiceId}/void`, {});
@@ -434,64 +547,164 @@ export class AutlanticBilling {
   async getInvoice(id: string): Promise<RecurringInvoice> {
     if (this.localStore) {
       const invoice = this.localStore.getInvoice(id);
-      if (!invoice) throw new Error("Invoice not found");
+      if (!invoice) throw AutlanticBillingError.notFound("Invoice not found", { id });
       return invoice;
     }
     return this.get(`/v1/invoices/${id}`);
   }
 
-  private headers(extra?: Record<string, string>): Headers {
+  private requireApiBase(): string {
+    const base = this.config.apiBaseUrl?.replace(/\/$/, "");
+    if (!base) {
+      throw AutlanticBillingError.configuration("apiBaseUrl is required for remote mode");
+    }
+    return base;
+  }
+
+  private headers(extra?: Record<string, string>, requestId?: string): Headers {
     const headers = new Headers(extra);
     if (this.config.apiKey) {
       headers.set("X-Autlantic-Api-Key", this.config.apiKey);
     }
+    if (requestId) {
+      headers.set("X-Autlantic-Client-Request-Id", requestId);
+    }
+    headers.set("X-Autlantic-Sdk-Version", AUTLANTIC_BILLING_SDK_VERSION);
     return headers;
   }
 
   private async get<T>(path: string): Promise<T> {
-    const res = await this.fetch(path, { method: "GET" });
-    return res as T;
+    const base = this.requireApiBase();
+    return this.fetchJson(`${base}${path}`, { method: "GET", path });
   }
 
   private async post<T>(path: string, body: unknown, idempotent = true): Promise<T> {
+    const base = this.requireApiBase();
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (idempotent) {
       headers["Idempotency-Key"] = `sdk_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     }
-    const res = await this.fetch(path, {
+    return this.fetchJson(`${base}${path}`, {
       method: "POST",
+      path,
       headers,
-      body: JSON.stringify(body),
+      body,
     });
-    return res as T;
   }
 
   private async patch<T>(path: string, body: unknown): Promise<T> {
-    const res = await this.fetch(path, {
+    const base = this.requireApiBase();
+    return this.fetchJson(`${base}${path}`, {
       method: "PATCH",
+      path,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body,
     });
-    return res as T;
   }
 
-  private async fetch(path: string, init: RequestInit): Promise<unknown> {
-    const base = this.config.apiBaseUrl;
-    if (!base) throw new Error("apiBaseUrl is required for remote mode");
+  private async fetchJson<T>(
+    url: string,
+    init: {
+      method: string;
+      path: string;
+      headers?: Record<string, string>;
+      body?: unknown;
+      /** When false, do not attach API key (public checkout JSON). Default true. */
+      auth?: boolean;
+    },
+  ): Promise<T> {
+    const requestId = newClientRequestId();
+    const started = Date.now();
+    const method = init.method;
+    const headers =
+      init.auth === false
+        ? new Headers({
+            ...(init.headers ?? {}),
+            "X-Autlantic-Client-Request-Id": requestId,
+            "X-Autlantic-Sdk-Version": AUTLANTIC_BILLING_SDK_VERSION,
+          })
+        : this.headers(init.headers, requestId);
 
-    const headers = this.headers(
-      init.headers ? Object.fromEntries(new Headers(init.headers).entries()) : undefined,
-    );
-
-    const res = await fetch(`${base.replace(/\/$/, "")}${path}`, {
-      ...init,
-      headers,
+    this.logger.debug("http.request", {
+      requestId,
+      method,
+      path: init.path,
+      headers: redactHeadersForLog(headers),
+      body: init.body !== undefined ? redactForLog(init.body) : undefined,
     });
 
-    const json = (await res.json()) as ApiEnvelope<unknown>;
-    if (!res.ok) {
-      throw new Error(json.error ?? `Billing API error ${res.status}`);
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method,
+        headers,
+        body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
+      });
+    } catch (cause) {
+      const err = new AutlanticBillingError({
+        message: cause instanceof Error ? cause.message : "Network request failed",
+        code: "api_error",
+        type: "api_error",
+        requestId,
+        path: init.path,
+        method,
+        cause,
+      });
+      this.logger.error("http.network_error", err.toJSON());
+      throw err;
     }
-    return json;
+
+    const correlationId = readRequestId(res, requestId);
+    const elapsedMs = Date.now() - started;
+
+    let json: ApiEnvelope<T> = {} as ApiEnvelope<T>;
+    const text = await res.text();
+    if (text) {
+      try {
+        json = JSON.parse(text) as ApiEnvelope<T>;
+      } catch (cause) {
+        const err = new AutlanticBillingError({
+          message: `Invalid JSON response (${res.status})`,
+          code: "api_error",
+          type: "api_error",
+          statusCode: res.status,
+          requestId: correlationId,
+          path: init.path,
+          method,
+          cause,
+          details: { bodyPreview: text.slice(0, 200) },
+        });
+        this.logger.error("http.invalid_json", err.toJSON());
+        throw err;
+      }
+    }
+
+    if (!res.ok) {
+      const err = AutlanticBillingError.fromHttp({
+        statusCode: res.status,
+        message: json.error ?? `Billing API error ${res.status}`,
+        requestId: json.requestId ?? correlationId,
+        path: init.path,
+        method,
+        code: json.code,
+      });
+      this.logger.warn("http.error", {
+        ...err.toJSON(),
+        elapsedMs,
+        response: redactForLog(json),
+      });
+      throw err;
+    }
+
+    this.logger.debug("http.response", {
+      requestId: correlationId,
+      method,
+      path: init.path,
+      status: res.status,
+      elapsedMs,
+      body: redactForLog(json),
+    });
+
+    return json as T;
   }
 }

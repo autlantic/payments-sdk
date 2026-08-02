@@ -9,20 +9,45 @@ Signing uses the **webhook endpoint secret** from the merchant portal (Test and 
 ```ts
 import {
   verifyBillingWebhook,
+  verifyBillingWebhookDetailed,
   parseBillingWebhookEvent,
+  parseBillingWebhookEventDetailed,
+  assertBillingWebhook,
 } from "@autlantic/payments-recurring";
 
+// Argument order: (secret, rawBody, signatureHeader)
 const ok = verifyBillingWebhook(
+  process.env.AUTLANTIC_BILLING_WEBHOOK_SECRET!,
   rawBody,
   signatureHeader,
-  process.env.AUTLANTIC_BILLING_WEBHOOK_SECRET!,
 );
 if (!ok) throw new Error("bad signature");
 
-const event = parseBillingWebhookEvent(JSON.parse(rawBody));
+const event = parseBillingWebhookEvent(rawBody);
+```
+
+Prefer detailed helpers when you need ops-friendly failure reasons:
+
+```ts
+const verified = verifyBillingWebhookDetailed(secret, rawBody, signatureHeader);
+if (!verified.ok) {
+  // missing_header | empty_secret | length_mismatch | invalid_signature | compare_error
+  console.warn(verified.reason);
+}
+
+const parsed = parseBillingWebhookEventDetailed(rawBody);
+if (!parsed.ok) {
+  // invalid_json | missing_fields
+  console.warn(parsed.reason);
+}
+
+// Or throw AutlanticBillingError with code webhook_* :
+assertBillingWebhook(secret, rawBody, signatureHeader);
 ```
 
 Always verify against the **raw** request body. Do not re-serialize JSON before checking the signature.
+
+See [Debugging](/guide/debugging) for logger setup and portal delivery retries.
 
 ## Test vs Live
 

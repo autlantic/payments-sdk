@@ -38,13 +38,24 @@ Optional human text may also appear on `invoice.failureMessage`. Prefer branchin
 
 ## HTTP / client errors
 
-The Node client throws `Error` with a message when:
+The Node client throws **`AutlanticBillingError`** (extends `Error`) when:
 
 - Remote API returns non-2xx (`json.error` or status text)
-- Sandbox activation cannot find the subscription
+- Sandbox resource is missing or an operation cannot complete
 - Remote mode is used without `apiBaseUrl`
+- Webhook assertion helpers reject a signature / body
+
+```ts
+import { AutlanticBillingError } from "@autlantic/payments-recurring";
+
+if (AutlanticBillingError.is(err)) {
+  // err.code, err.type, err.statusCode, err.requestId
+}
+```
 
 These are transport / client errors, not `InvoiceFailureCode` values. For hosted HTTP, non-2xx bodies typically look like `{ "error": "…" }`.
+
+See [Debugging](/guide/debugging) for opt-in logs and webhook verify reasons.
 
 ## Related
 

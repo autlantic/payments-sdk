@@ -1,6 +1,16 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { AutlanticBilling, signBillingWebhook, verifyBillingWebhook } from "./index";
+import {
+  AutlanticBilling,
+  AutlanticBillingError,
+  assertBillingWebhook,
+  createConsoleBillingLogger,
+  parseBillingWebhookEventDetailed,
+  redactSecret,
+  signBillingWebhook,
+  verifyBillingWebhook,
+  verifyBillingWebhookDetailed,
+} from "./index";
 
 describe("AutlanticBilling sandbox", () => {
   it("creates, completes, and charges a subscription", async () => {
@@ -75,6 +85,82 @@ describe("AutlanticBilling sandbox", () => {
     const { body, signature } = signBillingWebhook("secret", event);
     assert.equal(verifyBillingWebhook("secret", body, signature), true);
     assert.equal(verifyBillingWebhook("wrong", body, signature), false);
+  });
+
+  it("returns detailed webhook verify/parse failures", () => {
+    const event = {
+      type: "invoice.paid" as const,
+      id: "evt_detail",
+      createdAt: new Date().toISOString(),
+      data: {},
+    };
+    const { body, signature } = signBillingWebhook("secret", event);
+    assert.deepEqual(verifyBillingWebhookDetailed("secret", body, signature), { ok: true });
+    assert.equal(
+      verifyBillingWebhookDetailed("secret", body, null).reason,
+      "missing_header",
+    );
+    assert.equal(
+      verifyBillingWebhookDetailed("secret", body, "00").reason,
+      "length_mismatch",
+    );
+    assert.equal(
+      verifyBillingWebhookDetailed("wrong", body, signature).reason,
+      "invalid_signature",
+    );
+    assert.equal(parseBillingWebhookEventDetailed("{").reason, "invalid_json");
+    assert.equal(parseBillingWebhookEventDetailed("{}").reason, "missing_fields");
+    assert.equal(parseBillingWebhookEventDetailed(body).ok, true);
+    assert.throws(
+      () => assertBillingWebhook("secret", body, null),
+      (err: unknown) =>
+        AutlanticBillingError.is(err) && err.code === "webhook_missing_header",
+    );
+  });
+
+  it("throws typed AutlanticBillingError in sandbox", async () => {
+    const billing = AutlanticBilling.sandbox({ merchantId: "mer_demo" });
+    await assert.rejects(
+      () =>
+        billing.createSubscription({
+          merchantRef: "x",
+          customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          payoutAddressEvm: "0x1111111111111111111111111111111111111111",
+        } as never),
+      (err: unknown) =>
+        AutlanticBillingError.is(err) &&
+        err.type === "validation_error" &&
+        err.code === "validation_error",
+    );
+    await assert.rejects(
+      () => billing.getPaymentLink("plink_missing"),
+      (err: unknown) => AutlanticBillingError.is(err) && err.type === "not_found",
+    );
+  });
+
+  it("emits redacted debug logs when debug is enabled", async () => {
+    const lines: string[] = [];
+    const billing = AutlanticBilling.sandbox({
+      merchantId: "mer_demo",
+      debug: true,
+      logger: createConsoleBillingLogger({
+        minLevel: "debug",
+        writers: {
+          debug: (line) => lines.push(line),
+          info: (line) => lines.push(line),
+          warn: (line) => lines.push(line),
+          error: (line) => lines.push(line),
+        },
+      }),
+    });
+    await billing.createPayment({
+      merchantRef: "log_pay",
+      customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+      payoutAddressEvm: "0x1111111111111111111111111111111111111111",
+      amountUsdc: 3,
+    });
+    assert.ok(lines.some((l) => l.includes("sandbox.createPayment")));
+    assert.equal(redactSecret("abk_live_abcdefghijklmnop"), "abk_…mnop");
   });
 
   it("covers list/get/cancel/refund/void sandbox client surface", async () => {

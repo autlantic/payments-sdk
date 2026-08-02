@@ -1,3 +1,5 @@
+import type { BillingLogLevel, BillingLogger } from "./logger";
+
 export type AutlanticBillingConfig = {
   /** REST API base URL (no trailing slash). Omit for in-process sandbox. */
   apiBaseUrl?: string;
@@ -5,6 +7,15 @@ export type AutlanticBillingConfig = {
   merchantId: string;
   sandbox?: boolean;
   webhookSecret?: string;
+  /**
+   * Opt-in HTTP + SDK diagnostics (method, path, status, latency).
+   * Secrets are redacted. Also enabled via `AUTLANTIC_BILLING_DEBUG=1`.
+   */
+  debug?: boolean;
+  /** Minimum level when using the built-in console logger. */
+  logLevel?: BillingLogLevel;
+  /** Inject Datadog / Pino / custom sink. Overrides the built-in console logger. */
+  logger?: BillingLogger;
 };
 
 export type BillingCatalogPrice = {

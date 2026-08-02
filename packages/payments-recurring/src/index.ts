@@ -8,10 +8,37 @@ export type {
   CreateSubscriptionRequest,
 } from "./config";
 export {
+  AutlanticBillingError,
+  type AutlanticBillingErrorCode,
+  type AutlanticBillingErrorParams,
+  type AutlanticBillingErrorType,
+} from "./errors";
+export {
+  createConsoleBillingLogger,
+  isBillingDebugEnv,
+  noopBillingLogger,
+  parseBillingLogLevel,
+  redactForLog,
+  redactHeadersForLog,
+  redactSecret,
+  resolveBillingLogger,
+  type BillingLogLevel,
+  type BillingLogMeta,
+  type BillingLogger,
+  type CreateConsoleLoggerOptions,
+} from "./logger";
+export {
+  assertBillingWebhook,
   signBillingWebhook,
   verifyBillingWebhook,
+  verifyBillingWebhookDetailed,
   parseBillingWebhookEvent,
+  parseBillingWebhookEventDetailed,
   BILLING_WEBHOOK_SIGNATURE_HEADER,
+  type WebhookParseFailureReason,
+  type WebhookParseResult,
+  type WebhookVerifyFailureReason,
+  type WebhookVerifyResult,
 } from "./webhook";
 
 export type {

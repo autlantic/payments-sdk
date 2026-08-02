@@ -36,6 +36,10 @@ export function hydrateBillingStore(
 export function createWriteThroughBillingStore(
   memory: BillingStore,
   persist: BillingPersistAdapter,
+  options?: {
+    /** Called when a queued persist fails. Default: silent (no console). */
+    onPersistError?: (label: string, err: unknown) => void;
+  },
 ): BillingStore {
   let persistQueue = Promise.resolve();
 
@@ -43,7 +47,7 @@ export function createWriteThroughBillingStore(
     persistQueue = persistQueue
       .then(fn)
       .catch((err) => {
-        console.error(`[billing-store] persist ${label} failed`, err);
+        options?.onPersistError?.(label, err);
       });
   };
 
