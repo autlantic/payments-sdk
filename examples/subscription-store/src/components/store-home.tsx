@@ -14,7 +14,7 @@ type SubscribeResult = {
   error?: string;
 };
 
-export function StoreHome() {
+export function StoreHome({ focusPlanId }: { focusPlanId?: string }) {
   const [mode, setMode] = useState<"sandbox" | "hosted">("sandbox");
   const [plans, setPlans] = useState<StorePlan[]>([]);
   const [catalogHint, setCatalogHint] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export function StoreHome() {
 
   useEffect(() => {
     void loadCatalog();
-  }, []);
+  }, [focusPlanId]);
 
   async function loadCatalog() {
     try {
@@ -42,8 +42,12 @@ export function StoreHome() {
       const nextPlans = catalog.plans ?? [];
       setPlans(nextPlans);
       setCatalogHint(catalog.hint ?? catalog.error ?? null);
-      const preferred = nextPlans.find((p) => p.highlighted)?.id ?? nextPlans[0]?.id ?? "";
-      setPlanId((prev) => (nextPlans.some((p) => p.id === prev) ? prev : preferred));
+      const preferred =
+        (focusPlanId && nextPlans.find((p) => p.id === focusPlanId)?.id) ||
+        nextPlans.find((p) => p.highlighted)?.id ||
+        nextPlans[0]?.id ||
+        "";
+      setPlanId(preferred);
     } catch {
       setCatalogHint("Could not load catalog");
     }
@@ -91,19 +95,19 @@ export function StoreHome() {
         <span className={`badge ${mode === "sandbox" ? "sandbox" : "hosted"}`}>
           {mode === "sandbox" ? "Sandbox mode" : "Hosted API mode"}
         </span>
-        <h1>Ship recurring USDC memberships</h1>
+        <p className="hero__eyebrow">Recurring</p>
+        <h1>Ship USDC memberships</h1>
         <p>
           {mode === "sandbox" ? (
             <>
-              Pick a plan to subscribe. Sandbox activates instantly. Connect an API key under{" "}
-              <Link href="/settings">Settings</Link> for portal prices and Autlantic wallet
-              checkout. Prefer a single purchase? See the <Link href="/one-time">one-time example</Link>
-              .
+              Nova Analytics and Signal Desk style plans. Sandbox activates instantly. Connect an API
+              key under <Link href="/settings">Settings</Link> for portal prices. Need an invoice or
+              QR? See <Link href="/payment-links">payment links</Link>.
             </>
           ) : (
             <>
-              Pick a plan to open Autlantic hosted checkout. Buyers connect their wallet there.
-              Prefer a single purchase? See the <Link href="/one-time">one-time example</Link>.
+              Pick a plan to open Autlantic hosted checkout. For fixed invoices without a catalog
+              pick, use <Link href="/payment-links">payment links</Link>.
             </>
           )}
         </p>
@@ -136,7 +140,9 @@ export function StoreHome() {
           return (
             <article
               key={plan.id}
-              className={`plan ${plan.highlighted || selected ? "highlighted" : ""}`}
+              className={`plan ${plan.highlighted || selected ? "highlighted" : ""} ${
+                focusPlanId === plan.id ? "focus-ring" : ""
+              }`}
             >
               <h2>{plan.name}</h2>
               {plan.description ? <p className="interval">{plan.description}</p> : null}

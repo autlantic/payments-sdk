@@ -1,7 +1,3 @@
-/**
- * Storefront plan card. In sandbox these are demo plans.
- * In hosted mode they come from GET /v1/products (one card per active price).
- */
 export type StorePlan = {
   id: string;
   name: string;
@@ -10,7 +6,7 @@ export type StorePlan = {
   interval: "month" | "year";
   features: string[];
   highlighted?: boolean;
-  /** Set when the plan maps to a portal catalog price. */
+  storeTypeId?: string;
   priceId?: string;
   productId?: string;
 };
@@ -18,27 +14,39 @@ export type StorePlan = {
 export const DEMO_PLANS: StorePlan[] = [
   {
     id: "plan_starter",
-    name: "Starter",
-    description: "For indie products shipping their first paid plan.",
+    name: "Nova Starter",
+    description: "SaaS starter seat for indie teams shipping their first paid plan.",
     amountUsdc: 9,
     interval: "month",
-    features: ["Unlimited API calls (demo)", "Email support", "Cancel anytime"],
+    storeTypeId: "saas",
+    features: ["1 project", "Email support", "Cancel anytime"],
   },
   {
     id: "plan_pro",
-    name: "Pro",
-    description: "The plan most merchants pick for production workloads.",
+    name: "Nova Pro",
+    description: "B2B analytics seat most merchants pick for production workloads.",
     amountUsdc: 29,
     interval: "month",
-    features: ["Everything in Starter", "Priority webhooks", "Invoice PDFs", "Team seats"],
+    storeTypeId: "saas",
+    features: ["Unlimited projects", "Priority webhooks", "Invoice PDFs", "Team seats"],
     highlighted: true,
   },
   {
+    id: "plan_creator",
+    name: "Signal Desk",
+    description: "Creator membership. Private drops and alpha chat every month.",
+    amountUsdc: 12,
+    interval: "month",
+    storeTypeId: "creator",
+    features: ["Weekly brief", "Member Discord", "Cancel at period end"],
+  },
+  {
     id: "plan_pro_yearly",
-    name: "Pro Yearly",
-    description: "Two months free when billed annually.",
+    name: "Nova Pro Yearly",
+    description: "Same Pro seat billed yearly. Two months free.",
     amountUsdc: 290,
     interval: "year",
+    storeTypeId: "saas",
     features: ["Everything in Pro", "Annual discount", "Dedicated onboarding"],
   },
 ];

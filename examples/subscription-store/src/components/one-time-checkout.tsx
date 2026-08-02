@@ -22,7 +22,7 @@ type Payment = {
   metadata?: Record<string, string>;
 };
 
-export function OneTimeCheckout() {
+export function OneTimeCheckout({ focusProductId }: { focusProductId?: string }) {
   const [mode, setMode] = useState<"sandbox" | "hosted">("sandbox");
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [productId, setProductId] = useState("");
@@ -33,7 +33,7 @@ export function OneTimeCheckout() {
 
   useEffect(() => {
     void loadCatalog();
-  }, []);
+  }, [focusProductId]);
 
   async function loadCatalog() {
     try {
@@ -53,8 +53,12 @@ export function OneTimeCheckout() {
       const next = catalog.products ?? [];
       setProducts(next);
       setCatalogHint(catalog.hint ?? catalog.error ?? null);
-      const preferred = next.find((p) => p.highlighted)?.id ?? next[0]?.id ?? "";
-      setProductId((prev) => (next.some((p) => p.id === prev) ? prev : preferred));
+      const preferred =
+        (focusProductId && next.find((p) => p.id === focusProductId)?.id) ||
+        next.find((p) => p.highlighted)?.id ||
+        next[0]?.id ||
+        "";
+      setProductId(preferred);
     } catch {
       setCatalogHint("Could not load catalog");
     }
@@ -119,7 +123,7 @@ export function OneTimeCheckout() {
     }
   }
 
-  const payout = payment?.payoutAddress ?? payment?.payoutAddressEvm ?? "";
+  const payout = payment?.payoutAddressEvm ?? payment?.payoutAddress ?? "";
   const busy = Boolean(busyId);
 
   return (
@@ -128,18 +132,19 @@ export function OneTimeCheckout() {
         <span className={`badge ${mode === "sandbox" ? "sandbox" : "hosted"}`}>
           {mode === "sandbox" ? "Sandbox mode" : "Hosted API mode"}
         </span>
+        <p className="hero__eyebrow">One-time</p>
         <h1>Pay once. No mandate.</h1>
         <p>
           {mode === "sandbox" ? (
             <>
-              Pick a product and pay. Sandbox stays local. Connect an API key under{" "}
-              <Link href="/settings">Settings</Link> to use portal Once prices and Autlantic wallet
-              checkout.
+              Forge Course and Northside Workshop style products. Connect an API key under{" "}
+              <Link href="/settings">Settings</Link> for portal Once prices. Sharing an invoice
+              outside your catalog? Use <Link href="/payment-links">payment links</Link>.
             </>
           ) : (
             <>
-              Pick a product to open Autlantic hosted checkout. Buyers connect their wallet there.
-              Payout uses your portal Settings address.
+              Pick a catalog product to open Autlantic hosted checkout. For ad-hoc amounts, use{" "}
+              <Link href="/payment-links">payment links</Link>.
             </>
           )}
         </p>
@@ -172,7 +177,9 @@ export function OneTimeCheckout() {
           return (
             <article
               key={product.id}
-              className={`plan ${product.highlighted || selected ? "highlighted" : ""}`}
+              className={`plan ${product.highlighted || selected ? "highlighted" : ""} ${
+                focusProductId === product.id ? "focus-ring" : ""
+              }`}
             >
               <h2>{product.name}</h2>
               {product.description ? <p className="interval">{product.description}</p> : null}
@@ -233,7 +240,7 @@ export function OneTimeCheckout() {
                 disabled={busy}
                 onClick={() => void sandboxPay()}
               >
-                {busyId === payment.id ? "Paying…" : "Simulate USDC transfer (sandbox)"}
+                {busyId === payment.id ? "Paying…" : "Confirm payment (sandbox)"}
               </button>
             </div>
           ) : null}

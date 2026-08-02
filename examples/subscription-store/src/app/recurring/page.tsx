@@ -1,5 +1,10 @@
 import { StoreHome } from "@/components/store-home";
 
-export default function RecurringPage() {
-  return <StoreHome />;
+export default async function RecurringPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ focus?: string }>;
+}) {
+  const params = await searchParams;
+  return <StoreHome focusPlanId={params.focus} />;
 }

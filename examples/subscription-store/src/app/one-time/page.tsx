@@ -1,5 +1,10 @@
 import { OneTimeCheckout } from "@/components/one-time-checkout";
 
-export default function OneTimePage() {
-  return <OneTimeCheckout />;
+export default async function OneTimePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ focus?: string }>;
+}) {
+  const params = await searchParams;
+  return <OneTimeCheckout focusProductId={params.focus} />;
 }
