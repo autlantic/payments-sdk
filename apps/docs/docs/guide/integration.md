@@ -107,7 +107,7 @@ Pay in hosted checkout → portal **Payment links** shows opens vs paid → webh
 
 ## HTTP-only (no Node SDK)
 
-Import [OpenAPI](/openapi.yaml) or the [Postman collection](/postman/autlantic-billing.postman_collection.json). Same flow: `POST /v1/subscriptions` → open `checkoutUrl` → handle webhook.
+Import [OpenAPI](/api/openapi) or the [Postman collection](/resources/postman). Same flow: `POST /v1/subscriptions` → open `checkoutUrl` → handle webhook.
 
 ## Next
 

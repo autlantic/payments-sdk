@@ -13,8 +13,8 @@ Catalog, subscriptions, invoices, payments, payment links, and webhooks are scop
 
 | Artifact | URL |
 |----------|-----|
-| **OpenAPI 3.1** | [/openapi.yaml](/openapi.yaml) |
-| **Postman collection** | [/postman/autlantic-billing.postman_collection.json](/postman/autlantic-billing.postman_collection.json) |
+| **OpenAPI 3.1** | [OpenAPI guide](/api/openapi) · raw [`/openapi.yaml`](https://docs.autlantic.com/openapi.yaml) |
+| **Postman collection** | [Postman guide](/resources/postman) · raw [JSON](https://docs.autlantic.com/postman/autlantic-billing.postman_collection.json) |
 
 Import either into Postman, Insomnia, Speakeasy, or your codegen tool. Production server: `https://billing.autlantic.com`.
 

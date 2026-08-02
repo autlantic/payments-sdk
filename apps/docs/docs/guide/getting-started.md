@@ -133,4 +133,4 @@ If you prefer HTTP + API key over embedding Node, see [Hosted HTTP API](/api/htt
 - [15-minute integration](/guide/integration) — catalog → checkout → webhook → unlock
 - [Local webhooks](/guide/local-webhooks) — tunnel to localhost
 - [FAQ](/guide/faq) — Autlantic vs card processors
-- [OpenAPI](/openapi.yaml) · [Postman](/postman/autlantic-billing.postman_collection.json)
+- [OpenAPI](/api/openapi) · [Postman](/resources/postman)

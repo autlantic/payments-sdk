@@ -64,7 +64,7 @@ export default withMermaid(
             { text: "Node.js SDK", link: "/api/nodejs" },
             { text: "TypeScript types", link: "/api/types" },
             { text: "Hosted HTTP API", link: "/api/http" },
-            { text: "OpenAPI", link: "/openapi.yaml" },
+            { text: "OpenAPI", link: "/api/openapi" },
           ],
         },
         {
@@ -72,10 +72,7 @@ export default withMermaid(
           items: [
             { text: "Changelog", link: "/resources/changelog" },
             { text: "Deploy on Railway", link: "/resources/deploy-railway" },
-            {
-              text: "Postman collection",
-              link: "/postman/autlantic-billing.postman_collection.json",
-            },
+{ text: "Postman collection", link: "/resources/postman" },
           ],
         },
       ],

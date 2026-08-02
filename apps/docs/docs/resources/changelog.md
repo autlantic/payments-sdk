@@ -9,7 +9,7 @@
 - Write-through store persist failures no longer hardcode `console.error` (optional `onPersistError`)
 - `logRelayerIntent` is silent unless a log fn is passed
 - Docs: [Debugging](/guide/debugging); fixed webhook verify argument order
-- Docs DX: [15-minute integration](/guide/integration), [Local webhooks](/guide/local-webhooks), [FAQ](/guide/faq), [OpenAPI](/openapi.yaml), [Postman](/postman/autlantic-billing.postman_collection.json)
+- Docs DX: [15-minute integration](/guide/integration), [Local webhooks](/guide/local-webhooks), [FAQ](/guide/faq), [OpenAPI](/api/openapi), [Postman](/resources/postman)
 
 Package versions: `@autlantic/payments-recurring` / `@autlantic/billing-engine` **0.3.2**, `@autlantic/chain-evm` **0.2.7**.
 

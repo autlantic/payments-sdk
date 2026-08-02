@@ -32,8 +32,8 @@ Webhook secrets are per mode. Do not mix a Live key with a Test webhook secret.
 
 No. Any stack can call the [Hosted HTTP API](/api/http). Use:
 
-- [OpenAPI](/openapi.yaml)  
-- [Postman collection](/postman/autlantic-billing.postman_collection.json)  
+- [OpenAPI](/api/openapi)  
+- [Postman collection](/resources/postman)  
 - `@autlantic/payments-recurring` when you want typed Node/TS  
 
 ## How do renewals work?
