@@ -1,14 +1,20 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
 
 const NPM_BILLING = "https://www.npmjs.com/package/@autlantic/payments-recurring";
 const PRODUCT = "https://autlantic.com";
 const GITHUB = "https://github.com/autlantic/payments-sdk";
+const docsRoot = path.dirname(fileURLToPath(import.meta.url));
 
 export default withMermaid(
   defineConfig({
-    // Markdown lives in ./docs; theme/config/public stay at apps/docs/.vitepress + public.
+    // Markdown lives in ./docs; static assets live in ./public (not docs/public).
     srcDir: "docs",
+    vite: {
+      publicDir: path.resolve(docsRoot, "../public"),
+    },
     title: "Autlantic Billing",
     description:
       "USDC payments on Base. Recurring subscriptions, one-time payments, payment links, hosted API, and webhooks for Autlantic Payments.",
