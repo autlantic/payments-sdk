@@ -4,7 +4,7 @@ Machine-readable Autlantic Billing HTTP API (OpenAPI **3.1**).
 
 ## Download / import
 
-<a href="/openapi.yaml" target="_blank" rel="noopener">Open `openapi.yaml`</a> (raw file, full page load)
+<a href="https://docs.autlantic.com/openapi.yaml" target="_blank" rel="noopener">Open `openapi.yaml`</a> (raw file)
 
 Import into Postman, Insomnia, Speakeasy, or your OpenAPI codegen.
 

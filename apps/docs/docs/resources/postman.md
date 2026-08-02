@@ -4,7 +4,7 @@ Ready-made requests for the Autlantic Billing API (catalog, subscriptions, payme
 
 ## Download / import
 
-<a href="/postman/autlantic-billing.postman_collection.json" target="_blank" rel="noopener">Download Postman collection (JSON)</a>
+<a href="https://docs.autlantic.com/postman/autlantic-billing.postman_collection.json" target="_blank" rel="noopener">Download Postman collection (JSON)</a>
 
 Or import from URL in Postman → **Import** → **Link**:
 
