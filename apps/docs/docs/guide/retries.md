@@ -56,6 +56,8 @@ On `RecurringInvoice`:
 3. Do **not** spam `chargeInvoice` on the same open invoice unless you intend a manual retry outside the schedule.
 4. After success, you get `invoice.paid` and the subscription period advances.
 
+In the [merchant portal](https://portal.autlantic.com), open invoices with a failure code appear under **Invoices → Failed** and on the dashboard **Needs attention** list. Use **Retry payment** for a manual attempt. Past-due subscriptions show on **Customers** and **Subscriptions**.
+
 ## Sandbox
 
 In-process sandbox can force declines with `chargeInvoice(id, "insufficient_balance" | "allowance_revoked")` so you can test retry messaging without waiting real days.

@@ -42,6 +42,10 @@ Test events are delivered only to Test endpoints. Live events only to Live endpo
 - `invoice.voided`
 - `payment.created` / `payment.paid` (one-time payments and payment links)
 
+## Delivery in the portal
+
+Under **Webhooks**, each endpoint shows recent deliveries. Failed attempts are highlighted; use **Retry now** to redeliver. Automatic retries still run in the background. Keep Test and Live endpoints separate so secrets match the API key in that deploy.
+
 ## Env
 
 | Variable | Purpose |

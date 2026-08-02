@@ -35,6 +35,16 @@ Open [http://localhost:3040](http://localhost:3040). No API key required.
 5. Flows redirect to Autlantic hosted checkout (`/checkout/subscribe|:pay|:link/:id`)  
 6. Payment links can use portal **once** prices via `priceId`
 
+### What the portal shows after a pay
+
+- **Payment links**: opens vs paid per link; payments list under each link  
+- **Invoices**: one-time / link charges with collected name and email when enabled  
+- **Customers**: merged wallet history (subscriptions + payment links); search by name/email; internal notes  
+- **Analytics**: link conversion and one-time revenue  
+- **Webhooks**: failed deliveries highlighted with **Retry now**
+
+Railway: point Config-as-code at repo-root `railway.example-store.toml` (builds SDK packages, then this Next app).
+
 ## SDK surface
 
 ```ts
