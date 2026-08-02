@@ -126,3 +126,11 @@ If you prefer HTTP + API key over embedding Node, see [Hosted HTTP API](/api/htt
 - [Webhooks](/guide/webhooks)
 - [Node.js API reference](/api/nodejs)
 - [Security](/guide/security)
+
+
+## Next
+
+- [15-minute integration](/guide/integration) — catalog → checkout → webhook → unlock
+- [Local webhooks](/guide/local-webhooks) — tunnel to localhost
+- [FAQ](/guide/faq) — Autlantic vs card processors
+- [OpenAPI](/openapi.yaml) · [Postman](/postman/autlantic-billing.postman_collection.json)

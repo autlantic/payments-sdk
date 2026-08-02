@@ -38,6 +38,7 @@ export default withMermaid(
           text: "Guide",
           items: [
             { text: "Getting started", link: "/guide/getting-started" },
+            { text: "15-minute integration", link: "/guide/integration" },
             { text: "One-time payments", link: "/guide/one-time-payments" },
             { text: "Payment links", link: "/guide/payment-links" },
             { text: "Lifecycle", link: "/guide/lifecycle" },
@@ -46,7 +47,9 @@ export default withMermaid(
             { text: "Retries", link: "/guide/retries" },
             { text: "Sandbox & testing", link: "/guide/sandbox" },
             { text: "Webhooks", link: "/guide/webhooks" },
+            { text: "Local webhooks", link: "/guide/local-webhooks" },
             { text: "Security", link: "/guide/security" },
+            { text: "FAQ", link: "/guide/faq" },
           ],
         },
         {
@@ -55,6 +58,7 @@ export default withMermaid(
             { text: "Node.js SDK", link: "/api/nodejs" },
             { text: "TypeScript types", link: "/api/types" },
             { text: "Hosted HTTP API", link: "/api/http" },
+            { text: "OpenAPI", link: "/openapi.yaml" },
           ],
         },
         {
@@ -62,6 +66,10 @@ export default withMermaid(
           items: [
             { text: "Changelog", link: "/resources/changelog" },
             { text: "Deploy on Railway", link: "/resources/deploy-railway" },
+            {
+              text: "Postman collection",
+              link: "/postman/autlantic-billing.postman_collection.json",
+            },
           ],
         },
       ],

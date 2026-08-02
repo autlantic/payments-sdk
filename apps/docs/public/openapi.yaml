@@ -1,0 +1,811 @@
+openapi: 3.1.0
+info:
+  title: Autlantic Billing API
+  version: 0.3.2
+  summary: USDC subscriptions, one-time payments, and payment links on Base
+  description: |
+    Hosted Billing API for Autlantic Payments.
+
+    - **Test** keys (`abk_test_…`) → Base Sepolia
+    - **Live** keys (`abk_live_…`) → Base mainnet
+
+    Production base URL: `https://billing.autlantic.com`
+
+    Authenticate with `x-autlantic-api-key` (or `Authorization: Bearer`).
+    Pass `Idempotency-Key` on POST requests to safely retry creates.
+  contact:
+    name: Autlantic
+    url: https://docs.autlantic.com
+  license:
+    name: MIT
+servers:
+  - url: https://billing.autlantic.com
+    description: Production
+  - url: http://localhost:8788
+    description: Local billing-api
+tags:
+  - name: Catalog
+  - name: Subscriptions
+  - name: Invoices
+  - name: Payments
+  - name: Payment links
+  - name: Checkout
+security:
+  - ApiKeyAuth: []
+paths:
+  /v1/products:
+    get:
+      tags: [Catalog]
+      summary: List active products and prices
+      operationId: listProducts
+      responses:
+        "200":
+          description: Catalog for the API key mode
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Product"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/subscriptions:
+    get:
+      tags: [Subscriptions]
+      summary: List subscriptions
+      operationId: listSubscriptions
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [incomplete, active, past_due, canceled, paused]
+      responses:
+        "200":
+          description: Subscriptions for this merchant/mode
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscriptions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Subscription"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Subscriptions]
+      summary: Create a subscription
+      operationId: createSubscription
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubscriptionRequest"
+            examples:
+              withPriceId:
+                value:
+                  merchantRef: order_123
+                  customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0"
+                  priceId: price_xxx
+              adHoc:
+                value:
+                  merchantRef: order_123
+                  customerWallet: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0"
+                  payoutAddressEvm: "0x1111111111111111111111111111111111111111"
+                  amountUsdc: 20
+                  interval: month
+      responses:
+        "201":
+          description: Incomplete subscription + open invoice + checkout URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscription:
+                    $ref: "#/components/schemas/Subscription"
+                  invoice:
+                    $ref: "#/components/schemas/Invoice"
+                  checkoutUrl:
+                    type: string
+                    format: uri
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/subscriptions/{id}:
+    get:
+      tags: [Subscriptions]
+      summary: Get a subscription
+      operationId: getSubscription
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Subscription
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: [Subscriptions]
+      summary: Update a subscription
+      operationId: updateSubscription
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amountUsdc:
+                  type: number
+                interval:
+                  type: string
+                  enum: [month, year]
+                planId:
+                  type: string
+                metadata:
+                  type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        "200":
+          description: Updated subscription
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscription:
+                    $ref: "#/components/schemas/Subscription"
+
+  /v1/subscriptions/{id}/activate:
+    post:
+      tags: [Subscriptions]
+      summary: Activate subscription (mandate + first charge)
+      operationId: activateSubscription
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                onChainSubscriptionId:
+                  type: string
+      responses:
+        "200":
+          description: Activated subscription
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /v1/subscriptions/{id}/complete:
+    post:
+      tags: [Subscriptions]
+      summary: Complete mandate without charging
+      operationId: completeSubscription
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Mandate completed
+
+  /v1/subscriptions/{id}/cancel:
+    post:
+      tags: [Subscriptions]
+      summary: Cancel a subscription
+      operationId: cancelSubscription
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                immediate:
+                  type: boolean
+                  default: false
+      responses:
+        "200":
+          description: Canceled (or cancel at period end)
+
+  /v1/invoices:
+    get:
+      tags: [Invoices]
+      summary: List invoices
+      operationId: listInvoices
+      parameters:
+        - name: subscriptionId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Invoices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invoices:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Invoice"
+
+  /v1/invoices/{id}:
+    get:
+      tags: [Invoices]
+      summary: Get an invoice
+      operationId: getInvoice
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Invoice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /v1/invoices/{id}/charge:
+    post:
+      tags: [Invoices]
+      summary: Attempt to charge an open invoice
+      operationId: chargeInvoice
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sandboxMode:
+                  type: string
+      responses:
+        "200":
+          description: Charge result
+
+  /v1/invoices/{id}/refund:
+    post:
+      tags: [Invoices]
+      summary: Refund a paid invoice
+      operationId: refundInvoice
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amountUsdc:
+                  type: number
+      responses:
+        "200":
+          description: Refunded invoice
+
+  /v1/invoices/{id}/void:
+    post:
+      tags: [Invoices]
+      summary: Void an open invoice
+      operationId: voidInvoice
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Voided invoice
+
+  /v1/payments:
+    post:
+      tags: [Payments]
+      summary: Create a one-time payment
+      operationId: createPayment
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentRequest"
+      responses:
+        "201":
+          description: Open payment + checkout URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payment:
+                    $ref: "#/components/schemas/Payment"
+                  checkoutUrl:
+                    type: string
+                    format: uri
+
+  /v1/payments/{id}:
+    get:
+      tags: [Payments]
+      summary: Get a one-time payment
+      operationId: getPayment
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Payment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payment:
+                    $ref: "#/components/schemas/Payment"
+
+  /v1/payment-links:
+    get:
+      tags: [Payment links]
+      summary: List payment links
+      operationId: listPaymentLinks
+      responses:
+        "200":
+          description: Payment links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  paymentLinks:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PaymentLink"
+    post:
+      tags: [Payment links]
+      summary: Create a payment link
+      operationId: createPaymentLink
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentLinkRequest"
+      responses:
+        "201":
+          description: Link + shareable URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  paymentLink:
+                    $ref: "#/components/schemas/PaymentLink"
+                  url:
+                    type: string
+                    format: uri
+
+  /v1/payment-links/{id}:
+    get:
+      tags: [Payment links]
+      summary: Get a payment link
+      operationId: getPaymentLink
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Payment link
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  paymentLink:
+                    $ref: "#/components/schemas/PaymentLink"
+                  url:
+                    type: string
+
+  /v1/payment-links/{id}/disable:
+    post:
+      tags: [Payment links]
+      summary: Disable a payment link
+      operationId: disablePaymentLink
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Disabled link
+
+  /checkout/subscribe/{id}:
+    get:
+      tags: [Checkout]
+      summary: Hosted subscription checkout (HTML)
+      operationId: checkoutSubscribeHtml
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: HTML checkout page
+
+  /checkout/subscribe/{id}.json:
+    get:
+      tags: [Checkout]
+      summary: Subscription checkout session JSON
+      operationId: checkoutSubscribeSession
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Session JSON
+
+  /checkout/subscribe/{id}/activate:
+    post:
+      tags: [Checkout]
+      summary: Activate from hosted checkout
+      operationId: checkoutSubscribeActivate
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                onChainSubscriptionId:
+                  type: string
+      responses:
+        "200":
+          description: Activation result
+
+  /checkout/pay/{id}:
+    get:
+      tags: [Checkout]
+      summary: Hosted one-time payment checkout (HTML)
+      operationId: checkoutPayHtml
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: HTML checkout page
+
+  /checkout/pay/{id}/status:
+    get:
+      tags: [Checkout]
+      summary: One-time payment session JSON
+      operationId: checkoutPayStatus
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Payment status
+
+  /checkout/pay/{id}/confirm:
+    post:
+      tags: [Checkout]
+      summary: Confirm one-time payment
+      operationId: checkoutPayConfirm
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                txHash:
+                  type: string
+      responses:
+        "200":
+          description: Confirmed payment
+
+  /checkout/link/{id}:
+    get:
+      tags: [Checkout]
+      summary: Payment link landing (HTML)
+      operationId: checkoutLinkHtml
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: HTML landing
+
+  /checkout/link/{id}/status:
+    get:
+      tags: [Checkout]
+      summary: Payment link status JSON
+      operationId: checkoutLinkStatus
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Link status
+
+  /checkout/link/{id}/open:
+    post:
+      tags: [Checkout]
+      summary: Open payment link (mint one-time payment)
+      operationId: checkoutLinkOpen
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerWallet:
+                  type: string
+                email:
+                  type: string
+                name:
+                  type: string
+      responses:
+        "200":
+          description: Minted payment + checkout URL
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-autlantic-api-key
+      description: Portal API key (`abk_test_…` or `abk_live_…`)
+
+  parameters:
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Optional. Cached for 24 hours on POST creates.
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    BadRequest:
+      description: Validation or business rule error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+      required: [error]
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+        prices:
+          type: array
+          items:
+            $ref: "#/components/schemas/Price"
+
+    Price:
+      type: object
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        amountUsdc:
+          type: number
+        interval:
+          type: string
+          enum: [month, year, once]
+        trialDays:
+          type: integer
+        active:
+          type: boolean
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        amountUsdc:
+          type: number
+        interval:
+          type: string
+        walletAddress:
+          type: string
+        currentPeriodEnd:
+          type: string
+          format: date-time
+        cancelAtPeriodEnd:
+          type: boolean
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        subscriptionId:
+          type: string
+        status:
+          type: string
+        amountUsdc:
+          type: number
+        failureCode:
+          type: string
+          nullable: true
+        failureMessage:
+          type: string
+          nullable: true
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        amountUsdc:
+          type: number
+        customerWallet:
+          type: string
+        merchantRef:
+          type: string
+        checkoutUrl:
+          type: string
+
+    PaymentLink:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        amountUsdc:
+          type: number
+        description:
+          type: string
+          nullable: true
+        useCount:
+          type: integer
+        maxUses:
+          type: integer
+          nullable: true
+
+    CreateSubscriptionRequest:
+      type: object
+      required: [merchantRef, customerWallet]
+      properties:
+        merchantRef:
+          type: string
+        customerWallet:
+          type: string
+        payoutAddressEvm:
+          type: string
+        amountUsdc:
+          type: number
+        interval:
+          type: string
+          enum: [month, year]
+        priceId:
+          type: string
+        planId:
+          type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+
+    CreatePaymentRequest:
+      type: object
+      required: [merchantRef, customerWallet]
+      properties:
+        merchantRef:
+          type: string
+        customerWallet:
+          type: string
+        payoutAddressEvm:
+          type: string
+        amountUsdc:
+          type: number
+        priceId:
+          type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+
+    CreatePaymentLinkRequest:
+      type: object
+      properties:
+        merchantRefPrefix:
+          type: string
+        payoutAddressEvm:
+          type: string
+        amountUsdc:
+          type: number
+        priceId:
+          type: string
+        description:
+          type: string
+        maxUses:
+          type: integer
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        successUrl:
+          type: string
+          format: uri
+        cancelUrl:
+          type: string
+          format: uri
+        collectEmail:
+          type: boolean
+        collectName:
+          type: boolean
+        metadata:
+          type: object
+          additionalProperties:
+            type: string

@@ -114,7 +114,10 @@ In the [merchant portal](https://portal.autlantic.com), open **Webhooks** → fi
 
 ## Related
 
+- [15-minute integration](/guide/integration)
+- [Local webhooks](/guide/local-webhooks)
 - [Error codes](/guide/errors)
 - [Webhooks](/guide/webhooks)
 - [Sandbox & testing](/guide/sandbox)
 - [Security](/guide/security)
+- [FAQ](/guide/faq)

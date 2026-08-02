@@ -1,0 +1,236 @@
+{
+  "info": {
+    "_postman_id": "autlantic-billing-0-3-2",
+    "name": "Autlantic Billing API",
+    "description": "USDC subscriptions, one-time payments, and payment links on Base.\n\n1. Set `baseUrl` (default production).\n2. Set `apiKey` from the merchant portal (Test or Live).\n3. Optional: set `merchantId` / wallets for create calls.\n\nOpenAPI: https://docs.autlantic.com/openapi.yaml",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "0.3.2"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://billing.autlantic.com" },
+    { "key": "apiKey", "value": "abk_test_…" },
+    { "key": "customerWallet", "value": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0" },
+    { "key": "payoutAddressEvm", "value": "0x1111111111111111111111111111111111111111" },
+    { "key": "priceId", "value": "price_…" },
+    { "key": "subscriptionId", "value": "" },
+    { "key": "paymentId", "value": "" },
+    { "key": "paymentLinkId", "value": "" }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key", "value": "x-autlantic-api-key", "type": "string" },
+      { "key": "value", "value": "{{apiKey}}", "type": "string" },
+      { "key": "in", "value": "header", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Catalog",
+      "item": [
+        {
+          "name": "List products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/products"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Create subscription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.subscription && j.subscription.id) {",
+                  "  pm.collectionVariables.set('subscriptionId', j.subscription.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"merchantRef\": \"order_{{$timestamp}}\",\n  \"customerWallet\": \"{{customerWallet}}\",\n  \"payoutAddressEvm\": \"{{payoutAddressEvm}}\",\n  \"priceId\": \"{{priceId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/v1/subscriptions"
+          }
+        },
+        {
+          "name": "List subscriptions",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/subscriptions"
+          }
+        },
+        {
+          "name": "Get subscription",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/subscriptions/{{subscriptionId}}"
+          }
+        },
+        {
+          "name": "Activate subscription",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/v1/subscriptions/{{subscriptionId}}/activate"
+          }
+        },
+        {
+          "name": "Cancel subscription",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"immediate\": false\n}" },
+            "url": "{{baseUrl}}/v1/subscriptions/{{subscriptionId}}/cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create one-time payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.payment && j.payment.id) {",
+                  "  pm.collectionVariables.set('paymentId', j.payment.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"merchantRef\": \"pay_{{$timestamp}}\",\n  \"customerWallet\": \"{{customerWallet}}\",\n  \"payoutAddressEvm\": \"{{payoutAddressEvm}}\",\n  \"amountUsdc\": 15\n}"
+            },
+            "url": "{{baseUrl}}/v1/payments"
+          }
+        },
+        {
+          "name": "Get payment",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/payments/{{paymentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment links",
+      "item": [
+        {
+          "name": "Create payment link",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.paymentLink && j.paymentLink.id) {",
+                  "  pm.collectionVariables.set('paymentLinkId', j.paymentLink.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"merchantRefPrefix\": \"invoice\",\n  \"payoutAddressEvm\": \"{{payoutAddressEvm}}\",\n  \"amountUsdc\": 42,\n  \"description\": \"Consulting\",\n  \"maxUses\": 1,\n  \"collectEmail\": true,\n  \"collectName\": true\n}"
+            },
+            "url": "{{baseUrl}}/v1/payment-links"
+          }
+        },
+        {
+          "name": "List payment links",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/payment-links"
+          }
+        },
+        {
+          "name": "Disable payment link",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/v1/payment-links/{{paymentLinkId}}/disable"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "item": [
+        {
+          "name": "List invoices",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/invoices"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Checkout (public)",
+      "auth": { "type": "noauth" },
+      "item": [
+        {
+          "name": "Payment link status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkout/link/{{paymentLinkId}}/status"
+          }
+        },
+        {
+          "name": "Open payment link",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerWallet\": \"{{customerWallet}}\"\n}"
+            },
+            "url": "{{baseUrl}}/checkout/link/{{paymentLinkId}}/open"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -9,6 +9,15 @@ Authenticate with `x-autlantic-api-key` (or `Authorization: Bearer`). Mode follo
 
 Catalog, subscriptions, invoices, payments, payment links, and webhooks are scoped to that mode.
 
+## Machine-readable
+
+| Artifact | URL |
+|----------|-----|
+| **OpenAPI 3.1** | [/openapi.yaml](/openapi.yaml) |
+| **Postman collection** | [/postman/autlantic-billing.postman_collection.json](/postman/autlantic-billing.postman_collection.json) |
+
+Import either into Postman, Insomnia, Speakeasy, or your codegen tool. Production server: `https://billing.autlantic.com`.
+
 ## Public checkout (no API key)
 
 | Method | Path | Purpose |
