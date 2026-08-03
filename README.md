@@ -24,6 +24,8 @@ Autlantic Billing is the same engine that powers [Autlantic](https://autlantic.c
 
 - Recurring **USDC** charges, **one-time** transfers, and shareable **payment links** on **Base**
 - Direct settlement to the merchant `payoutAddressEvm` (Autlantic does not custody subscription revenue)
+- Relayers sponsor gas and submit transactions; they do not hold member balances
+- [Non-custodial overview](https://autlantic.com/non-custodial) · [Security](https://autlantic.com/security)
 - Typed Node client, signed webhooks, and an in-process sandbox
 - Optional hosted HTTP API for non-Node stacks
 

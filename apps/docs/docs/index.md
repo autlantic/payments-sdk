@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Autlantic Billing
   text: USDC on Base
-  tagline: TypeScript SDK and hosted API for USDC subscriptions, one-time payments, and shareable payment links. Direct payouts to your EVM wallet, Test and Live keys.
+  tagline: TypeScript SDK and hosted API for USDC subscriptions, one-time payments, and shareable payment links. Non-custodial settlement to your EVM wallet. Test and Live keys.
   actions:
     - theme: brand
       text: Get started

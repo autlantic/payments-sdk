@@ -59,6 +59,13 @@ export default withMermaid(
           ],
         },
         {
+          text: "Product policies",
+          items: [
+            { text: "Non-custodial", link: "https://autlantic.com/non-custodial" },
+            { text: "Security (product)", link: "https://autlantic.com/security" },
+          ],
+        },
+        {
           text: "API reference",
           items: [
             { text: "Node.js SDK", link: "/api/nodejs" },
@@ -72,7 +79,7 @@ export default withMermaid(
           items: [
             { text: "Changelog", link: "/resources/changelog" },
             { text: "Deploy on Railway", link: "/resources/deploy-railway" },
-{ text: "Postman collection", link: "/resources/postman" },
+            { text: "Postman collection", link: "/resources/postman" },
           ],
         },
       ],

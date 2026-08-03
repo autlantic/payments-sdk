@@ -50,7 +50,13 @@ Integrators should:
 - Keep `AUTLANTIC_BILLING_SANDBOX` off in production. Sandbox mode must not run against mainnet wallets or live payout addresses.
 - Confirm Base chain id and USDC contract addresses match the environment (Sepolia vs mainnet).
 - Treat on-chain USDC settlement as final. Autlantic does not custody merchant subscription revenue; funds go to `payoutAddressEvm`.
+- Relayers (platform-operated) sponsor gas and submit transactions. They do not custody member or merchant subscription balances.
 - Rotate API keys and webhook secrets after any suspected leak.
+
+## Product policy
+
+- [Non-custodial overview](https://autlantic.com/non-custodial)
+- [Security](https://autlantic.com/security)
 
 ## Scope
 

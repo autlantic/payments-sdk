@@ -13,11 +13,11 @@ Short answers for evaluators comparing Autlantic Billing to card processors (Str
 | Chargebacks | On-chain finality (no card chargebacks) | Disputes / chargebacks |
 | Best for | Crypto-native products, global USDC | Mass-market fiat commerce |
 
-Use Autlantic when your members already have wallets (or you want them to) and you want programmable USDC renewals without becoming a money transmitter for member revenue.
+Use Autlantic when your members already have wallets (or you want them to) and you want programmable USDC renewals with settlement straight to your wallet.
 
 ## Do funds touch Autlantic?
 
-No. Settlement is to your `payoutAddressEvm`. Autlantic runs checkout, invoices, webhooks, and renewals. Member USDC moves wallet → your wallet (via the billing rails on Base).
+No. Settlement is to your `payoutAddressEvm`. Autlantic runs checkout, invoices, webhooks, and renewals. Member USDC moves wallet → your wallet on Base. Autlantic does not custody member subscription revenue. Relayers may sponsor gas and submit transactions; they do not hold member revenue. See the product [Non-custodial overview](https://autlantic.com/non-custodial).
 
 ## Test vs Live?
 
@@ -38,7 +38,7 @@ No. Any stack can call the [Hosted HTTP API](/api/http). Use:
 
 ## How do renewals work?
 
-After activation, the mandate allows Autlantic’s billing worker to charge due invoices in USDC on schedule. Failures set `invoice.failureCode`, retry per [Retries](/guide/retries), and may move the subscription to `past_due`. You get `invoice.payment_failed` webhooks to message the member.
+After activation, the mandate lets scheduled vault charges settle USDC from the customer wallet to your payout wallet. Autlantic’s billing worker submits those charges on schedule. Failures set `invoice.failureCode`, retry per [Retries](/guide/retries), and may move the subscription to `past_due`. You get `invoice.payment_failed` webhooks to message the member.
 
 ## What about taxes, multi-currency, and disputes?
 
