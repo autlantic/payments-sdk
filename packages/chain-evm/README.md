@@ -16,7 +16,7 @@
 
 ---
 
-Addresses, amount conversion, allowance/vault calldata, **UsdcPass** transfer verification, and relayer helpers used by the Autlantic Billing stack.
+Addresses, amount conversion, allowance/vault calldata, **UsdcPass** transfer verification, and relayer helpers used by the Autlantic Billing stack. Relayer helpers are for gas sponsorship and transaction submission; they are not used to custody USDC balances.
 
 ## Install
 

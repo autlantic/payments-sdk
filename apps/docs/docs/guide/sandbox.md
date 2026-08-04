@@ -1,6 +1,6 @@
 # Test & Live
 
-Autlantic mirrors Stripe’s model: **portal toggle** for the dashboard, **API keys** for your app, **checkout** follows the key that created the session.
+**Portal toggle** for the dashboard, **API keys** for your app, and **checkout** follows the key that created the session.
 
 ## How mode is chosen
 

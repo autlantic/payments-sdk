@@ -38,7 +38,7 @@ import {
   type BillingLogger,
 } from "./logger";
 
-export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.2";
+export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.3";
 
 type ApiEnvelope<T> = T & { error?: string; code?: string; requestId?: string };
 

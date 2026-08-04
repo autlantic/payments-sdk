@@ -95,7 +95,9 @@ Most integrators only need `@autlantic/payments-recurring`.
 | Node.js API | https://docs.autlantic.com/api/nodejs |
 | Hosted HTTP API | https://docs.autlantic.com/api/http |
 | Webhooks | https://docs.autlantic.com/guide/webhooks |
-| Security | [SECURITY.md](./SECURITY.md) |
+| Non-custodial overview | https://autlantic.com/non-custodial |
+| Product security | https://autlantic.com/security |
+| Security (repo) | [SECURITY.md](./SECURITY.md) |
 | Publishing | [PUBLISHING.md](./PUBLISHING.md) |
 
 ## Develop in this repo

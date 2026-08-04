@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3 - Docs and npm positioning
+
+- npm / README: non-custodial settlement, relayer gas-only wording, product security links
+- Docs: Test / Live wording without Stripe-as-model framing; example store custody notes
+- Package versions: `@autlantic/payments-recurring` / `@autlantic/billing-engine` **0.3.3**, `@autlantic/chain-evm` **0.2.8**
+
 ## 0.3.2 - Enterprise SDK diagnostics
 
 - Pluggable **`BillingLogger`** + opt-in **`debug`** / `AUTLANTIC_BILLING_DEBUG`
@@ -38,7 +44,7 @@ Package versions: `@autlantic/payments-recurring` / `@autlantic/billing-engine` 
 
 ## Docs - Test / Live API keys
 
-- Document Stripe-style Test and Live: portal toggle, `abk_test_` / `abk_live_` keys, Sepolia vs Base mainnet
+- Document Test and Live: portal toggle, `abk_test_` / `abk_live_` keys, Sepolia vs Base mainnet
 - Webhook docs use per-mode endpoint signing secrets
 - Clarify `AUTLANTIC_BILLING_SANDBOX` is not the primary hosted mode switch
 

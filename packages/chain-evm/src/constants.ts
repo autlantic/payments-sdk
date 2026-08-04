@@ -56,7 +56,7 @@ export function defaultSandboxChainId(): BillingChainId {
   return CHAIN_BASE_SEPOLIA;
 }
 
-/** Stripe-style: test → Base Sepolia, live → Base mainnet. */
+/** Test → Base Sepolia, live → Base mainnet. */
 export function chainIdForBillingMode(mode: "test" | "live"): BillingChainId {
   return mode === "live" ? CHAIN_BASE_MAINNET : CHAIN_BASE_SEPOLIA;
 }

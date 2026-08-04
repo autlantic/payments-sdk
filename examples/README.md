@@ -1,6 +1,6 @@
 # Examples
 
-Runnable apps that show how to integrate Autlantic Billing.
+Runnable apps that show how to integrate Autlantic Billing (USDC on Base, settlement to your merchant wallet).
 
 | Example | What it shows |
 |---------|----------------|

@@ -24,7 +24,7 @@ features:
   - title: Hosted API
     details: "REST with API key when you do not want Node in your stack. Same billing engine as the SDK."
   - title: Test and Live
-    details: "abk_test_ keys on Base Sepolia, abk_live_ keys on Base mainnet. Same Stripe-style split as the merchant portal."
+    details: "abk_test_ keys on Base Sepolia, abk_live_ keys on Base mainnet. Same Test / Live split as the merchant portal."
 ---
 
 ## Two ways to integrate

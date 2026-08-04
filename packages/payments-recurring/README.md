@@ -2,7 +2,11 @@
 
 Autlantic Billing SDK. Create USDC subscriptions, one-time payments, and shareable payment links on Base. Receive webhooks. Test and Live environments.
 
-Public docs: https://docs.autlantic.com
+USDC settles to your merchant `payoutAddressEvm`. Autlantic does not custody subscription revenue. Relayers sponsor gas and submit transactions; they do not hold member balances.
+
+- Docs: https://docs.autlantic.com  
+- Non-custodial: https://autlantic.com/non-custodial  
+- Security: https://autlantic.com/security  
 
 ## Install
 
@@ -12,7 +16,7 @@ npm install @autlantic/payments-recurring
 
 ## Test vs Live (hosted API)
 
-Mode follows your API key (Stripe-style):
+Mode follows your API key (Test vs Live):
 
 | Key | Environment |
 |-----|-------------|

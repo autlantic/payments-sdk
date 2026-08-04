@@ -2,7 +2,7 @@
 
 Autlantic Billing verifies **USDC** on **Base**: recurring subscriptions, one-time payments, and shareable payment links. Funds settle to **your** EVM wallet (`payoutAddressEvm`). Autlantic does not custody member revenue.
 
-Test and Live work like Stripe: the **API key** selects the environment. Hosted checkout and data follow that key.
+**Test** and **Live** are separate environments: the **API key** selects which one. Hosted checkout and data follow that key.
 
 ## Install
 

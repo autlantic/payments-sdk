@@ -4,7 +4,7 @@
     "name": "Autlantic Billing API",
     "description": "USDC subscriptions, one-time payments, and payment links on Base.\n\n1. Set `baseUrl` (default production).\n2. Set `apiKey` from the merchant portal (Test or Live).\n3. Optional: set `merchantId` / wallets for create calls.\n\nOpenAPI: https://docs.autlantic.com/openapi.yaml",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "0.3.2"
+    "version": "0.3.3"
   },
   "variable": [
     { "key": "baseUrl", "value": "https://billing.autlantic.com" },

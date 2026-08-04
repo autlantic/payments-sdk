@@ -1,6 +1,8 @@
 # Example store: recurring, one-time, payment links
 
-Next.js demo for the three Autlantic Billing methods via `@autlantic/payments-recurring`:
+Next.js demo for the three Autlantic Billing methods via `@autlantic/payments-recurring`.
+
+USDC settles to the merchant `payoutAddressEvm` you configure. Autlantic does not custody subscription revenue. Relayers (hosted live mode) sponsor gas and submit vault charges; they do not hold member balances. See [Non-custodial overview](https://autlantic.com/non-custodial).
 
 | Flow | SDK method | Route |
 |------|------------|-------|
@@ -94,4 +96,5 @@ await billing.createPaymentLink({ /* … */ });
 - [Getting started](https://docs.autlantic.com/guide/getting-started)
 - [Payment links](https://docs.autlantic.com/guide/payment-links)
 - [One-time payments](https://docs.autlantic.com/guide/one-time-payments)
+- [Non-custodial overview](https://autlantic.com/non-custodial)
 - [Billing portal](https://portal.autlantic.com)

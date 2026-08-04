@@ -18,7 +18,7 @@ export AUTLANTIC_PAYOUT_ADDRESS_EVM=0xYourSettlementWallet
 ```
 
 ```bash
-npm install @autlantic/payments-recurring@0.3.2
+npm install @autlantic/payments-recurring@0.3.3
 ```
 
 ## Path A. Recurring subscription (recommended)

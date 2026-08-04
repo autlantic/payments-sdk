@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Autlantic Billing API
-  version: 0.3.2
+  version: 0.3.3
   summary: USDC subscriptions, one-time payments, and payment links on Base
   description: |
     Hosted Billing API for Autlantic Payments.
