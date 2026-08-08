@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.4 - Unwrap getSubscription / getInvoice
+
+- `getSubscription` and `getInvoice` now return the resource object (same as `getPayment`), not the `{ subscription }` / `{ invoice }` API wrapper
+- Fixes remote-mode ownership checks that read `metadata` / `status` on an undefined nested object
+
 ## 0.3.3 - Docs and npm positioning
 
 - npm / README: non-custodial settlement, relayer gas-only wording, product security links
