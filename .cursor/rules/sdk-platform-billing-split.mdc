@@ -1,11 +1,11 @@
 ---
-description: Change and test SDK first; Autlantico only after npm publish and pin
+description: Billing SDK is multi-merchant; Autlantico is one merchant after npm publish
 alwaysApply: true
 ---
 
-# SDK first workflow
+# SDK first; Autlantico is a merchant
 
-This repo is the Billing SDK. Autlantico dogfoods published packages only.
+This repo is the **Billing SDK / product**. Autlantico dogfoods **published** packages only. It is one merchant among many, not the parent of billing.
 
 ## Order for shared billing behavior
 
@@ -16,6 +16,12 @@ This repo is the Billing SDK. Autlantico dogfoods published packages only.
 5. Only then Autlantico app/infra changes that depend on the new API.
 
 Do not tell Autlantico to ship against an unpublished SDK version.
+
+## Webhooks
+
+- Delivery target + signing secret live on **merchant portal endpoints** (test/live).
+- Do not add Autlantico-specific global webhook URL/secret into billing core.
+- Merchants verify with their endpoint secret(s).
 
 ## Mode model
 
