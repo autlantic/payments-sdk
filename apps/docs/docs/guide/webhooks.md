@@ -76,4 +76,5 @@ Under **Webhooks**, each endpoint shows recent deliveries. Failed attempts are h
 | Variable | Purpose |
 |----------|---------|
 | `AUTLANTIC_BILLING_WEBHOOK_SECRET` | Endpoint signing secret for this environment |
-| `AUTLANTIC_BILLING_WEBHOOK_URL` | Optional platform destination (billing-worker / engine), not your merchant URL |
+
+Register your app URL under **portal → Webhooks**. Billing delivers only via those merchant endpoints.

@@ -22,6 +22,7 @@ Do not tell Autlantico to ship against an unpublished SDK version.
 - Delivery target + signing secret live on **merchant portal endpoints** (test/live).
 - Do not add Autlantico-specific global webhook URL/secret into billing core.
 - Merchants verify with their endpoint secret(s).
+- There is no `AUTLANTIC_BILLING_WEBHOOK_URL` delivery path.
 
 ## Mode model
 

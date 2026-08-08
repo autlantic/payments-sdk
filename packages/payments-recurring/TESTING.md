@@ -76,7 +76,6 @@ Terminal 2 (renewals worker):
 
 ```bash
 export AUTLANTIC_BILLING_API_KEY=abk_test_local
-export AUTLANTIC_BILLING_WEBHOOK_URL=http://localhost:3001/api/webhooks/recurring-billing
 pnpm dev:billing-worker
 ```
 
@@ -113,4 +112,4 @@ forge test
 
 ## Webhook verification
 
-Set `AUTLANTIC_BILLING_WEBHOOK_URL` to a request bin or your app endpoint. Events are POSTed with HMAC `x-autlantic-signature`.
+Register a Test webhook endpoint in the merchant portal (URL + signing secret). Events are POSTed with HMAC `x-autlantic-signature`. Verify with `verifyBillingWebhook` / `verifyBillingWebhookDetailed`.

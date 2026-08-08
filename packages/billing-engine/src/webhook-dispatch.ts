@@ -64,12 +64,3 @@ export async function deliverBillingWebhooks(
 
   return results;
 }
-
-/**
- * @deprecated Global WEBHOOK_URL delivery is removed. Merchants register endpoints in the portal;
- * billing delivers via per-merchant endpoint secrets only. Kept so older callers compile.
- */
-export function billingWebhookUrl(): string | null {
-  const url = process.env.AUTLANTIC_BILLING_WEBHOOK_URL?.trim();
-  return url || null;
-}
