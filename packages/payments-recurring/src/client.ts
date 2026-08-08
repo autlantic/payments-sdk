@@ -11,6 +11,7 @@ import {
   openPaymentLink,
   refundInvoice,
   resolvePaymentLinkStatus,
+  resumeSubscription,
   updateSubscription,
   voidInvoice,
   type BillingStore,
@@ -38,7 +39,7 @@ import {
   type BillingLogger,
 } from "./logger";
 
-export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.4";
+export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.5";
 
 type ApiEnvelope<T> = T & { error?: string; code?: string; requestId?: string };
 
@@ -471,6 +472,23 @@ export class AutlanticBilling {
       return { subscription: result.subscription };
     }
     return this.post(`/v1/subscriptions/${id}/cancel`, { immediate });
+  }
+
+  /** Undo cancel-at-period-end so renewals continue. */
+  async resumeSubscription(id: string): Promise<{ subscription: RecurringSubscription }> {
+    if (this.localStore) {
+      const result = resumeSubscription(this.localStore, id);
+      if (!result) {
+        throw new AutlanticBillingError({
+          message: "Could not resume subscription",
+          code: "subscription_resume_failed",
+          type: "api_error",
+          details: { subscriptionId: id },
+        });
+      }
+      return { subscription: result.subscription };
+    }
+    return this.post(`/v1/subscriptions/${id}/resume`, {});
   }
 
   async listInvoices(input?: { subscriptionId?: string }): Promise<{ invoices: RecurringInvoice[] }> {

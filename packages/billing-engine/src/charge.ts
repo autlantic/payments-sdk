@@ -46,8 +46,12 @@ export function attemptInvoiceCharge(
       txHash: sandboxTxHash(invoice.id),
       updatedAt: now,
     };
-    let updatedSub = advanceSubscriptionPeriod(subscription);
-    if (subscription.status === "incomplete" || subscription.status === "past_due") {
+    // Initial checkout pays for the current period; only renewals advance it.
+    let updatedSub =
+      subscription.status === "incomplete"
+        ? { ...subscription, status: "active" as const, updatedAt: now }
+        : advanceSubscriptionPeriod(subscription);
+    if (subscription.status === "past_due") {
       updatedSub = { ...updatedSub, status: "active" };
     }
     store.saveInvoice(paidInvoice);
@@ -103,8 +107,12 @@ export function attemptInvoiceCharge(
     updatedAt: now,
   };
 
-  let updatedSub = advanceSubscriptionPeriod(subscription);
-  if (subscription.status === "incomplete" || subscription.status === "past_due") {
+  // Initial checkout pays for the current period; only renewals advance it.
+  let updatedSub =
+    subscription.status === "incomplete"
+      ? { ...subscription, status: "active" as const, updatedAt: now }
+      : advanceSubscriptionPeriod(subscription);
+  if (subscription.status === "past_due") {
     updatedSub = { ...updatedSub, status: "active" };
   }
   if (updatedSub.cancelAtPeriodEnd && updatedSub.currentPeriodStart.getTime() >= subscription.currentPeriodEnd.getTime()) {

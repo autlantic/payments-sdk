@@ -44,6 +44,9 @@ describe("billing-engine", () => {
       vaultAddress: VAULT_PLACEHOLDER_BASE_SEPOLIA,
     });
 
+    const periodStart = subscription.currentPeriodStart.getTime();
+    const periodEnd = subscription.currentPeriodEnd.getTime();
+
     const activated = completeMandate(store, subscription.id);
     assert.equal(activated?.subscription.status, "incomplete");
 
@@ -52,6 +55,8 @@ describe("billing-engine", () => {
     assert.equal(paid?.subscription.status, "active");
     assert.equal(paid?.invoice.status, "paid");
     assert.ok(paid?.invoice.txHash?.startsWith("0x"));
+    assert.equal(paid?.subscription.currentPeriodStart.getTime(), periodStart);
+    assert.equal(paid?.subscription.currentPeriodEnd.getTime(), periodEnd);
   });
 
   it("marks past_due after sandbox failure retries", () => {

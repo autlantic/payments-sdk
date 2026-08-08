@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.5 - Resume + first-period charge fix
+
+- `resumeSubscription(id)` undoes cancel-at-period-end (hosted `POST /v1/subscriptions/:id/resume`)
+- First invoice payment no longer advances `currentPeriodStart` / `currentPeriodEnd` (renewals still advance)
+- `@autlantic/billing-engine` **0.3.4**, `@autlantic/payments-recurring` **0.3.5**
+
 ## 0.3.4 - Unwrap getSubscription / getInvoice
 
 - `getSubscription` and `getInvoice` now return the resource object (same as `getPayment`), not the `{ subscription }` / `{ invoice }` API wrapper

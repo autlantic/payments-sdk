@@ -200,6 +200,8 @@ describe("AutlanticBilling sandbox", () => {
 
     const canceled = await billing.cancelSubscription(created.subscription.id, false);
     assert.equal(canceled.subscription.cancelAtPeriodEnd, true);
+    const resumed = await billing.resumeSubscription(created.subscription.id);
+    assert.equal(resumed.subscription.cancelAtPeriodEnd, false);
 
     const pay = await billing.createPayment({
       merchantRef: "order_surface_pay",

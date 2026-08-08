@@ -62,6 +62,7 @@ Env vars:
 | `completeSubscription(id)` | Mark wallet mandate active (no charge) |
 | `activateSubscription(id, { onChainSubscriptionId? })` | Complete mandate + first charge (test or live) |
 | `cancelSubscription(id, immediate?)` | Cancel at period end or now (+ on-chain cancel via API) |
+| `resumeSubscription(id)` | Undo cancel-at-period-end so renewals continue |
 | `listInvoices({ subscriptionId? })` | List invoices (key mode) |
 | `getInvoice(id)` | Fetch invoice |
 | `chargeInvoice(id, sandboxMode?)` | Attempt invoice payment |
