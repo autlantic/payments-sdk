@@ -7,7 +7,7 @@ For the hosted billing API, **mode comes from the API key**:
 - `abk_test_…` → Test data plane, Base Sepolia, hosted checkout shows **Test**
 - `abk_live_…` → Live data plane, Base mainnet, hosted checkout shows **Live**
 
-Use a test key in staging and a live key in production (same env var names, different values). Webhook verification should use the signing secret from the matching Test or Live webhook endpoint in the portal.
+Use a test key in staging and a live key in production (same env var names, different values). Webhook verification should use the signing secret from the matching Test or Live webhook endpoint in the portal. Register your app URL under portal → Webhooks; there is no `AUTLANTIC_BILLING_WEBHOOK_URL` delivery env.
 
 `AutlanticBilling.fromEnv()` sets `sandbox` from the API key the same way:
 

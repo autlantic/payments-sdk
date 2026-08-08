@@ -35,6 +35,8 @@ AUTLANTIC_BILLING_WEBHOOK_SECRET=whsec_…   # Test webhook endpoint secret
 
 Create keys and webhook endpoints in the merchant portal under Test or Live. Use one key per deploy.
 
+Billing POSTs events to **portal webhook endpoints** only (signed with that endpoint’s secret). Put the matching secret in `AUTLANTIC_BILLING_WEBHOOK_SECRET`. There is no global `AUTLANTIC_BILLING_WEBHOOK_URL` env for delivery.
+
 ```ts
 import { AutlanticBilling } from "@autlantic/payments-recurring";
 

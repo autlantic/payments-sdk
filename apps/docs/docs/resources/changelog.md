@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.7 - Portal webhooks only
+
+- Removed deprecated `billingWebhookUrl()` / `AUTLANTIC_BILLING_WEBHOOK_URL` delivery helper from `@autlantic/billing-engine`
+- Docs and npm README: merchants register webhook URL + secret in the **portal**; billing delivers only via those endpoints
+- `@autlantic/billing-engine` **0.3.5**, `@autlantic/payments-recurring` **0.3.7**
+
+## 0.3.6 - Mode from API key
+
+- `fromEnv()` sandbox follows API key mode (`abk_test_*` / `abk_live_*`); live break-glass via `AUTLANTIC_BILLING_ALLOW_LIVE_SANDBOX`
+- Helpers: `billingModeFromApiKey`, `sandboxFromApiKeyAndEnv`
+- `@autlantic/payments-recurring` **0.3.6**
+
 ## 0.3.5 - Resume + first-period charge fix
 
 - `resumeSubscription(id)` undoes cancel-at-period-end (hosted `POST /v1/subscriptions/:id/resume`)
