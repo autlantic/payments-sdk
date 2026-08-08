@@ -35,8 +35,10 @@ export {
 export {
   assertBillingWebhook,
   signBillingWebhook,
+  signBillingWebhookBody,
   verifyBillingWebhook,
   verifyBillingWebhookDetailed,
+  BILLING_WEBHOOK_TOLERANCE_SEC,
   parseBillingWebhookEvent,
   parseBillingWebhookEventDetailed,
   BILLING_WEBHOOK_SIGNATURE_HEADER,
