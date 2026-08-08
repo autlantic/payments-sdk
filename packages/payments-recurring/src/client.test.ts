@@ -4,13 +4,28 @@ import {
   AutlanticBilling,
   AutlanticBillingError,
   assertBillingWebhook,
+  billingModeFromApiKey,
   createConsoleBillingLogger,
   parseBillingWebhookEventDetailed,
   redactSecret,
+  sandboxFromApiKeyAndEnv,
   signBillingWebhook,
   verifyBillingWebhook,
   verifyBillingWebhookDetailed,
 } from "./index";
+
+describe("billingModeFromApiKey / sandboxFromApiKeyAndEnv", () => {
+  it("derives mode and sandbox from the API key", () => {
+    assert.equal(billingModeFromApiKey("abk_test_x"), "test");
+    assert.equal(billingModeFromApiKey("abk_live_x"), "live");
+    assert.equal(sandboxFromApiKeyAndEnv("abk_test_x", {}), true);
+    assert.equal(sandboxFromApiKeyAndEnv("abk_live_x", {}), false);
+    assert.equal(
+      sandboxFromApiKeyAndEnv("abk_live_x", { AUTLANTIC_BILLING_ALLOW_LIVE_SANDBOX: "true" }),
+      true,
+    );
+  });
+});
 
 describe("AutlanticBilling sandbox", () => {
   it("creates, completes, and charges a subscription", async () => {

@@ -9,7 +9,12 @@ For the hosted billing API, **mode comes from the API key**:
 
 Use a test key in staging and a live key in production (same env var names, different values). Webhook verification should use the signing secret from the matching Test or Live webhook endpoint in the portal.
 
-`AUTLANTIC_BILLING_SANDBOX` is optional and mainly for in-process sandbox or local overrides. It is not the primary hosted Test/Live switch.
+`AutlanticBilling.fromEnv()` sets `sandbox` from the API key the same way:
+
+- test key → sandbox `true`
+- live key → sandbox `false`, unless `AUTLANTIC_BILLING_ALLOW_LIVE_SANDBOX=true` (break-glass only)
+
+Do not use `AUTLANTIC_BILLING_SANDBOX` as the Test/Live switch. Prefer `AutlanticBilling.sandbox({…})` for in-process demos with no API URL.
 
 ## `AutlanticBilling`
 
@@ -31,15 +36,20 @@ AutlanticBilling.sandbox({ merchantId, webhookSecret?, debug?, logger? });
 AutlanticBilling.fromEnv();
 ```
 
+Helpers:
+
+- `billingModeFromApiKey(apiKey)` → `"test" | "live"`
+- `sandboxFromApiKeyAndEnv(apiKey, env?)` → boolean
+
 Env vars:
 
 | Variable | Purpose |
 |----------|---------|
 | `AUTLANTIC_BILLING_API_URL` | Hosted API base URL |
-| `AUTLANTIC_BILLING_API_KEY` | `abk_test_…` or `abk_live_…` |
+| `AUTLANTIC_BILLING_API_KEY` | `abk_test_…` or `abk_live_…` (mode source of truth) |
 | `AUTLANTIC_BILLING_MERCHANT_ID` | Merchant id |
 | `AUTLANTIC_BILLING_WEBHOOK_SECRET` | Endpoint signing secret for this env |
-| `AUTLANTIC_BILLING_SANDBOX` | Optional; in-process / local override |
+| `AUTLANTIC_BILLING_ALLOW_LIVE_SANDBOX` | Break-glass fake charges with a live key (prefer unset) |
 | `AUTLANTIC_BILLING_DEBUG` | `1` / `true` enables redacted HTTP + SDK debug logs |
 | `AUTLANTIC_BILLING_LOG_LEVEL` | `debug` \| `info` \| `warn` \| `error` |
 

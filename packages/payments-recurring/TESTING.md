@@ -68,14 +68,14 @@ When `DATABASE_URL` is set, billing defaults to `AUTLANTIC_BILLING_STORE=prisma`
 Terminal 1 (web):
 
 ```bash
-export AUTLANTIC_BILLING_SANDBOX=1
+export AUTLANTIC_BILLING_API_KEY=abk_test_local
 pnpm dev
 ```
 
 Terminal 2 (renewals worker):
 
 ```bash
-export AUTLANTIC_BILLING_SANDBOX=1
+export AUTLANTIC_BILLING_API_KEY=abk_test_local
 export AUTLANTIC_BILLING_WEBHOOK_URL=http://localhost:3001/api/webhooks/recurring-billing
 pnpm dev:billing-worker
 ```

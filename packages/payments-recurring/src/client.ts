@@ -39,9 +39,33 @@ import {
   type BillingLogger,
 } from "./logger";
 
-export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.5";
+export const AUTLANTIC_BILLING_SDK_VERSION = "0.3.6";
 
 type ApiEnvelope<T> = T & { error?: string; code?: string; requestId?: string };
+
+/** Hosted mode from API key prefix (Stripe-style). */
+export function billingModeFromApiKey(
+  apiKey: string | null | undefined,
+): "test" | "live" {
+  const key = apiKey?.trim() ?? "";
+  if (key.includes("_live_")) return "live";
+  return "test";
+}
+
+/**
+ * Sandbox charge / in-process behavior for fromEnv.
+ * Test keys always sandbox. Live keys only with ALLOW_LIVE_SANDBOX break-glass.
+ */
+export function sandboxFromApiKeyAndEnv(
+  apiKey: string | null | undefined,
+  env: Record<string, string | undefined> = process.env,
+): boolean {
+  if (billingModeFromApiKey(apiKey) === "test") return true;
+  const allow =
+    env.AUTLANTIC_BILLING_ALLOW_LIVE_SANDBOX === "1" ||
+    env.AUTLANTIC_BILLING_ALLOW_LIVE_SANDBOX === "true";
+  return allow;
+}
 
 function newClientRequestId(): string {
   return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
@@ -102,13 +126,12 @@ export class AutlanticBilling {
   }
 
   static fromEnv(env: Record<string, string | undefined> = process.env): AutlanticBilling {
+    const apiKey = env.AUTLANTIC_BILLING_API_KEY?.trim();
     return new AutlanticBilling({
       apiBaseUrl: env.AUTLANTIC_BILLING_API_URL?.trim(),
-      apiKey: env.AUTLANTIC_BILLING_API_KEY?.trim(),
+      apiKey,
       merchantId: env.AUTLANTIC_BILLING_MERCHANT_ID?.trim() ?? "mer_default",
-      sandbox:
-        env.AUTLANTIC_BILLING_SANDBOX === "1" ||
-        env.AUTLANTIC_BILLING_SANDBOX === "true",
+      sandbox: sandboxFromApiKeyAndEnv(apiKey, env),
       webhookSecret: env.AUTLANTIC_BILLING_WEBHOOK_SECRET?.trim(),
       debug:
         env.AUTLANTIC_BILLING_DEBUG === "1" ||

@@ -1,0 +1,24 @@
+---
+description: Change and test SDK first; Autlantico only after npm publish and pin
+alwaysApply: true
+---
+
+# SDK first workflow
+
+This repo is the Billing SDK. Autlantico dogfoods published packages only.
+
+## Order for shared billing behavior
+
+1. Implement here.
+2. Test here (`pnpm test`, package checks).
+3. Publish to npm.
+4. Autlantico bumps the pin and installs.
+5. Only then Autlantico app/infra changes that depend on the new API.
+
+Do not tell Autlantico to ship against an unpublished SDK version.
+
+## Mode model
+
+- `abk_test_*` / `abk_live_*` own mode.
+- `fromEnv()` sandbox follows the key (+ `AUTLANTIC_BILLING_ALLOW_LIVE_SANDBOX` break-glass for live).
+- `AUTLANTIC_BILLING_SANDBOX` is not the Test/Live switch.

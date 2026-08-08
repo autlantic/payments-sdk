@@ -1,4 +1,9 @@
-export { AutlanticBilling, AUTLANTIC_BILLING_SDK_VERSION } from "./client";
+export {
+  AutlanticBilling,
+  AUTLANTIC_BILLING_SDK_VERSION,
+  billingModeFromApiKey,
+  sandboxFromApiKeyAndEnv,
+} from "./client";
 export type {
   AutlanticBillingConfig,
   BillingCatalogPrice,
