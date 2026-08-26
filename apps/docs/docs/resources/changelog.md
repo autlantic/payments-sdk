@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.11 - Fix npm dependency pins
+
+- Republish with resolved semver deps (0.3.10 tarball incorrectly contained `workspace:*`)
+
 ## 0.3.10 - Legal readme update
 
 - npm README: Autlantic Limited operator line, About, Terms, Privacy, and Billing Terms links
