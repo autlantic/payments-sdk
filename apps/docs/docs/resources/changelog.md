@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.10 - Legal readme update
+
+- npm README: Autlantic Limited operator line, About, Terms, Privacy, and Billing Terms links
+- Root README and LICENSE: copyright holder **Autlantic Limited** (UK co. 17422039)
+
 ## 0.3.7 - Portal webhooks only
 
 - Removed deprecated `billingWebhookUrl()` / `AUTLANTIC_BILLING_WEBHOOK_URL` delivery helper from `@autlantic/billing-engine`
