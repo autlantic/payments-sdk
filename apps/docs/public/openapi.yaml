@@ -14,8 +14,9 @@ info:
     Authenticate with `x-autlantic-api-key` (or `Authorization: Bearer`).
     Pass `Idempotency-Key` on POST requests to safely retry creates.
   contact:
-    name: Autlantic
-    url: https://docs.autlantic.com
+    name: Autlantic Limited
+    url: https://autlantic.com/about
+    email: support@autlantic.com
   license:
     name: MIT
 servers:

@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
+import { DOCS_FOOTER_COPYRIGHT, DOCS_FOOTER_MESSAGE } from "./company-legal";
 
 const NPM_BILLING = "https://www.npmjs.com/package/@autlantic/payments-recurring";
 const PRODUCT = "https://autlantic.com";
@@ -59,8 +60,13 @@ export default withMermaid(
           ],
         },
         {
-          text: "Product policies",
+          text: "Legal & policies",
           items: [
+            { text: "About Autlantic", link: "https://autlantic.com/about" },
+            { text: "Terms of Service", link: "https://autlantic.com/terms" },
+            { text: "Privacy Policy", link: "https://autlantic.com/privacy" },
+            { text: "Refund Policy", link: "https://autlantic.com/refunds" },
+            { text: "Billing Terms (portal)", link: "https://portal.autlantic.com/terms" },
             { text: "Non-custodial", link: "https://autlantic.com/non-custodial" },
             { text: "Security (product)", link: "https://autlantic.com/security" },
           ],
@@ -85,8 +91,8 @@ export default withMermaid(
       ],
       socialLinks: [{ icon: "github", link: GITHUB }],
       footer: {
-        message: "Autlantic Payments SDK",
-        copyright: "Copyright © Autlantic",
+        message: DOCS_FOOTER_MESSAGE,
+        copyright: DOCS_FOOTER_COPYRIGHT,
       },
     },
   }),
