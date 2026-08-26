@@ -95,6 +95,10 @@ Most integrators only need `@autlantic/payments-recurring`.
 | Node.js API | https://docs.autlantic.com/api/nodejs |
 | Hosted HTTP API | https://docs.autlantic.com/api/http |
 | Webhooks | https://docs.autlantic.com/guide/webhooks |
+| About | https://autlantic.com/about |
+| Terms of Service | https://autlantic.com/terms |
+| Privacy Policy | https://autlantic.com/privacy |
+| Billing Terms (portal) | https://portal.autlantic.com/terms |
 | Non-custodial overview | https://autlantic.com/non-custodial |
 | Product security | https://autlantic.com/security |
 | Security (repo) | [SECURITY.md](./SECURITY.md) |
@@ -143,11 +147,12 @@ Do not use Autlantic branding to imply endorsement. See [SECURITY.md](./SECURITY
 
 This software is licensed under the [MIT License](./LICENSE).
 
-Copyright © 2026 Autlantic. All rights reserved for trademarks and brand assets; the MIT License covers the source code in this repository.
+Copyright © 2026 Autlantic Limited (UK company no. 17422039). All rights reserved for trademarks and brand assets; the MIT License covers the source code in this repository.
 
 ## Links
 
 - Product: [autlantic.com](https://autlantic.com)
+- About: [autlantic.com/about](https://autlantic.com/about)
 - Docs: [docs.autlantic.com](https://docs.autlantic.com)
 - npm: [@autlantic/payments-recurring](https://www.npmjs.com/package/@autlantic/payments-recurring)
 - Support: [support@autlantic.com](mailto:support@autlantic.com)

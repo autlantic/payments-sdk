@@ -5,8 +5,14 @@ Autlantic Billing SDK. Create USDC subscriptions, one-time payments, and shareab
 USDC settles to your merchant `payoutAddressEvm`. Autlantic does not custody subscription revenue. Relayers sponsor gas and submit transactions; they do not hold member balances.
 
 - Docs: https://docs.autlantic.com  
+- About: https://autlantic.com/about  
+- Terms: https://autlantic.com/terms  
+- Privacy: https://autlantic.com/privacy  
+- Billing Terms: https://portal.autlantic.com/terms  
 - Non-custodial: https://autlantic.com/non-custodial  
 - Security: https://autlantic.com/security  
+
+Operated by **Autlantic Limited** (UK company no. 17422039).
 
 ## Install
 
