@@ -96,6 +96,7 @@ Most integrators only need `@autlantic/payments-recurring`.
 | Hosted HTTP API | https://docs.autlantic.com/api/http |
 | Webhooks | https://docs.autlantic.com/guide/webhooks |
 | About | https://autlantic.com/about |
+| Press & media | https://autlantic.com/press |
 | Terms of Service | https://autlantic.com/terms |
 | Privacy Policy | https://autlantic.com/privacy |
 | Billing Terms (portal) | https://portal.autlantic.com/terms |
@@ -153,6 +154,8 @@ Copyright © 2026 Autlantic Limited (UK company no. 17422039). All rights reserv
 
 - Product: [autlantic.com](https://autlantic.com)
 - About: [autlantic.com/about](https://autlantic.com/about)
+- Press & media: [autlantic.com/press](https://autlantic.com/press)
 - Docs: [docs.autlantic.com](https://docs.autlantic.com)
+- GitHub: [github.com/Autlantic/payments-sdk](https://github.com/Autlantic/payments-sdk)
 - npm: [@autlantic/payments-recurring](https://www.npmjs.com/package/@autlantic/payments-recurring)
 - Support: [support@autlantic.com](mailto:support@autlantic.com)
